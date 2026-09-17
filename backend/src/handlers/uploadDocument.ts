@@ -4,7 +4,8 @@ import { parseMultipartFile } from "../lib/multipart";
 import { uploadToS3 } from "../lib/s3";
 import { putDocument, updateDocument } from "../lib/dynamo";
 import { identifyPaper } from "../services/paperIdentifier";
-import { Document } from "../types/document";
+import { checkRetractionStatus } from "../services/crossrefService";
+import { Document, DocumentStatus, RetractionStatus } from "../types/document";
 
 const ALLOWED_CONTENT_TYPES = ["application/pdf"];
 const MAX_SIZE_BYTES = 20 * 1024 * 1024; // 20 MB
@@ -24,14 +25,16 @@ function errorResponse(
 /**
  * POST /documents
  *
- * 1. Parse multipart PDF from request
- * 2. Validate file type and size
- * 3. Generate documentId
- * 4. Upload PDF to S3
- * 5. Create DynamoDB record with status PROCESSING
- * 6. Return the document record
- *
- * DOI extraction and Crossref lookup happen in a later milestone (Step 3+).
+ * Full synchronous pipeline:
+ * 1. Parse + validate multipart PDF
+ * 2. Generate document ID
+ * 3. Upload PDF to S3
+ * 4. Create DynamoDB record (PROCESSING)
+ * 5. Identify paper — extract DOI / title from PDF text
+ * 6. Crossref retraction lookup (if DOI found)
+ * 7. Finalize status: ACTIVE | RETRACTED | UNKNOWN
+ * 8. Update DynamoDB with final metadata
+ * 9. Return resolved document
  */
 export const handler = async (
   event: APIGatewayProxyEvent
@@ -99,34 +102,67 @@ export const handler = async (
     identification = await identifyPaper(parsedFile.buffer);
   } catch (err) {
     console.error("Paper identification error:", err);
-    // Non-fatal — document is stored; identification defaults to unknown
     identification = { title: null, doi: null, identificationMethod: "unknown" };
   }
 
-  // ── 7. Update DynamoDB with identified metadata ───────────────────────────
-  const identifiedAt = new Date().toISOString();
-  try {
-    await updateDocument(documentId, {
-      title: identification.title,
-      doi: identification.doi,
-      updatedAt: identifiedAt,
-    });
-  } catch (err) {
-    console.error("DynamoDB update (identification) error:", err);
-    // Non-fatal — return what we have
+  // ── 7. Crossref retraction lookup ──────────────────────────────────────
+  let finalRetractionStatus: RetractionStatus = "UNKNOWN";
+  let retractionNotice = null;
+  let crossrefTitle: string | null = null;
+
+  if (identification.doi) {
+    try {
+      const crossrefResult = await checkRetractionStatus(identification.doi);
+      finalRetractionStatus = crossrefResult.retractionStatus;
+      retractionNotice = crossrefResult.retractionNotice;
+      // Prefer Crossref-resolved title if we didn't get one from the PDF
+      crossrefTitle = crossrefResult.title;
+    } catch (err) {
+      console.error("Crossref lookup error:", err);
+      // Non-fatal — falls through to UNKNOWN
+    }
   }
 
-  // ── 8. Return enriched document ───────────────────────────────────────────
-  const responseDocument: Document = {
+  // ── 8. Compute final document status ────────────────────────────────────
+  const finalStatus: DocumentStatus =
+    finalRetractionStatus === "RETRACTED"
+      ? "RETRACTED"
+      : finalRetractionStatus === "NONE_FOUND"
+        ? "ACTIVE"
+        : "UNKNOWN";
+
+  const resolvedTitle = identification.title ?? crossrefTitle ?? null;
+  const finalUpdatedAt = new Date().toISOString();
+
+  // ── 9. Update DynamoDB with all final metadata ────────────────────────────
+  try {
+    await updateDocument(documentId, {
+      title: resolvedTitle,
+      doi: identification.doi,
+      status: finalStatus,
+      retractionStatus: finalRetractionStatus,
+      retractionNotice,
+      updatedAt: finalUpdatedAt,
+    });
+  } catch (err) {
+    console.error("DynamoDB final update error:", err);
+    // Non-fatal — document is in S3; return what we have
+  }
+
+  // ── 10. Return fully resolved document ─────────────────────────────────────
+  const finalDocument: Document = {
     ...document,
-    title: identification.title,
+    title: resolvedTitle,
     doi: identification.doi,
-    updatedAt: identifiedAt,
+    status: finalStatus,
+    retractionStatus: finalRetractionStatus,
+    retractionNotice,
+    updatedAt: finalUpdatedAt,
   };
 
   return {
-    statusCode: 202, // 202 Accepted — Crossref lookup runs in next milestone
+    statusCode: 200,
     headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
-    body: JSON.stringify(responseDocument),
+    body: JSON.stringify(finalDocument),
   };
 };

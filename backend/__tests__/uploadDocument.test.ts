@@ -24,6 +24,11 @@ jest.mock("../src/services/paperIdentifier");
 import { identifyPaper } from "../src/services/paperIdentifier";
 const mockIdentifyPaper = identifyPaper as jest.MockedFunction<typeof identifyPaper>;
 
+// ── Mock Crossref service ──────────────────────────────────────────────────
+jest.mock("../src/services/crossrefService");
+import { checkRetractionStatus } from "../src/services/crossrefService";
+const mockCheckRetraction = checkRetractionStatus as jest.MockedFunction<typeof checkRetractionStatus>;
+
 // ─────────────────────────────────────────────────────────────────────────────
 
 const mockEvent = {} as APIGatewayProxyEvent;
@@ -45,23 +50,31 @@ beforeEach(() => {
     doi: "10.1038/test.doi",
     identificationMethod: "doi_in_pdf",
   });
+  mockCheckRetraction.mockResolvedValue({
+    found: true,
+    doi: "10.1038/test.doi",
+    title: "Test Research Paper",
+    retractionStatus: "NONE_FOUND",
+    retractionNotice: null,
+  });
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe("POST /documents — happy path", () => {
-  it("returns 202 with a document record", async () => {
+  it("returns 200 with a fully resolved document", async () => {
     const result = await handler(mockEvent);
-    expect(result.statusCode).toBe(202);
+    expect(result.statusCode).toBe(200);
 
     const body = JSON.parse(result.body);
     expect(body.id).toMatch(/^doc_/);
     expect(body.filename).toBe("paper.pdf");
-    expect(body.status).toBe("PROCESSING");
-    expect(body.retractionStatus).toBe("UNKNOWN");
+    expect(body.status).toBe("ACTIVE");
+    expect(body.retractionStatus).toBe("NONE_FOUND");
     expect(body.s3Key).toMatch(/^uploads\/doc_/);
     expect(body.title).toBe("Test Research Paper");
     expect(body.doi).toBe("10.1038/test.doi");
+    expect(body.retractionNotice).toBeNull();
     expect(body.createdAt).toBeDefined();
     expect(body.updatedAt).toBeDefined();
   });
