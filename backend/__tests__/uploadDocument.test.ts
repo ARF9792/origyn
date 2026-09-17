@@ -15,8 +15,14 @@ const mockUploadToS3 = uploadToS3 as jest.MockedFunction<typeof uploadToS3>;
 
 // ── Mock DynamoDB ─────────────────────────────────────────────────────────────
 jest.mock("../src/lib/dynamo");
-import { putDocument } from "../src/lib/dynamo";
+import { putDocument, updateDocument } from "../src/lib/dynamo";
 const mockPutDocument = putDocument as jest.MockedFunction<typeof putDocument>;
+const mockUpdateDocument = updateDocument as jest.MockedFunction<typeof updateDocument>;
+
+// ── Mock paper identifier ──────────────────────────────────────────────────
+jest.mock("../src/services/paperIdentifier");
+import { identifyPaper } from "../src/services/paperIdentifier";
+const mockIdentifyPaper = identifyPaper as jest.MockedFunction<typeof identifyPaper>;
 
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -33,6 +39,12 @@ beforeEach(() => {
   });
   mockUploadToS3.mockResolvedValue(undefined);
   mockPutDocument.mockResolvedValue(undefined);
+  mockUpdateDocument.mockResolvedValue(undefined);
+  mockIdentifyPaper.mockResolvedValue({
+    title: "Test Research Paper",
+    doi: "10.1038/test.doi",
+    identificationMethod: "doi_in_pdf",
+  });
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -48,8 +60,8 @@ describe("POST /documents — happy path", () => {
     expect(body.status).toBe("PROCESSING");
     expect(body.retractionStatus).toBe("UNKNOWN");
     expect(body.s3Key).toMatch(/^uploads\/doc_/);
-    expect(body.title).toBeNull();
-    expect(body.doi).toBeNull();
+    expect(body.title).toBe("Test Research Paper");
+    expect(body.doi).toBe("10.1038/test.doi");
     expect(body.createdAt).toBeDefined();
     expect(body.updatedAt).toBeDefined();
   });

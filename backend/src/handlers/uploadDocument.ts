@@ -2,7 +2,8 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { v4 as uuidv4 } from "uuid";
 import { parseMultipartFile } from "../lib/multipart";
 import { uploadToS3 } from "../lib/s3";
-import { putDocument } from "../lib/dynamo";
+import { putDocument, updateDocument } from "../lib/dynamo";
+import { identifyPaper } from "../services/paperIdentifier";
 import { Document } from "../types/document";
 
 const ALLOWED_CONTENT_TYPES = ["application/pdf"];
@@ -92,10 +93,40 @@ export const handler = async (
     return errorResponse(502, "INTERNAL_ERROR", "Document stored in S3 but failed to create record. Contact support.");
   }
 
-  // ── 6. Return document ────────────────────────────────────────────────────
+  // ── 6. Identify paper (DOI / title) ──────────────────────────────────────
+  let identification: Awaited<ReturnType<typeof identifyPaper>>;
+  try {
+    identification = await identifyPaper(parsedFile.buffer);
+  } catch (err) {
+    console.error("Paper identification error:", err);
+    // Non-fatal — document is stored; identification defaults to unknown
+    identification = { title: null, doi: null, identificationMethod: "unknown" };
+  }
+
+  // ── 7. Update DynamoDB with identified metadata ───────────────────────────
+  const identifiedAt = new Date().toISOString();
+  try {
+    await updateDocument(documentId, {
+      title: identification.title,
+      doi: identification.doi,
+      updatedAt: identifiedAt,
+    });
+  } catch (err) {
+    console.error("DynamoDB update (identification) error:", err);
+    // Non-fatal — return what we have
+  }
+
+  // ── 8. Return enriched document ───────────────────────────────────────────
+  const responseDocument: Document = {
+    ...document,
+    title: identification.title,
+    doi: identification.doi,
+    updatedAt: identifiedAt,
+  };
+
   return {
-    statusCode: 202, // 202 Accepted — pipeline continues asynchronously (DOI + Crossref)
+    statusCode: 202, // 202 Accepted — Crossref lookup runs in next milestone
     headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
-    body: JSON.stringify(document),
+    body: JSON.stringify(responseDocument),
   };
 };
