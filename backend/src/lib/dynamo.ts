@@ -47,6 +47,18 @@ export async function listDocuments(): Promise<Document[]> {
   return (result.Items as Document[]) ?? [];
 }
 
+/** Find a document by exact DOI match (full scan — acceptable at hackathon scale). */
+export async function findDocumentByDoi(doi: string): Promise<Document | null> {
+  const result = await dynamo.send(
+    new ScanCommand({
+      TableName: config.dynamodb.documentsTable,
+      FilterExpression: "doi = :doi",
+      ExpressionAttributeValues: { ":doi": doi },
+    })
+  );
+  return (result.Items && result.Items.length > 0) ? (result.Items[0] as Document) : null;
+}
+
 /**
  * Partially update a document record.
  * Always stamps updatedAt automatically.

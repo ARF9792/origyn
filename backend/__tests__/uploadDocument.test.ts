@@ -15,9 +15,10 @@ const mockUploadToS3 = uploadToS3 as jest.MockedFunction<typeof uploadToS3>;
 
 // ── Mock DynamoDB ─────────────────────────────────────────────────────────────
 jest.mock("../src/lib/dynamo");
-import { putDocument, updateDocument } from "../src/lib/dynamo";
+import { putDocument, updateDocument, findDocumentByDoi } from "../src/lib/dynamo";
 const mockPutDocument = putDocument as jest.MockedFunction<typeof putDocument>;
 const mockUpdateDocument = updateDocument as jest.MockedFunction<typeof updateDocument>;
+const mockFindDocumentByDoi = findDocumentByDoi as jest.MockedFunction<typeof findDocumentByDoi>;
 
 // ── Mock paper identifier ──────────────────────────────────────────────────
 jest.mock("../src/services/paperIdentifier");
@@ -45,6 +46,8 @@ beforeEach(() => {
   mockUploadToS3.mockResolvedValue(undefined);
   mockPutDocument.mockResolvedValue(undefined);
   mockUpdateDocument.mockResolvedValue(undefined);
+  mockFindDocumentByDoi.mockResolvedValue(null);
+  mockFindDocumentByDoi.mockResolvedValue(null);
   mockIdentifyPaper.mockResolvedValue({
     title: "Test Research Paper",
     doi: "10.1038/test.doi",
@@ -155,5 +158,43 @@ describe("POST /documents — AWS errors", () => {
     expect(result.statusCode).toBe(502);
     const body = JSON.parse(result.body);
     expect(body.error.code).toBe("INTERNAL_ERROR");
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("POST /documents — duplicate DOI checks", () => {
+  it("returns 409 if normalized DOI already exists", async () => {
+    mockIdentifyPaper.mockResolvedValue({
+      title: "Test Research Paper",
+      doi: "DOI: 10.1038/test.doi ", // raw, unnormalized
+      identificationMethod: "doi_in_pdf",
+    });
+    mockFindDocumentByDoi.mockResolvedValue({
+      id: "doc_existing123",
+      filename: "old.pdf",
+      s3Key: "uploads/doc_existing123.pdf",
+      title: "Old Paper",
+      doi: "10.1038/test.doi",
+      status: "ACTIVE",
+      retractionStatus: "NONE_FOUND",
+      retractionNotice: null,
+      claims: [],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
+
+    const result = await handler(mockEvent);
+    expect(result.statusCode).toBe(409);
+
+    const body = JSON.parse(result.body);
+    expect(body.error.code).toBe("DUPLICATE_DOCUMENT");
+    expect(body.error.existingDocumentId).toBe("doc_existing123");
+
+    // verify it normalized correctly before checking
+    expect(mockFindDocumentByDoi).toHaveBeenCalledWith("10.1038/test.doi");
+    // verify it did NOT upload or create a new record
+    expect(mockUploadToS3).not.toHaveBeenCalled();
+    expect(mockPutDocument).not.toHaveBeenCalled();
   });
 });

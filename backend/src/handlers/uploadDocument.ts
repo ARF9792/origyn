@@ -2,7 +2,7 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { v4 as uuidv4 } from "uuid";
 import { parseMultipartFile } from "../lib/multipart";
 import { uploadToS3 } from "../lib/s3";
-import { putDocument, updateDocument } from "../lib/dynamo";
+import { putDocument, updateDocument, findDocumentByDoi } from "../lib/dynamo";
 import { identifyPaper } from "../services/paperIdentifier";
 import { checkRetractionStatus } from "../services/crossrefService";
 import { Document, DocumentStatus, RetractionStatus } from "../types/document";
@@ -22,19 +22,27 @@ function errorResponse(
   };
 }
 
+function normalizeDoi(doi: string): string {
+  let normalized = doi.trim().toLowerCase();
+  normalized = normalized.replace(/^https?:\/\/doi\.org\//, "");
+  normalized = normalized.replace(/^doi:\s*/, "");
+  return normalized;
+}
+
 /**
  * POST /documents
  *
  * Full synchronous pipeline:
  * 1. Parse + validate multipart PDF
- * 2. Generate document ID
- * 3. Upload PDF to S3
- * 4. Create DynamoDB record (PROCESSING)
- * 5. Identify paper — extract DOI / title from PDF text
- * 6. Crossref retraction lookup (if DOI found)
- * 7. Finalize status: ACTIVE | RETRACTED | UNKNOWN
- * 8. Update DynamoDB with final metadata
- * 9. Return resolved document
+ * 2. Identify paper — extract DOI / title from PDF text
+ * 3. Normalize DOI and check for duplicates (409 Conflict)
+ * 4. Generate document ID
+ * 5. Upload PDF to S3
+ * 6. Create DynamoDB record (PROCESSING)
+ * 7. Crossref retraction lookup (if DOI found)
+ * 8. Finalize status: ACTIVE | RETRACTED | UNKNOWN
+ * 9. Update DynamoDB with final metadata
+ * 10. Return resolved document
  */
 export const handler = async (
   event: APIGatewayProxyEvent
@@ -61,12 +69,47 @@ export const handler = async (
     return errorResponse(400, "INVALID_FILE", "Uploaded file is empty.");
   }
 
-  // ── 3. Generate IDs ───────────────────────────────────────────────────────
+  // ── 3. Identify paper (DOI / title) ──────────────────────────────────────
+  let identification: Awaited<ReturnType<typeof identifyPaper>>;
+  try {
+    identification = await identifyPaper(parsedFile.buffer);
+  } catch (err) {
+    console.error("Paper identification error:", err);
+    identification = { title: null, doi: null, identificationMethod: "unknown" };
+  }
+
+  // ── 4. Normalize DOI and Check Duplicates ─────────────────────────────────
+  let normalizedDoi: string | null = null;
+  if (identification.doi) {
+    normalizedDoi = normalizeDoi(identification.doi);
+    try {
+      // Re-importing dynamically or using the imported findDocumentByDoi
+      const existingDoc = await findDocumentByDoi(normalizedDoi);
+      if (existingDoc) {
+        return {
+          statusCode: 409,
+          headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+          body: JSON.stringify({
+            error: {
+              code: "DUPLICATE_DOCUMENT",
+              message: "A document with this DOI already exists.",
+              existingDocumentId: existingDoc.id
+            }
+          }),
+        };
+      }
+    } catch (err) {
+      console.error("DynamoDB duplicate check error:", err);
+      // Fall through on DB read error
+    }
+  }
+
+  // ── 5. Generate IDs ───────────────────────────────────────────────────────
   const documentId = `doc_${uuidv4().replace(/-/g, "").slice(0, 12)}`;
   const s3Key = `uploads/${documentId}.pdf`;
   const now = new Date().toISOString();
 
-  // ── 4. Upload to S3 ───────────────────────────────────────────────────────
+  // ── 6. Upload to S3 ───────────────────────────────────────────────────────
   try {
     await uploadToS3(s3Key, parsedFile.buffer, parsedFile.contentType);
   } catch (err) {
@@ -74,13 +117,13 @@ export const handler = async (
     return errorResponse(502, "UPLOAD_FAILED", "Failed to store the document. Please try again.");
   }
 
-  // ── 5. Write DynamoDB record ──────────────────────────────────────────────
+  // ── 7. Write DynamoDB record ──────────────────────────────────────────────
   const document: Document = {
     id: documentId,
     filename: parsedFile.filename,
     s3Key,
     title: null,
-    doi: null,
+    doi: normalizedDoi, // Use normalized DOI here
     status: "PROCESSING",
     retractionStatus: "UNKNOWN",
     retractionNotice: null,
@@ -96,23 +139,14 @@ export const handler = async (
     return errorResponse(502, "INTERNAL_ERROR", "Document stored in S3 but failed to create record. Contact support.");
   }
 
-  // ── 6. Identify paper (DOI / title) ──────────────────────────────────────
-  let identification: Awaited<ReturnType<typeof identifyPaper>>;
-  try {
-    identification = await identifyPaper(parsedFile.buffer);
-  } catch (err) {
-    console.error("Paper identification error:", err);
-    identification = { title: null, doi: null, identificationMethod: "unknown" };
-  }
-
-  // ── 7. Crossref retraction lookup ──────────────────────────────────────
+  // ── 8. Crossref retraction lookup ──────────────────────────────────────
   let finalRetractionStatus: RetractionStatus = "UNKNOWN";
   let retractionNotice = null;
   let crossrefTitle: string | null = null;
 
-  if (identification.doi) {
+  if (normalizedDoi) {
     try {
-      const crossrefResult = await checkRetractionStatus(identification.doi);
+      const crossrefResult = await checkRetractionStatus(normalizedDoi);
       finalRetractionStatus = crossrefResult.retractionStatus;
       retractionNotice = crossrefResult.retractionNotice;
       // Prefer Crossref-resolved title if we didn't get one from the PDF
@@ -123,7 +157,7 @@ export const handler = async (
     }
   }
 
-  // ── 8. Compute final document status ────────────────────────────────────
+  // ── 9. Compute final document status ────────────────────────────────────
   const finalStatus: DocumentStatus =
     finalRetractionStatus === "RETRACTED"
       ? "RETRACTED"
@@ -134,11 +168,11 @@ export const handler = async (
   const resolvedTitle = identification.title ?? crossrefTitle ?? null;
   const finalUpdatedAt = new Date().toISOString();
 
-  // ── 9. Update DynamoDB with all final metadata ────────────────────────────
+  // ── 10. Update DynamoDB with all final metadata ────────────────────────────
   try {
     await updateDocument(documentId, {
       title: resolvedTitle,
-      doi: identification.doi,
+      doi: normalizedDoi, // Use normalized DOI here as well
       status: finalStatus,
       retractionStatus: finalRetractionStatus,
       retractionNotice,
@@ -149,11 +183,11 @@ export const handler = async (
     // Non-fatal — document is in S3; return what we have
   }
 
-  // ── 10. Return fully resolved document ─────────────────────────────────────
+  // ── 11. Return fully resolved document ─────────────────────────────────────
   const finalDocument: Document = {
     ...document,
     title: resolvedTitle,
-    doi: identification.doi,
+    doi: normalizedDoi,
     status: finalStatus,
     retractionStatus: finalRetractionStatus,
     retractionNotice,
