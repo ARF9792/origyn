@@ -6,11 +6,14 @@ import { Document } from "../src/types/document";
 
 // ── Mock DynamoDB ─────────────────────────────────────────────────────────────
 jest.mock("../src/lib/dynamo");
-import { listDocuments, getDocument, listClaimsByDocument } from "../src/lib/dynamo";
+import { listDocuments, getDocument, listClaimsByDocument, listAllClaims, listAllAnswers } from "../src/lib/dynamo";
 const mockListDocuments = listDocuments as jest.MockedFunction<typeof listDocuments>;
 const mockGetDocument = getDocument as jest.MockedFunction<typeof getDocument>;
 // listClaimsByDocument is called by getDocument handler — default to [] in all tests.
 const mockListClaimsByDocument = listClaimsByDocument as jest.MockedFunction<typeof listClaimsByDocument>;
+// listAllClaims and listAllAnswers are called by getGraph — default to [] in all tests.
+const mockListAllClaims = listAllClaims as jest.MockedFunction<typeof listAllClaims>;
+const mockListAllAnswers = listAllAnswers as jest.MockedFunction<typeof listAllAnswers>;
 
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -52,6 +55,9 @@ beforeEach(() => {
   jest.clearAllMocks();
   // Default: no persisted claims (Day 1 behaviour preserved for all doc tests).
   mockListClaimsByDocument.mockResolvedValue([]);
+  // Default: no claims or answers in graph (populates once Bedrock extraction runs).
+  mockListAllClaims.mockResolvedValue([]);
+  mockListAllAnswers.mockResolvedValue([]);
 });
 
 // ═════════════════════════════════════════════════════════════════════════════
