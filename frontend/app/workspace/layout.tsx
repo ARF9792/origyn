@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { TopBar } from '@/components/layout/TopBar';
 import '@/styles/workspace.css';
@@ -21,6 +22,9 @@ export default function WorkspaceLayout({
     return () => document.removeEventListener('keydown', handleEscape);
   }, []);
 
+  const pathname = usePathname();
+  const isChatRoute = pathname === '/workspace/chat';
+
   return (
     <div className={`shell ${isNavOpen ? 'nav-open' : ''}`}>
       <a className="skip-link" href="#main">
@@ -39,7 +43,7 @@ export default function WorkspaceLayout({
 
       <main id="main" className="app-main" inert={isNavOpen ? true : undefined}>
         <TopBar onToggleMobile={() => setIsNavOpen(!isNavOpen)} />
-        <div className="content">
+        <div className={`content ${isChatRoute ? 'chat-content' : ''}`}>
           {children}
         </div>
       </main>

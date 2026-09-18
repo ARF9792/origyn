@@ -160,3 +160,111 @@ export interface LibraryQuery {
   sort: 'recent' | 'title' | 'year';
   page: number;
 }
+
+// ────────────────────────────────────────────────────────────────────────────
+// Chat / Evidence types
+// Translated from Astra Pass 2 mock-data.js / service.js.
+// ────────────────────────────────────────────────────────────────────────────
+
+// ─── Answer status ────────────────────────────────────────────────────────────
+export type AnswerStatus =
+  | 'CURRENT'
+  | 'EVIDENCE_CHANGED'
+  | 'INSUFFICIENT'
+  | 'GENERATING';
+
+// ─── Answer ───────────────────────────────────────────────────────────────────
+// Immutable once created. Evidence changes create a NEW answer version;
+// the original is never mutated.
+export interface Answer {
+  id: string;
+  question: string;
+  text: string;
+  status: AnswerStatus;
+  createdAt: string;
+  claimIds: string[];
+  sourceIds: string[];
+  /** ID of the answer this was generated to replace (updated version only) */
+  previousVersionId: string | null;
+  /** ID of the updated version if one has been generated */
+  updatedVersionId: string | null;
+  version: number;
+  /** ISO timestamp of the evidence snapshot used at generation time */
+  evidenceAtGeneration: string;
+  /** Source status at generation time — historical record, never mutated */
+  sourceStatusSnapshot: Record<string, DocumentStatus>;
+  /** Source IDs removed from evidence (updated version only) */
+  removedSourceIds?: string[];
+  /** Claim IDs removed from evidence (updated version only) */
+  removedClaimIds?: string[];
+  /** Evidence change event attached when status becomes EVIDENCE_CHANGED */
+  evidenceChange?: EvidenceEvent;
+  isMock?: boolean;
+}
+
+// ─── Conversation ─────────────────────────────────────────────────────────────
+export interface Conversation {
+  id: string;
+  title: string;
+  /** 'current' | 'before-retraction' */
+  snapshot: string;
+  answers: Answer[];
+  keptVersions: string[];
+}
+
+// ─── Retraction / evidence event ─────────────────────────────────────────────
+export interface EvidenceEvent {
+  id?: string;
+  sourceId: string;
+  detectedAt: string;
+  noticeDate: string;
+  previousStatus: DocumentStatus;
+  currentStatus: DocumentStatus;
+}
+
+// ─── Chat claim (extends Claim with multi-source support) ─────────────────────
+// In chat, claims can reference multiple sources.
+export interface ChatClaim extends Omit<Claim, 'sourceId'> {
+  /** All source IDs supporting this claim */
+  sourceIds: string[];
+  quote?: string;
+}
+
+// ─── Evidence context ─────────────────────────────────────────────────────────
+export interface EvidenceContext {
+  sources: Document[];
+  usable: Document[];
+  excluded: Document[];
+  snapshot: string;
+}
+
+// ─── Evidence result (for inspector) ─────────────────────────────────────────
+export interface EvidenceResult {
+  answer: Answer;
+  context: EvidenceContext;
+  claims: (ChatClaim & { sources: Document[] })[];
+  sources: Document[];
+}
+
+// ─── Generation pending state ─────────────────────────────────────────────────
+export interface GenerationPending {
+  kind: 'generate' | 'regenerate';
+  question: string;
+  answerId: string | null;
+  stage: string;
+  error: string | null;
+  cancelled: boolean;
+  preview?: boolean;
+}
+
+// ─── Demo state options ───────────────────────────────────────────────────────
+export type ChatDemoState =
+  | 'normal'
+  | 'empty'
+  | 'loading'
+  | 'insufficient'
+  | 'evidence'
+  | 'historical'
+  | 'regenerating'
+  | 'updated'
+  | 'failure';
