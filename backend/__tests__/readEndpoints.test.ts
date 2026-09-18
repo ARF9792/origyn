@@ -6,9 +6,11 @@ import { Document } from "../src/types/document";
 
 // ── Mock DynamoDB ─────────────────────────────────────────────────────────────
 jest.mock("../src/lib/dynamo");
-import { listDocuments, getDocument } from "../src/lib/dynamo";
+import { listDocuments, getDocument, listClaimsByDocument } from "../src/lib/dynamo";
 const mockListDocuments = listDocuments as jest.MockedFunction<typeof listDocuments>;
 const mockGetDocument = getDocument as jest.MockedFunction<typeof getDocument>;
+// listClaimsByDocument is called by getDocument handler — default to [] in all tests.
+const mockListClaimsByDocument = listClaimsByDocument as jest.MockedFunction<typeof listClaimsByDocument>;
 
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -48,6 +50,8 @@ const retractedDoc: Document = {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  // Default: no persisted claims (Day 1 behaviour preserved for all doc tests).
+  mockListClaimsByDocument.mockResolvedValue([]);
 });
 
 // ═════════════════════════════════════════════════════════════════════════════
@@ -194,7 +198,8 @@ describe("GET /graph", () => {
     const result = await getGraphHandler(mockEvent);
     const node = JSON.parse(result.body).nodes[0];
     expect(node.id).toBe("doc_abc123");
-    expect(node.type).toBe("document");
+    // Day 2 API contract uses uppercase node types (06_DAY2_API_CONTRACT_ADDENDUM.md)
+    expect(node.type).toBe("DOCUMENT");
     expect(node.label).toBe("The Nature of Things");
     expect(node.status).toBe("ACTIVE");
   });

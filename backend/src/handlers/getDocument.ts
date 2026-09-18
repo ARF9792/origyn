@@ -1,5 +1,6 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import { getDocument } from "../lib/dynamo";
+import { getDocument, listClaimsByDocument } from "../lib/dynamo";
+import { Claim } from "../types/document";
 
 function errorResponse(
   statusCode: number,
@@ -17,8 +18,10 @@ function errorResponse(
  * GET /documents/:id
  *
  * Returns one source and its full status information.
- * Includes `claims: []` on Day 1 (Bedrock extraction is optional/later).
- * Response shape matches 04_DAY1_API_CONTRACT.md exactly.
+ * Day 2: `claims` is populated from the origyn-claims table (persisted by
+ * the extract endpoint) rather than from the embedded document record array.
+ *
+ * Response shape matches 04_DAY1_API_CONTRACT.md + 06_DAY2_API_CONTRACT_ADDENDUM.md.
  */
 export const handler = async (
   event: APIGatewayProxyEvent
@@ -41,10 +44,19 @@ export const handler = async (
     return errorResponse(404, "DOCUMENT_NOT_FOUND", `Document with id '${id}' was not found.`);
   }
 
-  // Ensure claims is always an array (defensive, in case of legacy records)
+  // Day 2: fetch persisted claims from origyn-claims table.
+  // Falls back to [] gracefully if the table is empty or the lookup fails.
+  let claims: Claim[];
+  try {
+    claims = await listClaimsByDocument(id);
+  } catch (err) {
+    console.error(`DynamoDB listClaimsByDocument error for document ${id}:`, err);
+    claims = [];
+  }
+
   const response = {
     ...document,
-    claims: document.claims ?? [],
+    claims,
   };
 
   return {

@@ -5,12 +5,16 @@ import {
   GetCommand,
   ScanCommand,
   UpdateCommand,
+  DeleteCommand,
+  QueryCommand,
 } from "@aws-sdk/lib-dynamodb";
 import { config } from "../config";
-import { Document } from "../types/document";
+import { Document, Claim, Answer } from "../types/document";
 
 const rawClient = new DynamoDBClient({ region: config.aws.region });
 export const dynamo = DynamoDBDocumentClient.from(rawClient);
+
+// ─── Document repository ──────────────────────────────────────────────────────
 
 /** Persist a new document record. */
 export async function putDocument(doc: Document): Promise<void> {
@@ -33,7 +37,7 @@ export async function getDocument(id: string): Promise<Document | null> {
   return (result.Item as Document) ?? null;
 }
 
-/** List all documents (full scan — acceptable for Day 1 scale). */
+/** List all documents (full scan — acceptable at hackathon scale). */
 export async function listDocuments(): Promise<Document[]> {
   const result = await dynamo.send(
     new ScanCommand({
@@ -70,6 +74,144 @@ export async function updateDocument(
       UpdateExpression,
       ExpressionAttributeNames,
       ExpressionAttributeValues,
+    })
+  );
+}
+
+// ─── Claim repository ─────────────────────────────────────────────────────────
+
+/** Persist a single claim record. */
+export async function putClaim(claim: Claim): Promise<void> {
+  await dynamo.send(
+    new PutCommand({
+      TableName: config.dynamodb.claimsTable,
+      Item: claim,
+    })
+  );
+}
+
+/** Persist multiple claims in parallel. All-or-nothing at the caller level
+ *  (caller should not persist partial results on error). */
+export async function putClaims(claims: Claim[]): Promise<void> {
+  await Promise.all(claims.map((c) => putClaim(c)));
+}
+
+/** Fetch a single claim by ID. Returns null if not found. */
+export async function getClaim(id: string): Promise<Claim | null> {
+  const result = await dynamo.send(
+    new GetCommand({
+      TableName: config.dynamodb.claimsTable,
+      Key: { id },
+    })
+  );
+  return (result.Item as Claim) ?? null;
+}
+
+/**
+ * List all claims for a given document (full scan, filtered server-side).
+ * Acceptable at hackathon scale; would need a GSI on documentId at production.
+ */
+export async function listClaimsByDocument(documentId: string): Promise<Claim[]> {
+  const result = await dynamo.send(
+    new ScanCommand({
+      TableName: config.dynamodb.claimsTable,
+      FilterExpression: "documentId = :docId",
+      ExpressionAttributeValues: { ":docId": documentId },
+    })
+  );
+  return (result.Items as Claim[]) ?? [];
+}
+
+/** List ALL claims across all documents (used by chat and graph). */
+export async function listAllClaims(): Promise<Claim[]> {
+  const result = await dynamo.send(
+    new ScanCommand({
+      TableName: config.dynamodb.claimsTable,
+    })
+  );
+  return (result.Items as Claim[]) ?? [];
+}
+
+/**
+ * Update a claim's status (used during impact propagation).
+ * Only updates status + updatedAt — text and provenance are immutable.
+ */
+export async function updateClaimStatus(
+  id: string,
+  status: Claim["status"]
+): Promise<void> {
+  await dynamo.send(
+    new UpdateCommand({
+      TableName: config.dynamodb.claimsTable,
+      Key: { id },
+      UpdateExpression: "SET #s = :s, updatedAt = :u",
+      ExpressionAttributeNames: { "#s": "status" },
+      ExpressionAttributeValues: {
+        ":s": status,
+        ":u": new Date().toISOString(),
+      },
+    })
+  );
+}
+
+// ─── Answer repository ────────────────────────────────────────────────────────
+
+/** Persist a new answer record. */
+export async function putAnswer(answer: Answer): Promise<void> {
+  await dynamo.send(
+    new PutCommand({
+      TableName: config.dynamodb.answersTable,
+      Item: answer,
+    })
+  );
+}
+
+/** Fetch a single answer by ID. Returns null if not found. */
+export async function getAnswer(id: string): Promise<Answer | null> {
+  const result = await dynamo.send(
+    new GetCommand({
+      TableName: config.dynamodb.answersTable,
+      Key: { id },
+    })
+  );
+  return (result.Item as Answer) ?? null;
+}
+
+/** List all answers (used by GET /answers and impact traversal). */
+export async function listAllAnswers(): Promise<Answer[]> {
+  const result = await dynamo.send(
+    new ScanCommand({
+      TableName: config.dynamodb.answersTable,
+    })
+  );
+  return (result.Items as Answer[]) ?? [];
+}
+
+/**
+ * Update an answer's status (used when evidence becomes unusable).
+ * Preserves all provenance fields — only stamps status + updatedAt.
+ */
+export async function updateAnswerStatus(
+  id: string,
+  status: Answer["status"],
+  supersededByAnswerId?: string
+): Promise<void> {
+  const extra = supersededByAnswerId
+    ? ", supersededByAnswerId = :sup"
+    : "";
+  const values: Record<string, string> = {
+    ":s": status,
+    ":u": new Date().toISOString(),
+  };
+  if (supersededByAnswerId) values[":sup"] = supersededByAnswerId;
+
+  await dynamo.send(
+    new UpdateCommand({
+      TableName: config.dynamodb.answersTable,
+      Key: { id },
+      UpdateExpression: `SET #s = :s, updatedAt = :u${extra}`,
+      ExpressionAttributeNames: { "#s": "status" },
+      ExpressionAttributeValues: values,
     })
   );
 }

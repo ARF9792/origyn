@@ -27,6 +27,7 @@ export const config = {
   dynamodb: {
     documentsTable: optional("DYNAMODB_DOCUMENTS_TABLE", ""),
     claimsTable: optional("DYNAMODB_CLAIMS_TABLE", ""),
+    answersTable: optional("DYNAMODB_ANSWERS_TABLE", ""),
   },
   crossref: {
     /**
