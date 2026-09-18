@@ -30,7 +30,7 @@ export const handler = async (
   const graph: GraphResponse = {
     nodes: documents.map((doc) => ({
       id: doc.id,
-      type: "document",
+      type: "DOCUMENT",
       label: doc.title ?? doc.filename,
       status: doc.status,
     })),

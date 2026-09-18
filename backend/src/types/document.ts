@@ -56,13 +56,45 @@ export type DocumentSummary = Pick<
 
 // ─── Claim ────────────────────────────────────────────────────────────────────
 
-/** Day 1 optional — Bedrock-extracted claim from a document. */
+/**
+ * ClaimStatus — Day 2 API contract (06_DAY2_API_CONTRACT_ADDENDUM.md).
+ * UNSUPPORTED replaces the Day 1 stub value INVALID.
+ */
+export type ClaimStatus = "SUPPORTED" | "UNSUPPORTED";
+
+/** Bedrock-extracted claim from a document, with full Day 2 provenance fields. */
 export interface Claim {
   id: string;
   documentId: string;
+  /** All source document IDs that support this claim (currently always [documentId]). */
+  sourceDocumentIds: string[];
   text: string;
-  status: "SUPPORTED" | "INVALID";
+  status: ClaimStatus;
   createdAt: string;
+  updatedAt: string;
+}
+
+// ─── Answer ───────────────────────────────────────────────────────────────────
+
+export type AnswerStatus = "CURRENT" | "EVIDENCE_CHANGED";
+
+/**
+ * Persisted answer produced by Evidence-Locked chat.
+ * Stores exact claim and document IDs used so provenance is auditable.
+ */
+export interface Answer {
+  id: string;
+  question: string;
+  text: string;
+  claimIds: string[];
+  sourceDocumentIds: string[];
+  status: AnswerStatus;
+  /** ID of the answer this regenerates (null for original answers). */
+  previousAnswerId: string | null;
+  /** ID of the newer answer that superseded this one (null if still current). */
+  supersededByAnswerId: string | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
 // ─── API response shapes ──────────────────────────────────────────────────────
@@ -80,12 +112,27 @@ export interface DocumentListResponse {
 
 export interface GraphNode {
   id: string;
-  type: "document" | "claim" | "answer";
+  /** Uppercase node types per Day 2 contract (06_DAY2_API_CONTRACT_ADDENDUM.md). */
+  type: "DOCUMENT" | "CLAIM" | "ANSWER";
   label: string;
-  status: DocumentStatus;
+  /** Status drawn from the appropriate type — DocumentStatus | ClaimStatus | AnswerStatus. */
+  status: string;
+}
+
+export interface GraphEdge {
+  source: string;
+  target: string;
+  /** SUPPORTS: Document→Claim | USED_BY: Claim→Answer */
+  type: "SUPPORTS" | "USED_BY";
 }
 
 export interface GraphResponse {
   nodes: GraphNode[];
-  edges: { source: string; target: string }[];
+  edges: GraphEdge[];
+}
+
+// ─── Answer list response ─────────────────────────────────────────────────────
+
+export interface AnswerListResponse {
+  items: Answer[];
 }

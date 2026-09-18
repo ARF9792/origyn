@@ -37,6 +37,9 @@ export const config = {
     baseUrl: optional("CROSSREF_BASE_URL", "https://api.crossref.org"),
   },
   bedrock: {
-    modelId: optional("BEDROCK_MODEL_ID", "anthropic.claude-3-haiku-20240307-v1:0"),
+    // Cross-region inference profile for Claude 3 Haiku (us-east-1 + us-west-2).
+    // Direct foundation-model IDs are no longer invokable standalone in us-east-1;
+    // the inference profile ID is now required.
+    modelId: optional("BEDROCK_MODEL_ID", "us.anthropic.claude-3-haiku-20240307-v1:0"),
   },
 };

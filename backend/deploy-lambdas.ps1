@@ -10,7 +10,7 @@ $RT    = "nodejs20.x"
 $MEM   = 512   # MB
 $TO    = 30    # seconds (Crossref call may take a few seconds)
 
-$ENV_VARS = "Variables={S3_BUCKET_NAME=origyn-documents-135977257539,DYNAMODB_DOCUMENTS_TABLE=origyn-documents,DYNAMODB_CLAIMS_TABLE=origyn-claims,CROSSREF_CONTACT_EMAIL=parthmalhotra905@gmail.com,CROSSREF_BASE_URL=https://api.crossref.org}"
+$ENV_VARS = "Variables={S3_BUCKET_NAME=origyn-documents-135977257539,DYNAMODB_DOCUMENTS_TABLE=origyn-documents,DYNAMODB_CLAIMS_TABLE=origyn-claims,DYNAMODB_ANSWERS_TABLE=origyn-answers,CROSSREF_CONTACT_EMAIL=parthmalhotra905@gmail.com,CROSSREF_BASE_URL=https://api.crossref.org,BEDROCK_MODEL_ID=us.anthropic.claude-3-haiku-20240307-v1:0}"
 
 function Create-Lambda {
     param($Name, $Handler)
