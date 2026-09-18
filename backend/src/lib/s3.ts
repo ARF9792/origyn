@@ -40,10 +40,6 @@ export async function getFromS3(key: string): Promise<Buffer> {
     throw new Error(`S3 object '${key}' returned empty body.`);
   }
 
-  // result.Body is a ReadableStream in the AWS SDK v3 Node.js runtime.
-  const chunks: Uint8Array[] = [];
-  for await (const chunk of result.Body as AsyncIterable<Uint8Array>) {
-    chunks.push(chunk);
-  }
-  return Buffer.concat(chunks);
+  const byteArray = await result.Body.transformToByteArray();
+  return Buffer.from(byteArray);
 }
