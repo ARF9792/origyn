@@ -35,3 +35,14 @@ coverage/
 # ── Private docs (not for public repo) ───────────────────────────────────────
 private-docs/
 AGENTS.md
+
+# ── IDE ───────────────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.pdf
+out*.json
+response*.json
+lambda_event*.json
+stream.json
+event*.json
+nova*.json
