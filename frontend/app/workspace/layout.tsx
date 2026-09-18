@@ -24,6 +24,7 @@ export default function WorkspaceLayout({
 
   const pathname = usePathname();
   const isChatRoute = pathname === '/workspace/chat';
+  const isGraphRoute = pathname === '/workspace/graph';
 
   return (
     <div className={`shell ${isNavOpen ? 'nav-open' : ''}`}>
@@ -43,7 +44,7 @@ export default function WorkspaceLayout({
 
       <main id="main" className="app-main" inert={isNavOpen ? true : undefined}>
         <TopBar onToggleMobile={() => setIsNavOpen(!isNavOpen)} />
-        <div className={`content ${isChatRoute ? 'chat-content' : ''}`}>
+        <div className={`content ${isChatRoute ? 'chat-content' : ''} ${isGraphRoute ? 'graph-content' : ''}`}>
           {children}
         </div>
       </main>

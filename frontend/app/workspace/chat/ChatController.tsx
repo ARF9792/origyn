@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Icon } from '@/components/ui/Icon';
 import { CurrentEvidenceContext } from '@/components/chat/CurrentEvidenceContext';
 import { ChatComposer } from '@/components/chat/ChatComposer';
@@ -19,6 +20,9 @@ import type { Conversation, EvidenceContext, EvidenceResult, GenerationPending, 
  * Translates controller.js logic into React state.
  */
 export function ChatController() {
+  const searchParams = useSearchParams();
+  const initialized = useRef(false);
+
   // ── State ──────────────────────────────────────────────────────────────────
   const [threadId, setThreadId] = useState<string | null>(null);
   const [thread, setThread] = useState<Conversation | null>(null);
@@ -69,9 +73,31 @@ export function ChatController() {
 
   // Initial load
   useEffect(() => {
-    const t = chatService.createDemoConversation('normal');
-    setThreadId(t.id);
-  }, []);
+    if (initialized.current) return;
+    initialized.current = true;
+
+    const convParam = searchParams.get('conversation');
+    const ansParam = searchParams.get('answer');
+    const inspectParam = searchParams.get('inspect');
+
+    let t;
+    if (convParam && chatService.listConversations().some(c => c.id === convParam)) {
+      t = chatService.getConversation(convParam);
+      setThreadId(t.id);
+
+      if (ansParam) {
+        const baseAnswerId = t.answers.find(a => a.id === ansParam)?.previousVersionId || ansParam;
+        setVersionSelections(prev => ({ ...prev, [baseAnswerId]: ansParam }));
+        
+        if (inspectParam === '1') {
+          chatService.getEvidence(t.id, ansParam).then(setInspectedEvidence).catch(console.error);
+        }
+      }
+    } else {
+      t = chatService.createDemoConversation('normal');
+      setThreadId(t.id);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     refresh();

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import type { Metadata } from 'next';
 import { ChatController } from './ChatController';
 import '@/styles/chat.css';
@@ -8,5 +8,9 @@ export const metadata: Metadata = {
 };
 
 export default function ChatPage() {
-  return <ChatController />;
+  return (
+    <Suspense fallback={<div className="g-loading"><p>Loading chat...</p></div>}>
+      <ChatController />
+    </Suspense>
+  );
 }

@@ -1,33 +1,31 @@
-import React from 'react';
-import { EmptyState } from '@/components/ui/EmptyState';
+import React, { Suspense } from 'react';
 import type { Metadata } from 'next';
+import { EvidenceGraph } from '@/components/graph/EvidenceGraph';
+import { LoadingSkeleton } from '@/components/ui/LoadingSkeleton';
+import '@/styles/graph.css';
 
 export const metadata: Metadata = {
   title: 'Evidence Graph · Origyn Workspace',
 };
 
-export default function GraphPlaceholder() {
+// Next.js recommended approach for client components using useSearchParams
+function GraphFallback() {
   return (
-    <>
-      <div className="page-heading">
-        <div>
-          <span className="eyebrow">Analysis</span>
-          <h1>Evidence Graph</h1>
-          <p>Visual lineage of sources, claims, and answers.</p>
-        </div>
+    <div className="g-loading" style={{ padding: '60px' }}>
+      <p>Loading graph...</p>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '28px', margin: '25px 0' }}>
+        <LoadingSkeleton label="Loading" />
+        <LoadingSkeleton label="Loading" />
+        <LoadingSkeleton label="Loading" />
       </div>
-      <div className="reserved-surface">
-        <div className="panel">
-          <EmptyState
-            icon="graph"
-            title="Graph visualization reserved"
-            description="This route is reserved for the Evidence Graph implementation in a future phase."
-          />
-          <div className="reserved-note">
-            The Evidence Graph requires integrating React Flow with our persistent graph structure to visualize the relationships between literature, assertions, and generated answers.
-          </div>
-        </div>
-      </div>
-    </>
+    </div>
+  );
+}
+
+export default function GraphPage() {
+  return (
+    <Suspense fallback={<GraphFallback />}>
+      <EvidenceGraph />
+    </Suspense>
   );
 }
