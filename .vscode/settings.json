@@ -1,7 +1,0 @@
-{
-    "editor.minimap.autohide": "mouseover",
-    "files.exclude": {
-        "**/.git": false,
-        "/.git": true
-    }
-}
