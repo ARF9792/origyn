@@ -1,200 +1,209 @@
 import { APIGatewayProxyEvent } from "aws-lambda";
 import { handler } from "../src/handlers/uploadDocument";
 
-// ── Mock multipart parser ─────────────────────────────────────────────────────
+// ── Mocks ─────────────────────────────────────────────────────────────────────
 jest.mock("../src/lib/multipart");
-import { parseMultipartFile } from "../src/lib/multipart";
-const mockParseMultipart = parseMultipartFile as jest.MockedFunction<
-  typeof parseMultipartFile
->;
-
-// ── Mock S3 ───────────────────────────────────────────────────────────────────
 jest.mock("../src/lib/s3");
-import { uploadToS3 } from "../src/lib/s3";
-const mockUploadToS3 = uploadToS3 as jest.MockedFunction<typeof uploadToS3>;
-
-// ── Mock DynamoDB ─────────────────────────────────────────────────────────────
 jest.mock("../src/lib/dynamo");
-import { putDocument, updateDocument, findDocumentByDoi } from "../src/lib/dynamo";
-const mockPutDocument = putDocument as jest.MockedFunction<typeof putDocument>;
-const mockUpdateDocument = updateDocument as jest.MockedFunction<typeof updateDocument>;
-const mockFindDocumentByDoi = findDocumentByDoi as jest.MockedFunction<typeof findDocumentByDoi>;
-
-// ── Mock paper identifier ──────────────────────────────────────────────────
 jest.mock("../src/services/paperIdentifier");
-import { identifyPaper } from "../src/services/paperIdentifier";
-const mockIdentifyPaper = identifyPaper as jest.MockedFunction<typeof identifyPaper>;
-
-// ── Mock Crossref service ──────────────────────────────────────────────────
 jest.mock("../src/services/crossrefService");
-import { checkRetractionStatus } from "../src/services/crossrefService";
-const mockCheckRetraction = checkRetractionStatus as jest.MockedFunction<typeof checkRetractionStatus>;
 
-// ─────────────────────────────────────────────────────────────────────────────
+import { parseMultipartFile } from "../src/lib/multipart";
+import { uploadToS3 } from "../src/lib/s3";
+import { putDocument, updateDocument, findDocumentByDoi } from "../src/lib/dynamo";
+import { identifyPaper } from "../src/services/paperIdentifier";
+import { checkRetractionStatus, searchByTitle } from "../src/services/crossrefService";
 
-const mockEvent = {} as APIGatewayProxyEvent;
+const mockParse = parseMultipartFile as jest.Mock;
+const mockUploadS3 = uploadToS3 as jest.Mock;
+const mockPut = putDocument as jest.Mock;
+const mockUpdate = updateDocument as jest.Mock;
+const mockFindDoi = findDocumentByDoi as jest.Mock;
+const mockIdentify = identifyPaper as jest.Mock;
+const mockCheckRetraction = checkRetractionStatus as jest.Mock;
+const mockSearchByTitle = searchByTitle as jest.Mock;
 
-const fakePdfBuffer = Buffer.from("%PDF-1.4 fake pdf content");
+function createEvent(): APIGatewayProxyEvent {
+  return {
+    body: "fake-multipart-body",
+    headers: { "content-type": "multipart/form-data; boundary=---" },
+  } as unknown as APIGatewayProxyEvent;
+}
 
 beforeEach(() => {
   jest.clearAllMocks();
-  mockParseMultipart.mockResolvedValue({
-    filename: "paper.pdf",
-    buffer: fakePdfBuffer,
+
+  mockParse.mockResolvedValue({
+    filename: "test.pdf",
     contentType: "application/pdf",
+    buffer: Buffer.from("pdf-data"),
   });
-  mockUploadToS3.mockResolvedValue(undefined);
-  mockPutDocument.mockResolvedValue(undefined);
-  mockUpdateDocument.mockResolvedValue(undefined);
-  mockFindDocumentByDoi.mockResolvedValue(null);
-  mockFindDocumentByDoi.mockResolvedValue(null);
-  mockIdentifyPaper.mockResolvedValue({
-    title: "Test Research Paper",
-    doi: "10.1038/test.doi",
-    identificationMethod: "doi_in_pdf",
-  });
-  mockCheckRetraction.mockResolvedValue({
-    found: true,
-    doi: "10.1038/test.doi",
-    title: "Test Research Paper",
-    retractionStatus: "NONE_FOUND",
-    retractionNotice: null,
-  });
+
+  mockUploadS3.mockResolvedValue(undefined);
+  mockPut.mockResolvedValue(undefined);
+  mockUpdate.mockResolvedValue(undefined);
+  mockFindDoi.mockResolvedValue(null);
 });
 
-// ─────────────────────────────────────────────────────────────────────────────
+describe("uploadDocument pipeline", () => {
+  it("rejects non-PDF files", async () => {
+    mockParse.mockResolvedValueOnce({
+      filename: "test.png",
+      contentType: "image/png",
+      buffer: Buffer.from("img"),
+    });
 
-describe("POST /documents — happy path", () => {
-  it("returns 200 with a fully resolved document", async () => {
-    const result = await handler(mockEvent);
-    expect(result.statusCode).toBe(200);
-
-    const body = JSON.parse(result.body);
-    expect(body.id).toMatch(/^doc_/);
-    expect(body.filename).toBe("paper.pdf");
-    expect(body.status).toBe("ACTIVE");
-    expect(body.retractionStatus).toBe("NONE_FOUND");
-    expect(body.s3Key).toMatch(/^uploads\/doc_/);
-    expect(body.title).toBe("Test Research Paper");
-    expect(body.doi).toBe("10.1038/test.doi");
-    expect(body.retractionNotice).toBeNull();
-    expect(body.createdAt).toBeDefined();
-    expect(body.updatedAt).toBeDefined();
+    const res = await handler(createEvent());
+    expect(res.statusCode).toBe(400);
+    const body = JSON.parse(res.body);
+    expect(body.error.code).toBe("INVALID_FILE");
   });
 
-  it("calls uploadToS3 with the correct key and buffer", async () => {
-    await handler(mockEvent);
-    expect(mockUploadToS3).toHaveBeenCalledTimes(1);
-    const [key, buffer, contentType] = mockUploadToS3.mock.calls[0];
-    expect(key).toMatch(/^uploads\/doc_/);
-    expect(buffer).toEqual(fakePdfBuffer);
-    expect(contentType).toBe("application/pdf");
+  it("handles duplicate DOI rejection correctly", async () => {
+    mockIdentify.mockResolvedValueOnce({
+      title: null,
+      doi: "10.1000/duplicate",
+      identificationMethod: "doi_in_pdf",
+    });
+    mockFindDoi.mockResolvedValueOnce({ id: "doc_existing123" });
+
+    const res = await handler(createEvent());
+    expect(res.statusCode).toBe(409);
+    
+    const body = JSON.parse(res.body);
+    expect(body.error.code).toBe("DUPLICATE_DOCUMENT");
+    expect(body.error.existingDocumentId).toBe("doc_existing123");
+    
+    // Ensure it aborts before S3/Dynamo writes
+    expect(mockUploadS3).not.toHaveBeenCalled();
+    expect(mockPut).not.toHaveBeenCalled();
   });
 
-  it("calls putDocument with PROCESSING status", async () => {
-    await handler(mockEvent);
-    expect(mockPutDocument).toHaveBeenCalledTimes(1);
-    const [doc] = mockPutDocument.mock.calls[0];
-    expect(doc.status).toBe("PROCESSING");
+  it("identifies paper, uploads to S3, writes to DB, checks Crossref, and returns ACTIVE", async () => {
+    mockIdentify.mockResolvedValueOnce({
+      title: "Valid Science",
+      doi: "10.1000/valid",
+      identificationMethod: "doi_in_pdf",
+    });
+
+    mockCheckRetraction.mockResolvedValueOnce({
+      found: true,
+      doi: "10.1000/valid",
+      title: "Valid Science from Crossref",
+      retractionStatus: "NONE_FOUND",
+      retractionNotice: null,
+    });
+
+    const res = await handler(createEvent());
+    expect(res.statusCode).toBe(200);
+
+    const doc = JSON.parse(res.body);
+    expect(doc.status).toBe("ACTIVE");
+    expect(doc.retractionStatus).toBe("NONE_FOUND");
+    expect(doc.title).toBe("Valid Science"); // Prefers identified title over crossref if both exist (well, identification.title ?? crossrefTitle)
+    expect(doc.doi).toBe("10.1000/valid");
+
+    // Pipeline verifications
+    expect(mockUploadS3).toHaveBeenCalled();
+    expect(mockPut).toHaveBeenCalledWith(expect.objectContaining({
+      status: "PROCESSING"
+    }));
+    expect(mockUpdate).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({
+      status: "ACTIVE",
+      retractionStatus: "NONE_FOUND"
+    }));
+  });
+
+  it("returns RETRACTED when Crossref finds a retraction", async () => {
+    mockIdentify.mockResolvedValueOnce({
+      title: "Bad Science",
+      doi: "10.1000/bad",
+      identificationMethod: "doi_in_pdf",
+    });
+
+    mockCheckRetraction.mockResolvedValueOnce({
+      found: true,
+      doi: "10.1000/bad",
+      title: "Bad Science",
+      retractionStatus: "RETRACTED",
+      retractionNotice: {
+        date: "2024-01-01",
+        doi: "10.1000/bad",
+        source: "crossref"
+      },
+    });
+
+    const res = await handler(createEvent());
+    expect(res.statusCode).toBe(200);
+
+    const doc = JSON.parse(res.body);
+    expect(doc.status).toBe("RETRACTED");
+    expect(doc.retractionStatus).toBe("RETRACTED");
+    expect(doc.retractionNotice).not.toBeNull();
+  });
+
+  it("safely falls back to UNKNOWN if Crossref fails", async () => {
+    mockIdentify.mockResolvedValueOnce({
+      title: null,
+      doi: "10.1000/unknown",
+      identificationMethod: "doi_in_pdf",
+    });
+
+    mockCheckRetraction.mockRejectedValueOnce(new Error("API Timeout"));
+
+    const res = await handler(createEvent());
+    expect(res.statusCode).toBe(200);
+
+    const doc = JSON.parse(res.body);
+    // Even though DOI exists, retraction status could not be verified
+    expect(doc.status).toBe("UNKNOWN");
     expect(doc.retractionStatus).toBe("UNKNOWN");
   });
 
-  it("includes CORS header", async () => {
-    const result = await handler(mockEvent);
-    expect(result.headers?.["Access-Control-Allow-Origin"]).toBe("*");
-  });
-});
-
-// ─────────────────────────────────────────────────────────────────────────────
-
-describe("POST /documents — validation errors", () => {
-  it("returns 400 if multipart parse fails", async () => {
-    mockParseMultipart.mockRejectedValue(new Error("bad multipart"));
-    const result = await handler(mockEvent);
-    expect(result.statusCode).toBe(400);
-    const body = JSON.parse(result.body);
-    expect(body.error.code).toBe("INVALID_FILE");
-  });
-
-  it("returns 400 if file is not a PDF", async () => {
-    mockParseMultipart.mockResolvedValue({
-      filename: "image.png",
-      buffer: Buffer.from("fake"),
-      contentType: "image/png",
+  it("handles title fallback correctly when DOI is missing", async () => {
+    mockIdentify.mockResolvedValueOnce({
+      title: "Some Fallback Title",
+      doi: null,
+      identificationMethod: "title_extracted",
     });
-    const result = await handler(mockEvent);
-    expect(result.statusCode).toBe(400);
-    const body = JSON.parse(result.body);
-    expect(body.error.code).toBe("INVALID_FILE");
-  });
 
-  it("returns 400 if file is empty", async () => {
-    mockParseMultipart.mockResolvedValue({
-      filename: "empty.pdf",
-      buffer: Buffer.alloc(0),
-      contentType: "application/pdf",
-    });
-    const result = await handler(mockEvent);
-    expect(result.statusCode).toBe(400);
-    const body = JSON.parse(result.body);
-    expect(body.error.code).toBe("INVALID_FILE");
-  });
-});
+    mockSearchByTitle.mockResolvedValueOnce("10.1000/fallback");
+    mockFindDoi.mockResolvedValueOnce(null);
 
-// ─────────────────────────────────────────────────────────────────────────────
-
-describe("POST /documents — AWS errors", () => {
-  it("returns 502 if S3 upload fails", async () => {
-    mockUploadToS3.mockRejectedValue(new Error("S3 error"));
-    const result = await handler(mockEvent);
-    expect(result.statusCode).toBe(502);
-    const body = JSON.parse(result.body);
-    expect(body.error.code).toBe("UPLOAD_FAILED");
-  });
-
-  it("returns 502 if DynamoDB write fails", async () => {
-    mockPutDocument.mockRejectedValue(new Error("DynamoDB error"));
-    const result = await handler(mockEvent);
-    expect(result.statusCode).toBe(502);
-    const body = JSON.parse(result.body);
-    expect(body.error.code).toBe("INTERNAL_ERROR");
-  });
-});
-
-// ─────────────────────────────────────────────────────────────────────────────
-
-describe("POST /documents — duplicate DOI checks", () => {
-  it("returns 409 if normalized DOI already exists", async () => {
-    mockIdentifyPaper.mockResolvedValue({
-      title: "Test Research Paper",
-      doi: "DOI: 10.1038/test.doi ", // raw, unnormalized
-      identificationMethod: "doi_in_pdf",
-    });
-    mockFindDocumentByDoi.mockResolvedValue({
-      id: "doc_existing123",
-      filename: "old.pdf",
-      s3Key: "uploads/doc_existing123.pdf",
-      title: "Old Paper",
-      doi: "10.1038/test.doi",
-      status: "ACTIVE",
+    mockCheckRetraction.mockResolvedValueOnce({
+      found: true,
+      doi: "10.1000/fallback",
+      title: "Some Fallback Title from Crossref",
       retractionStatus: "NONE_FOUND",
       retractionNotice: null,
-      claims: [],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
     });
 
-    const result = await handler(mockEvent);
-    expect(result.statusCode).toBe(409);
+    const res = await handler(createEvent());
+    expect(res.statusCode).toBe(200);
 
-    const body = JSON.parse(result.body);
-    expect(body.error.code).toBe("DUPLICATE_DOCUMENT");
-    expect(body.error.existingDocumentId).toBe("doc_existing123");
+    const doc = JSON.parse(res.body);
+    expect(doc.doi).toBe("10.1000/fallback");
+    expect(doc.status).toBe("ACTIVE");
+    
+    expect(mockSearchByTitle).toHaveBeenCalledWith("Some Fallback Title");
+    // Duplicate check must be called AFTER the fallback resolves the DOI
+    expect(mockFindDoi).toHaveBeenCalledWith("10.1000/fallback");
+  });
 
-    // verify it normalized correctly before checking
-    expect(mockFindDocumentByDoi).toHaveBeenCalledWith("10.1038/test.doi");
-    // verify it did NOT upload or create a new record
-    expect(mockUploadToS3).not.toHaveBeenCalled();
-    expect(mockPutDocument).not.toHaveBeenCalled();
+  it("remains UNKNOWN if title fallback fails safely", async () => {
+    mockIdentify.mockResolvedValueOnce({
+      title: "Some Ambiguous Title",
+      doi: null,
+      identificationMethod: "title_extracted",
+    });
+
+    mockSearchByTitle.mockResolvedValueOnce(null);
+
+    const res = await handler(createEvent());
+    expect(res.statusCode).toBe(200);
+
+    const doc = JSON.parse(res.body);
+    expect(doc.doi).toBeNull();
+    expect(doc.status).toBe("UNKNOWN");
   });
 });

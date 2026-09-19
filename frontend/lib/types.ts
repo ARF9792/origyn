@@ -120,13 +120,110 @@ export type ApiErrorCode =
   | 'DOCUMENT_IDENTIFICATION_FAILED'
   | 'CROSSREF_LOOKUP_FAILED'
   | 'DOCUMENT_NOT_FOUND'
+  | 'DUPLICATE_DOCUMENT'
+  | 'NO_USABLE_EVIDENCE'
+  | 'PDF_TEXT_EXTRACTION_FAILED'
+  | 'CLAIM_EXTRACTION_FAILED'
   | 'INTERNAL_ERROR';
 
 export interface ApiError {
   error: {
     code: ApiErrorCode;
     message: string;
+    /** Only present on DUPLICATE_DOCUMENT (HTTP 409) */
+    existingDocumentId?: string;
   };
+}
+
+// ─── Typed duplicate-document error ──────────────────────────────────────────
+export class DuplicateDocumentError extends Error {
+  code: 'DUPLICATE_DOCUMENT' = 'DUPLICATE_DOCUMENT';
+  existingDocumentId: string;
+  constructor(message: string, existingDocumentId: string) {
+    super(message);
+    this.name = 'DuplicateDocumentError';
+    this.existingDocumentId = existingDocumentId;
+  }
+}
+
+// ─── Backend raw claim (GET /documents/{id} claims array) ─────────────────────
+// Backend does NOT expose: excerpt, page, pageNumber
+export interface BackendClaim {
+  id: string;
+  documentId: string;
+  sourceDocumentIds: string[];
+  text: string;
+  status: 'SUPPORTED' | 'UNSUPPORTED';
+  createdAt: string;
+  updatedAt: string;
+}
+
+// ─── Backend raw answer (GET /answers, GET /answers/{id}) ─────────────────────
+export interface BackendAnswer {
+  id: string;
+  question: string;
+  text: string;
+  claimIds: string[];
+  sourceDocumentIds: string[];
+  status: 'CURRENT' | 'EVIDENCE_CHANGED';
+  previousAnswerId: string | null;
+  supersededByAnswerId: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// ─── Backend chat citation ─────────────────────────────────────────────────────
+export interface BackendCitation {
+  claimId: string;
+  documentId: string;
+  claimText: string;
+  title: string | null;
+  doi: string | null;
+}
+
+// ─── Backend POST /chat response ──────────────────────────────────────────────
+export interface BackendChatResponse {
+  answer: BackendAnswer;
+  citations: BackendCitation[];
+}
+
+// ─── Backend POST /answers/{id}/regenerate response ───────────────────────────
+export interface BackendRegenerateResponse {
+  previousAnswer: { id: string; status: 'EVIDENCE_CHANGED' };
+  answer: BackendAnswer;
+}
+
+// ─── Backend GET /documents/{id}/impact response ─────────────────────────────
+export interface BackendImpactResponse {
+  documentId: string;
+  changed?: boolean;
+  status?: string;
+  retractionStatus?: string;
+  impact: {
+    claimIds: string[];
+    answerIds: string[];
+    claimCount?: number;
+    answerCount?: number;
+  };
+}
+
+// ─── Backend GET /graph node/edge ─────────────────────────────────────────────
+export interface BackendGraphNode {
+  id: string;
+  type: 'DOCUMENT' | 'CLAIM' | 'ANSWER';
+  label: string;
+  status: string;
+}
+
+export interface BackendGraphEdge {
+  source: string;
+  target: string;
+  type: 'SUPPORTS' | 'USED_BY';
+}
+
+export interface BackendGraphResponse {
+  nodes: BackendGraphNode[];
+  edges: BackendGraphEdge[];
 }
 
 // ─── Upload options ───────────────────────────────────────────────────────────
@@ -253,6 +350,7 @@ export interface GenerationPending {
   answerId: string | null;
   stage: string;
   error: string | null;
+  errorCode?: string;
   cancelled: boolean;
   preview?: boolean;
 }

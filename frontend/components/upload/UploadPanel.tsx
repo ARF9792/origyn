@@ -6,8 +6,9 @@ import { Icon } from '@/components/ui/Icon';
 import { UploadDropzone } from './UploadDropzone';
 import { AnalysisSteps } from './AnalysisSteps';
 import { ErrorState } from '@/components/ui/ErrorState';
-import { uploadDocument } from '@/lib/api';
+import { uploadDocument, extractClaims } from '@/lib/api';
 import type { Document } from '@/lib/types';
+import { DuplicateDocumentError } from '@/lib/types';
 import { DEMO_STATES } from '@/lib/mock-data';
 
 export function UploadPanel() {
@@ -15,6 +16,7 @@ export function UploadPanel() {
   const [file, setFile] = useState<File | null>(null);
   const [stage, setStage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [duplicateId, setDuplicateId] = useState<string | null>(null);
   const [result, setResult] = useState<Document | null>(null);
   
   // Developer overrides
@@ -24,6 +26,7 @@ export function UploadPanel() {
   const startUpload = async (selectedFile: File) => {
     setFile(selectedFile);
     setError(null);
+    setDuplicateId(null);
     setResult(null);
     setStage(null);
 
@@ -35,10 +38,17 @@ export function UploadPanel() {
         outcome: mockOutcome,
         onStage: setStage,
       });
+      if (doc.status === 'ACTIVE' && process.env.NEXT_PUBLIC_API_MODE === 'real') {
+        // Auto-extract claims in background
+        extractClaims(doc.id).catch(() => {});
+      }
       setResult(doc);
     } catch (err: any) {
       if (err.name === 'AbortError') {
         resetState();
+      } else if (err instanceof DuplicateDocumentError || err.code === 'DUPLICATE_DOCUMENT') {
+        setError('This paper is already in your workspace.');
+        setDuplicateId(err.existingDocumentId);
       } else {
         setError(err.message || 'Upload failed');
       }
@@ -58,6 +68,7 @@ export function UploadPanel() {
     setFile(null);
     setStage(null);
     setError(null);
+    setDuplicateId(null);
     setResult(null);
   };
 
@@ -75,7 +86,25 @@ export function UploadPanel() {
 
       <div className="upload-body">
         {error ? (
-          <ErrorState message={error} onRetry={resetState} />
+          <div className="error-state panel e-state" role="alert">
+            <Icon name="warning" />
+            <div>
+              <h3>Upload failed</h3>
+              <p>{error}</p>
+              {duplicateId ? (
+                <div className="dialog-actions">
+                  <button className="button compact quiet" onClick={resetState}>Upload another</button>
+                  <button className="button primary" onClick={() => router.push(`/workspace/sources/${encodeURIComponent(duplicateId)}`)}>
+                    View existing source
+                  </button>
+                </div>
+              ) : (
+                <button className="button" onClick={resetState}>
+                  <Icon name="refresh" /> Retry
+                </button>
+              )}
+            </div>
+          </div>
         ) : result ? (
           <div className={`analysis-result ${result.status.toLowerCase()}`}>
             <div className="result-status">

@@ -32,7 +32,8 @@ import { GraphInspector } from './GraphInspector';
 import { GraphLegend } from './GraphLegend';
 import { ImpactSummary } from './ImpactSummary';
 import { MobileLineageList } from './MobileLineageList';
-import { graphService, traverse, visibleGraph, layoutGraph } from '@/lib/graph-service';
+import { activeGraphService as graphService } from '@/lib/service-selector';
+import { traverse, visibleGraph, layoutGraph } from '@/lib/graph-service';
 import {
   defaultViewState,
 } from '@/lib/graph-types';
@@ -270,8 +271,7 @@ export function EvidenceGraph() {
         onDemoChange={handleDemoChange}
       />
 
-      {/* Replay banner (before-retraction) */}
-      {state.replay && (
+      {process.env.NEXT_PUBLIC_API_MODE !== 'real' && state.replay && (
         <div className="g-replay">
           <span><Icon name="clock" />15 Sep evidence snapshot · source library unchanged</span>
           <button className="button compact" onClick={handleRetract}>

@@ -20,8 +20,8 @@ import { ClaimBadge } from '@/components/ui/ClaimBadge';
 import { SourceStatusBadge } from '@/components/ui/SourceStatusBadge';
 import { LoadingSkeleton } from '@/components/ui/LoadingSkeleton';
 import { AlertDetail } from '@/components/evidence/AlertDetail';
+import { activeEvidenceService as evidenceService } from '@/lib/service-selector';
 import {
-  evidenceService,
   queryAlerts,
 } from '@/lib/evidence-service';
 import type {
@@ -423,7 +423,9 @@ export function AlertsController() {
         <h1>Alerts / Impact</h1>
         <p>What changed, what depends on it, and what needs review.</p>
       </div>
-      <ReviewMenu demo={demo} onDemoChange={handleDemoChange} />
+      {process.env.NEXT_PUBLIC_API_MODE !== 'real' && (
+        <ReviewMenu demo={demo} onDemoChange={handleDemoChange} />
+      )}
     </header>
   );
 

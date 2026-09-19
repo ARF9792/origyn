@@ -4,7 +4,7 @@ import { parseMultipartFile } from "../lib/multipart";
 import { uploadToS3 } from "../lib/s3";
 import { putDocument, updateDocument, findDocumentByDoi } from "../lib/dynamo";
 import { identifyPaper } from "../services/paperIdentifier";
-import { checkRetractionStatus } from "../services/crossrefService";
+import { checkRetractionStatus, searchByTitle } from "../services/crossrefService";
 import { Document, DocumentStatus, RetractionStatus } from "../types/document";
 
 const ALLOWED_CONTENT_TYPES = ["application/pdf"];
@@ -78,7 +78,20 @@ export const handler = async (
     identification = { title: null, doi: null, identificationMethod: "unknown" };
   }
 
-  // ── 4. Normalize DOI and Check Duplicates ─────────────────────────────────
+  // ── 4. Crossref Title Fallback & Normalize DOI ────────────────────────────
+  if (!identification.doi && identification.title) {
+    try {
+      const fallbackDoi = await searchByTitle(identification.title);
+      if (fallbackDoi) {
+        identification.doi = fallbackDoi;
+        identification.identificationMethod = "crossref_title_search" as any;
+      }
+    } catch (err) {
+      console.error("Crossref title fallback error:", err);
+      // Fall through, leaves doi as null
+    }
+  }
+
   let normalizedDoi: string | null = null;
   if (identification.doi) {
     normalizedDoi = normalizeDoi(identification.doi);

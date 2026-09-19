@@ -48,6 +48,13 @@ interface CrossrefResponse {
   message?: CrossrefWork;
 }
 
+interface CrossrefListResponse {
+  status?: string;
+  message?: {
+    items?: CrossrefWork[];
+  };
+}
+
 // ─── Public API ───────────────────────────────────────────────────────────────
 
 /**
@@ -112,8 +119,6 @@ export async function checkRetractionStatus(
   const title = extractTitle(work);
 
   // ── Retraction check ───────────────────────────────────────────────────────
-  // The `update-to` array on the original paper's record lists all
-  // updates; an entry with type === "retraction" means the paper is retracted.
   const retractionEntry = (work["update-to"] ?? []).find(
     (u) => u.type?.toLowerCase() === "retraction"
   );
@@ -128,7 +133,6 @@ export async function checkRetractionStatus(
     };
   }
 
-  // No retraction entry found
   return {
     found: true,
     doi: resolvedDoi,
@@ -136,6 +140,78 @@ export async function checkRetractionStatus(
     retractionStatus: "NONE_FOUND",
     retractionNotice: null,
   };
+}
+
+/**
+ * Searches Crossref by title and returns a validated DOI if confidence is high.
+ * Returns null if no match, ambiguous match, or network error.
+ */
+export async function searchByTitle(title: string): Promise<string | null> {
+  const url = `${config.crossref.baseUrl}/works?query.title=${encodeURIComponent(
+    title
+  )}&select=DOI,title,author,issued&rows=3`;
+
+  const userAgent = config.crossref.contactEmail
+    ? `Origyn/1.0 (mailto:${config.crossref.contactEmail})`
+    : "Origyn/1.0";
+
+  let response: Response;
+  try {
+    response = await fetch(url, {
+      headers: {
+        "User-Agent": userAgent,
+        Accept: "application/json",
+      },
+    });
+  } catch (err) {
+    console.error("Crossref searchByTitle network error:", err);
+    return null; // Safe fallback
+  }
+
+  if (!response.ok) {
+    console.error(`Crossref searchByTitle returned HTTP ${response.status}`);
+    return null;
+  }
+
+  let data: CrossrefListResponse;
+  try {
+    data = (await response.json()) as CrossrefListResponse;
+  } catch (err) {
+    console.error("Crossref searchByTitle parse error:", err);
+    return null;
+  }
+
+  const items = data.message?.items ?? [];
+  if (items.length === 0) return null;
+
+  // Evaluate candidates
+  const candidates = items.map((item) => {
+    const candidateTitle = extractTitle(item) ?? "";
+    const sim = calculateJaccardSimilarity(title, candidateTitle);
+    return { doi: item.DOI, sim, title: candidateTitle };
+  });
+
+  // Sort by similarity descending
+  candidates.sort((a, b) => b.sim - a.sim);
+
+  const best = candidates[0];
+  const threshold = 0.75;
+
+  if (best.sim < threshold) {
+    return null; // Not confident enough
+  }
+
+  // Check for ambiguity: if the runner-up is within 0.15 of the best score,
+  // the result is too close to commit to safely.
+  if (candidates.length > 1) {
+    const runnerUp = candidates[1];
+    if ((best.sim - runnerUp.sim) < 0.15) {
+      // Too ambiguous to pick safely
+      return null;
+    }
+  }
+
+  return best.doi ?? null;
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -159,10 +235,11 @@ function extractTitle(work: CrossrefWork): string | null {
 }
 
 function buildNotice(entry: CrossrefUpdateEntry): RetractionNotice {
-  // Extract date from Crossref's nested date-parts array [[YYYY, MM, DD]]
   const dateParts = entry.updated?.["date-parts"]?.[0];
   const date = dateParts
-    ? `${dateParts[0]}-${String(dateParts[1] ?? 1).padStart(2, "0")}-${String(dateParts[2] ?? 1).padStart(2, "0")}`
+    ? `${dateParts[0]}-${String(dateParts[1] ?? 1).padStart(2, "0")}-${String(
+        dateParts[2] ?? 1
+      ).padStart(2, "0")}`
     : (entry.updated?.["date-time"]?.split("T")[0] ?? "unknown");
 
   return {
@@ -170,4 +247,39 @@ function buildNotice(entry: CrossrefUpdateEntry): RetractionNotice {
     date,
     source: "crossref",
   };
+}
+
+/**
+ * Calculates Jaccard similarity between two strings.
+ * Normalized by lowercasing, removing punctuation, and splitting on whitespace.
+ * Does NOT strip domain words like "review", "volume" etc. — legitimate titles
+ * may contain these words and stripping them would damage similarity scores.
+ */
+function calculateJaccardSimilarity(s1: string, s2: string): number {
+  const normalize = (str: string) => {
+    return str
+      .toLowerCase()
+      // Normalize unicode apostrophes and quotes
+      .replace(/[\u2018\u2019\u201c\u201d]/g, "")
+      // Strip punctuation, keeping word chars and spaces
+      .replace(/[^\w\s]/g, " ")
+      .trim()
+      .split(/\s+/)
+      .filter((w) => w.length > 0);
+  };
+
+  const set1 = new Set(normalize(s1));
+  const set2 = new Set(normalize(s2));
+
+  if (set1.size === 0 || set2.size === 0) return 0;
+
+  let intersection = 0;
+  for (const word of set1) {
+    if (set2.has(word)) {
+      intersection++;
+    }
+  }
+
+  const union = set1.size + set2.size - intersection;
+  return intersection / union;
 }

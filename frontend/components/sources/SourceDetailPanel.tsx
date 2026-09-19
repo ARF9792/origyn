@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { getDocument } from '@/lib/api';
+import { getDocument, extractClaims, recheckDocument, invalidateDocument } from '@/lib/api';
 import { Icon } from '@/components/ui/Icon';
 import { SourceStatusBadge } from '@/components/ui/SourceStatusBadge';
 import { ClaimBadge } from '@/components/ui/ClaimBadge';
@@ -19,8 +19,11 @@ export function SourceDetailPanel({ id }: Props) {
   const [doc, setDoc] = useState<Document | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isExtracting, setIsExtracting] = useState(false);
+  const [isRechecking, setIsRechecking] = useState(false);
+  const [isInvalidating, setIsInvalidating] = useState(false);
 
-  useEffect(() => {
+  const fetchDoc = () => {
     getDocument(id)
       .then((res) => {
         setDoc(res);
@@ -30,7 +33,49 @@ export function SourceDetailPanel({ id }: Props) {
         setError(err.message || 'Failed to load document details.');
         setIsLoading(false);
       });
+  };
+
+  useEffect(() => {
+    fetchDoc();
   }, [id]);
+
+  const handleExtract = async () => {
+    setIsExtracting(true);
+    try {
+      await extractClaims(id);
+      fetchDoc();
+    } catch (err: any) {
+      alert(err.message || 'Failed to extract claims.');
+    } finally {
+      setIsExtracting(false);
+    }
+  };
+
+  const handleRecheck = async () => {
+    setIsRechecking(true);
+    try {
+      await recheckDocument(id);
+      fetchDoc();
+    } catch (err: any) {
+      alert(err.message || 'Failed to recheck document.');
+    } finally {
+      setIsRechecking(false);
+    }
+  };
+
+  const handleInvalidate = async () => {
+    const reason = window.prompt('Provide a reason for invalidation:');
+    if (!reason) return;
+    setIsInvalidating(true);
+    try {
+      await invalidateDocument(id, reason);
+      fetchDoc();
+    } catch (err: any) {
+      alert(err.message || 'Failed to invalidate document.');
+    } finally {
+      setIsInvalidating(false);
+    }
+  };
 
   if (isLoading) return <LoadingSkeleton lines={10} />;
   if (error || !doc) return <ErrorState message={error || 'Document not found.'} />;
@@ -78,6 +123,19 @@ export function SourceDetailPanel({ id }: Props) {
         <Link href="/workspace/graph" className="button compact quiet">
           <Icon name="graph" /> View in evidence graph
         </Link>
+        {process.env.NEXT_PUBLIC_API_MODE === 'real' && (
+          <>
+            <div className="action-divider" />
+            <button className="button compact quiet" onClick={handleRecheck} disabled={isRechecking}>
+              <Icon name="refresh" /> {isRechecking ? 'Rechecking...' : 'Recheck status'}
+            </button>
+            {doc.status !== 'INVALID' && (
+              <button className="button compact quiet" onClick={handleInvalidate} disabled={isInvalidating} style={{ color: '#d92d20' }}>
+                <Icon name="warning" /> {isInvalidating ? 'Invalidating...' : 'Invalidate source'}
+              </button>
+            )}
+          </>
+        )}
       </div>
 
       {isRetracted && doc.retractionNotice && (
@@ -158,8 +216,13 @@ export function SourceDetailPanel({ id }: Props) {
           </dl>
 
           <div className="claim-list">
-            <h2 style={{ marginTop: '45px', marginBottom: '20px' }}>
+            <h2 style={{ marginTop: '45px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '12px' }}>
               Extracted claims <span className="count-pill">{doc.claims.length}</span>
+              {process.env.NEXT_PUBLIC_API_MODE === 'real' && doc.status === 'ACTIVE' && (
+                <button className="button compact quiet" onClick={handleExtract} disabled={isExtracting} style={{ marginLeft: 'auto' }}>
+                  {isExtracting ? 'Extracting...' : 'Extract claims'}
+                </button>
+              )}
             </h2>
 
             {doc.claims.length === 0 ? (

@@ -28,11 +28,11 @@ export function EvidenceChangeSummary({
     <div className="evidence-change-summary">
       <h3>Evidence changed</h3>
       <p>
-        On {new Date(event.detectedAt).toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' })}, 
-        a source used in this answer was marked as retracted.
+        {event.detectedAt ? `On ${new Date(event.detectedAt).toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' })}, a` : 'A'} source used in this answer {event.currentStatus === 'RETRACTED' ? 'was marked as retracted.' : 'is no longer usable.'}
       </p>
       
       <div className="change-columns">
+        {event.previousStatus && (
         <div>
           <span className="change-label">Previous status</span>
           <div>
@@ -40,12 +40,13 @@ export function EvidenceChangeSummary({
           </div>
           <small>Status at generation time</small>
         </div>
+        )}
         <div>
           <span className="change-label">Current status</span>
           <div>
             <Icon name="warning" /> {event.currentStatus}
           </div>
-          <small>Detected via Crossref metadata</small>
+          <small>{event.currentStatus === 'RETRACTED' ? 'Detected via Crossref metadata' : 'Source invalidated'}</small>
         </div>
       </div>
       

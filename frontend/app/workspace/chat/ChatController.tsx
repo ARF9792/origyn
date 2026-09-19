@@ -11,7 +11,7 @@ import { EvidenceChangedBanner } from '@/components/chat/EvidenceChangedBanner';
 import { AnswerLoading } from '@/components/chat/AnswerLoading';
 import { GenerationError } from '@/components/chat/GenerationError';
 import { EvidenceDrawer } from '@/components/chat/EvidenceDrawer';
-import { chatService } from '@/lib/chat-service';
+import { activeChatService as chatService } from '@/lib/service-selector';
 import { chatDemoStates } from '@/lib/chat-mock-data';
 import type { Conversation, EvidenceContext, EvidenceResult, GenerationPending, ChatDemoState } from '@/lib/types';
 
@@ -76,27 +76,48 @@ export function ChatController() {
     if (initialized.current) return;
     initialized.current = true;
 
-    const convParam = searchParams.get('conversation');
-    const ansParam = searchParams.get('answer');
-    const inspectParam = searchParams.get('inspect');
-
-    let t;
-    if (convParam && chatService.listConversations().some(c => c.id === convParam)) {
-      t = chatService.getConversation(convParam);
-      setThreadId(t.id);
-
-      if (ansParam) {
-        const baseAnswerId = t.answers.find(a => a.id === ansParam)?.previousVersionId || ansParam;
-        setVersionSelections(prev => ({ ...prev, [baseAnswerId]: ansParam }));
-        
-        if (inspectParam === '1') {
-          chatService.getEvidence(t.id, ansParam).then(setInspectedEvidence).catch(console.error);
+    async function doInit() {
+      if ('hydrateFromBackend' in chatService) {
+        try {
+          await (chatService as any).hydrateFromBackend();
+        } catch (err) {
+          console.error('Failed to hydrate chat from backend:', err);
         }
       }
-    } else {
-      t = chatService.createDemoConversation('normal');
-      setThreadId(t.id);
+
+      const convParam = searchParams.get('conversation');
+      const ansParam = searchParams.get('answer');
+      const inspectParam = searchParams.get('inspect');
+
+      const allConvs = chatService.listConversations();
+
+      let t;
+      if (convParam && allConvs.some(c => c.id === convParam)) {
+        t = chatService.getConversation(convParam);
+        setThreadId(t.id);
+
+        if (ansParam) {
+          const baseAnswerId = t.answers.find(a => a.id === ansParam)?.previousVersionId || ansParam;
+          setVersionSelections(prev => ({ ...prev, [baseAnswerId]: ansParam }));
+          
+          if (inspectParam === '1') {
+            chatService.getEvidence(t.id, ansParam).then(setInspectedEvidence).catch(console.error);
+          }
+        }
+      } else if ('hydrateFromBackend' in chatService && allConvs.length > 0) {
+        t = allConvs.sort((a, b) => {
+          const timeA = new Date(a.answers[0]?.createdAt || 0).getTime();
+          const timeB = new Date(b.answers[0]?.createdAt || 0).getTime();
+          return timeB - timeA;
+        })[0];
+        setThreadId(t.id);
+      } else {
+        t = chatService.createDemoConversation('normal');
+        setThreadId(t.id);
+      }
     }
+
+    doInit();
   }, [searchParams]);
 
   useEffect(() => {
@@ -191,7 +212,7 @@ export function ChatController() {
       refresh();
     } catch (err: any) {
       if (err.name === 'AbortError') return;
-      setPending(p => p ? { ...p, error: err.message } : null);
+      setPending(p => p ? { ...p, error: err.message, errorCode: err.code } : null);
     }
   }
 
@@ -231,7 +252,7 @@ export function ChatController() {
       refresh();
     } catch (err: any) {
       if (err.name === 'AbortError') return;
-      setPending(p => p ? { ...p, error: err.message } : null);
+      setPending(p => p ? { ...p, error: err.message, errorCode: err.code } : null);
     }
   }
 
@@ -295,20 +316,22 @@ export function ChatController() {
           <p>Interact with your uploaded literature.</p>
         </div>
         <div>
-          <details className="chat-state-menu">
-            <summary>
-              <Icon name="chevron" /> Preview state
-            </summary>
-            <div>
-              <label>Jump to state</label>
-              <select value={demoState} onChange={handleDemoStateChange}>
-                {chatDemoStates.map(([val, label]) => (
-                  <option key={val} value={val}>{label}</option>
-                ))}
-              </select>
-              <p>This is a prototyping tool. It safely resets the local mock fixture state.</p>
-            </div>
-          </details>
+          {process.env.NEXT_PUBLIC_API_MODE !== 'real' && (
+            <details className="chat-state-menu">
+              <summary>
+                <Icon name="chevron" /> Preview state
+              </summary>
+              <div>
+                <label>Jump to state</label>
+                <select value={demoState} onChange={handleDemoStateChange}>
+                  {chatDemoStates.map(([val, label]) => (
+                    <option key={val} value={val}>{label}</option>
+                  ))}
+                </select>
+                <p>This is a prototyping tool. It safely resets the local mock fixture state.</p>
+              </div>
+            </details>
+          )}
           <button className="button" onClick={handleNewConversation}>
             <Icon name="plus" /> New conversation
           </button>
@@ -390,7 +413,30 @@ export function ChatController() {
             {pending?.answerId === base.id && (
               <div className="chat-exchange">
                 {pending.error ? (
-                  <GenerationError error={pending.error} onRetry={() => runRegeneration(base.id)} />
+                  pending.errorCode === 'NO_USABLE_EVIDENCE' ? (
+                    <div className="answer-block">
+                      <div className="answer-heading">
+                        <div className="answer-byline">
+                          <span className="brand-symbol" aria-hidden="true" />
+                          Origyn
+                          <span className="answer-status insufficient">
+                            <Icon name="warning" />
+                            Insufficient evidence
+                          </span>
+                        </div>
+                      </div>
+                      <div className="answer-text">
+                        <p>{pending.error}</p>
+                      </div>
+                      <div className="unsupported-note">
+                        <p>
+                          This conclusion cannot be drawn from the remaining evidence. The original inference has been removed from this version.
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    <GenerationError error={pending.error} onRetry={() => runRegeneration(base.id)} />
+                  )
                 ) : pending.cancelled ? (
                    <div className="chat-pending">
                      <div className="generation-stage">
@@ -429,7 +475,7 @@ export function ChatController() {
           </div>
         )}
 
-        {!isHistorical && (
+        {process.env.NEXT_PUBLIC_API_MODE !== 'real' && !isHistorical && (
           <div className="replay-notice">
             <Icon name="info" />
             <div>

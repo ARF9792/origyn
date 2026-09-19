@@ -16,8 +16,8 @@ import { Icon } from '@/components/ui/Icon';
 import { ClaimBadge } from '@/components/ui/ClaimBadge';
 import { LoadingSkeleton } from '@/components/ui/LoadingSkeleton';
 import { ClaimDetail } from '@/components/evidence/ClaimDetail';
+import { activeEvidenceService as evidenceService } from '@/lib/service-selector';
 import {
-  evidenceService,
   queryClaims,
   previewClaims,
 } from '@/lib/evidence-service';
@@ -348,7 +348,9 @@ export function ClaimsController() {
             <h1>Claims</h1>
             <p>Inspect what each claim rests on, and where it is used.</p>
           </div>
-          <ReviewMenu demo={demo} onDemoChange={handleDemoChange} />
+          {process.env.NEXT_PUBLIC_API_MODE !== 'real' && (
+            <ReviewMenu demo={demo} onDemoChange={handleDemoChange} />
+          )}
         </header>
         <EmptyLibraryState />
       </section>
@@ -363,7 +365,9 @@ export function ClaimsController() {
             <h1>Claims</h1>
             <p>Inspect what each claim rests on, and where it is used.</p>
           </div>
-          <ReviewMenu demo={demo} onDemoChange={handleDemoChange} />
+          {process.env.NEXT_PUBLIC_API_MODE !== 'real' && (
+            <ReviewMenu demo={demo} onDemoChange={handleDemoChange} />
+          )}
         </header>
         <LoadingState />
       </section>
@@ -378,7 +382,9 @@ export function ClaimsController() {
             <h1>Claims</h1>
             <p>Inspect what each claim rests on, and where it is used.</p>
           </div>
-          <ReviewMenu demo={demo} onDemoChange={handleDemoChange} />
+          {process.env.NEXT_PUBLIC_API_MODE !== 'real' && (
+            <ReviewMenu demo={demo} onDemoChange={handleDemoChange} />
+          )}
         </header>
         <ErrorState onRetry={() => { setDemo('normal'); load(); }} />
       </section>
@@ -394,7 +400,9 @@ export function ClaimsController() {
           <h1>Claims</h1>
           <p>Inspect what each claim rests on, and where it is used.</p>
         </div>
-        <ReviewMenu demo={demo} onDemoChange={handleDemoChange} />
+        {process.env.NEXT_PUBLIC_API_MODE !== 'real' && (
+          <ReviewMenu demo={demo} onDemoChange={handleDemoChange} />
+        )}
       </header>
 
       {/* Tools row */}

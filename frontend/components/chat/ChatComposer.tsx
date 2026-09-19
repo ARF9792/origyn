@@ -68,7 +68,7 @@ export function ChatComposer({ draft, busy, onSubmit, onStop, onChange }: Props)
         </div>
       </form>
       <div className="composer-note">
-        <span>Demo responses · not a live model</span>
+        <span>{process.env.NEXT_PUBLIC_API_MODE === 'real' ? 'Responses grounded in workspace evidence' : 'Demo responses · not a live model'}</span>
         <span>Enter to send · Shift + Enter for a new line</span>
       </div>
     </div>

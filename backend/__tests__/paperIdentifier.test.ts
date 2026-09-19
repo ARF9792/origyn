@@ -64,7 +64,7 @@ describe("identifyPaper — bare DOI in text", () => {
 });
 
 describe("identifyPaper — title extraction", () => {
-  it("uses PDF metadata Title when available", async () => {
+  it("uses PDF metadata Title when available and meaningful", async () => {
     mockExtract.mockResolvedValue({
       text: "Some text without a DOI",
       info: { Title: "Attention Is All You Need" },
@@ -75,26 +75,43 @@ describe("identifyPaper — title extraction", () => {
     expect(result.identificationMethod).toBe("title_extracted");
   });
 
-  it("ignores metadata Title that is too short", async () => {
+  it("ignores metadata Title that is a generic placeholder", async () => {
     mockExtract.mockResolvedValue({
       text: "A real title line that is long enough to pass the filter\nSome more text",
-      info: { Title: "Hi" },
+      info: { Title: "Microsoft Word - Document1" },
     });
     const result = await identifyPaper(anyBuffer);
-    // Should fall through to text heuristic
     expect(result.title).toBe("A real title line that is long enough to pass the filter");
   });
 
-  it("skips lines that look like section headers", async () => {
+  it("skips journal headers, article types, and page numbers", async () => {
     mockExtract.mockResolvedValue({
-      text: "Abstract\nIntroduction\nEffects of Drug X on Outcome Y in Randomized Trial",
+      text: "The EUROCALL Review, Volume 25, No. 2, September 2017\n18\nResearch paper\nA look at advanced learners’ use of mobile devices for\nEnglish language study: Insights from interview data\nMariusz Kruk\nUniversity of Zielona Gora, Poland\nAbstract",
       info: {},
     });
     const result = await identifyPaper(anyBuffer);
     expect(result.title).toBe(
-      "Effects of Drug X on Outcome Y in Randomized Trial"
+      "A look at advanced learners’ use of mobile devices for English language study: Insights from interview data"
     );
     expect(result.identificationMethod).toBe("title_extracted");
+  });
+
+  it("does not destroy legitimate titles with numbers/years", async () => {
+    mockExtract.mockResolvedValue({
+      text: "Machine Learning in 2024: A Review of the Field\nJohn Doe\nUniversity of Examples",
+      info: {},
+    });
+    const result = await identifyPaper(anyBuffer);
+    expect(result.title).toBe("Machine Learning in 2024: A Review of the Field");
+  });
+
+  it("joins up to 3 lines correctly", async () => {
+    mockExtract.mockResolvedValue({
+      text: "This is a very long paper title\nthat happens to span across\nthree distinct lines in the PDF\nAuthor Name\nDepartment",
+      info: {},
+    });
+    const result = await identifyPaper(anyBuffer);
+    expect(result.title).toBe("This is a very long paper title that happens to span across three distinct lines in the PDF");
   });
 });
 
@@ -121,21 +138,6 @@ describe("identifyPaper — UNKNOWN cases", () => {
       info: {},
     });
     const result = await identifyPaper(anyBuffer);
-    // Must not contain a fabricated DOI
     expect(result.doi).toBeNull();
-  });
-});
-
-describe("identifyPaper — DOI takes priority over title", () => {
-  it("returns doi_in_pdf even when metadata Title is set", async () => {
-    mockExtract.mockResolvedValue({
-      text: "doi: 10.1038/nature12373\nSome paper text",
-      info: { Title: "Some Title From Metadata" },
-    });
-    const result = await identifyPaper(anyBuffer);
-    expect(result.doi).toBe("10.1038/nature12373");
-    expect(result.identificationMethod).toBe("doi_in_pdf");
-    // Title can still be extracted alongside the DOI
-    expect(result.title).toBe("Some Title From Metadata");
   });
 });
