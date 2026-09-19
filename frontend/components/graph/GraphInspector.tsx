@@ -309,6 +309,14 @@ export function GraphInspector({
               Open source <Icon name="external" />
             </Link>
           ))}
+          {node.type === 'claim' && (
+            <Link
+              href={`/workspace/claims?claim=${encodeURIComponent(node.id)}`}
+              className="button compact"
+            >
+              Open claim <Icon name="arrow" />
+            </Link>
+          )}
           {node.type === 'answer' && (
             <>
               <Link href={chatLink(node)} className="button compact">

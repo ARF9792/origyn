@@ -1,0 +1,239 @@
+/*
+ * Origyn — Evidence domain styles.
+ * Faithful port of Astra Pass 4 evidence/evidence.css.
+ * All .e-* class names. Additive — does not modify workspace.css.
+ * Imported only on Claims and Alerts pages.
+ */
+
+/* ── Page shell ── */
+.e-page { min-width: 0; }
+.e-page .page-heading { align-items: flex-start; }
+
+/* ── Review-states dropdown ── */
+.e-review { position: relative; flex-shrink: 0; }
+.e-review summary { cursor: pointer; list-style: none; font-size: 11px; color: var(--muted); display: flex; gap: 7px; align-items: center; padding: 7px; }
+.e-review > div { position: absolute; right: 0; top: 32px; width: 240px; padding: 17px; background: var(--raised); border: 1px solid var(--line); border-radius: 7px; z-index: 15; box-shadow: 0 12px 32px #0005; }
+.e-review label { display: block; font-size: 12px; margin-bottom: 12px; }
+.e-review p { font-size: 11px; margin-top: 13px; }
+.e-review select { width: 100%; background: var(--surface); border: 1px solid var(--line); color: #b9bec8; padding: 8px 10px; border-radius: 5px; font-size: 12px; }
+
+/* ── Library tools ── */
+.e-page .filters { flex-wrap: wrap; }
+.e-page .library-tools { justify-content: space-between; }
+.e-page .search-field { width: 410px; }
+
+/* ── Claims table ── */
+.e-claims-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+.e-claims-table th { text-align: left; color: #7f8490; font-size: 11px; font-weight: 400; padding: 13px 12px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.e-claims-table th:first-child { width: 38%; padding-left: 0; }
+.e-claims-table th:nth-child(2) { width: 21%; }
+.e-claims-table th:nth-child(3) { width: 17%; }
+.e-claims-table th:nth-child(4) { width: 12%; }
+.e-claims-table th:nth-child(5) { width: 12%; }
+.e-claims-table td { padding: 20px 12px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+.e-claims-table td:first-child { padding-left: 0; }
+.e-claims-table tr:hover td { background: #ffffff02; }
+
+/* ── Claim link button ── */
+.e-claim-link { border: 0; padding: 0; text-align: left; display: flex; flex-direction: column; gap: 9px; background: none; width: 100%; cursor: pointer; }
+.e-claim-link > .mono { font-size: 10px; color: #798290; }
+.e-claim-link > span:last-child { font-size: 13px; line-height: 1.6; color: #cbd0d9; }
+.e-claim-link:hover > span:last-child { color: white; }
+
+/* ── Source cell ── */
+.e-source-cell { display: flex; flex-direction: column; gap: 7px; min-width: 0; }
+.e-source-cell > span { font-size: 11px; color: #a4acb9; }
+.e-source-cell a { font-size: 11px; line-height: 1.5; color: #707986; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.e-source-cell a:hover { color: #c8ced9; }
+.e-claims-table .claim-badge { font-size: 11px; white-space: normal; }
+
+/* ── Usage button ── */
+.e-usage-button { display: flex; gap: 5px; align-items: center; background: none; border: 0; padding: 4px 0; color: #979fab; font-size: 11px; white-space: nowrap; cursor: pointer; }
+.e-usage-button .icon { width: 12px; height: 12px; }
+.e-usage-button:hover { color: var(--text); }
+.e-claims-table .checked-time { font-size: 10px; }
+
+/* ── Empty/loading/error states ── */
+.e-state { padding: 25px; }
+.e-state > p { font-size: 13px; }
+.e-state .loading-skeleton { padding: 0 0 15px; }
+.e-state-action { display: flex; justify-content: center; padding: 0 20px 35px; }
+
+/* ── Preview note banner ── */
+.e-preview-note { border: 1px dashed #4a4255; border-radius: 6px; background: #17151c; color: #afa5c0; padding: 13px 15px; font-size: 12px; line-height: 1.6; margin-bottom: 20px; }
+
+/* ── Attention count ── */
+.e-attention-count { display: inline-flex; align-items: center; gap: 8px; color: var(--muted); font-size: 12px; white-space: nowrap; }
+.e-attention-count b { color: var(--text); font-weight: 500; }
+.e-attention-count > .icon { width: 14px; height: 14px; color: var(--amber); }
+
+/* ── Alert list ── */
+.e-alert-list { border-top: 1px solid var(--line); }
+.e-alert-row { display: flex; gap: 16px; border-bottom: 1px solid var(--line); padding: 25px 2px; }
+.e-event-icon { display: grid; place-items: center; width: 30px; height: 30px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); flex-shrink: 0; color: #9da7a6; }
+.e-event-icon > .icon { width: 15px; height: 15px; }
+.e-alert-content { flex: 1; min-width: 0; }
+.e-alert-heading { display: flex; justify-content: space-between; align-items: center; gap: 15px; }
+.e-alert-heading > button { border: 0; background: none; padding: 0; text-align: left; font-size: 13px; font-weight: 500; color: #dbdfe5; cursor: pointer; }
+.e-alert-heading > button:hover { text-decoration: underline; }
+.e-alert-row h2 { font-size: 14px; line-height: 1.6; letter-spacing: 0; color: #c4cbd6; font-weight: 450; margin-top: 12px; max-width: 720px; }
+.e-alert-row p { font-size: 12px; line-height: 1.7; color: #7c8694; margin-top: 7px; max-width: 760px; }
+.e-alert-meta { display: flex; gap: 17px; align-items: center; flex-wrap: wrap; font-size: 11px; color: #858e9c; margin-top: 16px; }
+.e-alert-meta .status-badge,
+.e-alert-meta .claim-badge { font-size: 11px; }
+.e-alert-meta time { font-size: 10px; color: #687381; margin-left: auto; }
+.e-alert-actions { display: flex; align-items: center; gap: 18px; margin-top: 19px; }
+.e-alert-actions .text-link { font-size: 11px; }
+
+/* ── Review badge ── */
+.e-review-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; color: #929e9a; white-space: nowrap; }
+.e-review-badge .icon { width: 13px; height: 13px; }
+.e-warning { color: var(--amber); }
+.e-critical { color: var(--red); }
+
+/* ── Inspector (right-side dialog panel) ── */
+.e-inspector { position: fixed; inset: 0 0 0 auto; margin: 0; width: 460px; max-width: 100%; height: 100dvh; max-height: 100dvh; border: 0; border-left: 1px solid #34363e; background: var(--surface); color: var(--text); padding: 0; box-shadow: -20px 0 60px #0005; overflow: auto; }
+.e-inspector::backdrop { background: #0004; }
+.e-inspector-head { display: flex; justify-content: space-between; gap: 15px; padding: 27px 25px 23px; border-bottom: 1px solid var(--line); position: sticky; top: 0; background: #111214f5; backdrop-filter: blur(10px); z-index: 2; }
+.e-inspector-head .eyebrow { display: block; font-size: 10px; margin-bottom: 10px; }
+.e-inspector-head h2 { font-size: 17px; line-height: 1.4; letter-spacing: -.35px; }
+.e-inspector-body { padding: 24px 25px 35px; }
+
+/* ── Inspector body elements ── */
+.e-id { font-size: 10px; color: #777f8d; overflow-wrap: anywhere; }
+.e-claim-text { font-size: 17px; line-height: 1.65; color: #d1d6df; margin: 16px 0 19px; letter-spacing: -.15px; }
+.e-reason { display: flex; align-items: flex-start; gap: 9px; border: 1px solid var(--line); border-radius: 6px; padding: 14px; margin: 23px 0; }
+.e-reason > .icon { width: 14px; height: 14px; margin-top: 3px; color: var(--muted); }
+.e-reason p { font-size: 12px; line-height: 1.7; }
+.e-detail-actions { display: flex; gap: 9px 16px; flex-wrap: wrap; align-items: center; margin: 21px 0; }
+.e-detail-actions .text-link { font-size: 11px; }
+.e-detail-section { margin-top: 29px; scroll-margin-top: 120px; }
+.e-detail-section > h3 { font-size: 12px; color: #aab2bf; margin-bottom: 17px; }
+.e-detail-section > h3 > span { font: 10px monospace; color: #747e8e; margin-left: 8px; }
+
+/* ── Support cards ── */
+.e-support { padding: 17px 0; border-top: 1px solid var(--line); }
+.e-support h4 { font-weight: 450; font-size: 13px; line-height: 1.6; margin: 0 0 10px; color: #c8cfd9; }
+.e-support p { font-size: 11px; margin-bottom: 11px; color: #7d8796; }
+.e-support .status-badge { font-size: 11px; }
+.e-support .mono { font-size: 10px; color: #798697; line-height: 1.6; margin: 12px 0; overflow-wrap: anywhere; }
+.e-support .text-link { font-size: 11px; margin-top: 10px; display: flex; width: fit-content; }
+
+/* ── Excerpt ── */
+.e-field-label { display: block; color: #788493; font-size: 11px; margin: 22px 0 12px; }
+.e-inspector blockquote { border-left: 2px solid #3b404a; margin: 0 0 10px; padding: 0 0 0 13px; font-size: 12px; line-height: 1.7; color: #a3adbb; }
+.e-inspector .caption { font-size: 11px; line-height: 1.7; }
+.e-inspector-body > p.caption { margin-top: 27px; }
+
+/* ── Answer usage cards ── */
+.e-answer { padding: 17px 0; border-top: 1px solid var(--line); }
+.e-answer > .mono { font-size: 10px; color: #778392; }
+.e-answer > p { font-size: 13px; line-height: 1.6; color: #bbc3d0; margin-top: 10px; }
+.e-answer-meta { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; margin-top: 15px; }
+.e-answer-meta .text-link { font-size: 11px; }
+.e-answer-status { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; color: #a6b0b7; }
+.e-answer-status.e-warning { color: var(--amber); }
+.e-answer-status .icon { width: 13px; height: 13px; }
+.e-answer small { font-size: 10px; color: #808c9b; display: block; margin-top: 13px; line-height: 1.6; }
+.e-inline-empty { font-size: 12px; color: #737f8f; padding: 15px 0; border-top: 1px solid var(--line); }
+
+/* ── Impact detail ── */
+.e-impact-title { font-size: 17px; font-weight: 450; line-height: 1.6; margin: 16px 0; }
+.e-impact-summary { display: flex; gap: 11px; background: #141518; border: 1px solid var(--line); border-radius: 6px; padding: 17px; margin-top: 24px; }
+.e-impact-summary > .icon { width: 15px; height: 15px; color: var(--amber); margin-top: 2px; }
+.e-impact-summary h3 { font-size: 13px; line-height: 1.6; }
+.e-impact-summary p { font-size: 12px; margin-top: 9px; }
+.e-detail-metadata { font-size: 12px; margin: 23px 0; }
+.e-detail-metadata > div { display: grid; grid-template-columns: 100px 1fr; gap: 13px; margin-bottom: 15px; }
+.e-detail-metadata dt { color: var(--muted); }
+.e-detail-metadata dd { margin: 0; color: #b8bec9; font-size: 11px; line-height: 1.6; }
+
+/* ── Impact claim ── */
+.e-impact-claim { border-top: 1px solid var(--line); padding-top: 18px; }
+.e-impact-claim > div:first-child { display: flex; align-items: center; justify-content: space-between; gap: 15px; }
+.e-impact-claim .mono { font-size: 11px; color: #929cac; }
+.e-impact-claim p { font-size: 13px; line-height: 1.6; color: #b8c1cf; margin-top: 14px; }
+.e-impact-claim p.caption { font-size: 11px; color: #808b99; }
+
+/* ── Review action ── */
+.e-review-action { border-top: 1px solid var(--line); margin-top: 28px; padding-top: 22px; }
+.e-review-action p { margin-top: 13px; }
+
+/* ── Table footer ── */
+.e-page .table-footer > span:last-child { font-size: 11px; }
+
+/* ── 1100px ── */
+@media (max-width: 1100px) {
+  .e-claims-table th:first-child    { width: 34%; }
+  .e-claims-table th:nth-child(2)   { width: 20%; }
+  .e-claims-table th:nth-child(3)   { width: 20%; }
+  .e-claims-table th:nth-child(4)   { width: 13%; }
+  .e-claims-table th:nth-child(5)   { width: 13%; }
+  .e-claims-table td  { padding: 17px 8px; }
+  .e-claims-table th  { padding-inline: 8px; }
+  .e-claims-table .claim-badge { font-size: 10px; }
+  .e-alert-meta time { margin-left: 0; }
+}
+
+/* ── 900px — stacked table rows ── */
+@media (max-width: 900px) {
+  .e-claims-table,
+  .e-claims-table tbody,
+  .e-claims-table tr,
+  .e-claims-table td { display: block; width: 100%; }
+  .e-claims-table thead { display: none; }
+  .e-claims-table tr  { padding: 19px 0; border-top: 1px solid var(--line); }
+  .e-claims-table td  { border: 0; padding: 7px 0; display: grid; grid-template-columns: 125px minmax(0, 1fr); gap: 12px; align-items: start; }
+  .e-claims-table td:first-child { display: block; padding-bottom: 13px; }
+  .e-claims-table td[data-label]::before { content: attr(data-label); font-size: 11px; line-height: 1.6; color: #77818f; }
+  .e-claims-table td:last-child { padding-bottom: 0; }
+  .e-source-cell a { font-size: 12px; }
+  .e-claim-link > span:last-child { font-size: 14px; }
+  .e-claim-link > .mono { font-size: 11px; }
+  .e-claims-table .claim-badge { font-size: 11px; }
+  .e-claims-table .checked-time { font-size: 11px; }
+  .e-page .filters { gap: 5px; }
+  .e-page .filter-button { font-size: 11px; }
+  .e-page .page-heading { gap: 12px; }
+  .e-page .page-heading p { font-size: 13px; max-width: 440px; }
+}
+
+/* ── 700px — mobile ── */
+@media (max-width: 700px) {
+  .e-page .page-heading h1 { font-size: 27px; }
+  .e-page .page-heading p { font-size: 12px; }
+  .e-page .eyebrow { font-size: 10px; }
+  .e-page .library-tools { align-items: stretch; flex-wrap: wrap; gap: 13px; }
+  .e-page .search-field { width: 100%; }
+  .e-page .search-field input { font-size: 16px; }
+  .e-attention-count { font-size: 11px; }
+  .e-alert-row { gap: 11px; padding: 22px 0; }
+  .e-event-icon { width: 25px; height: 25px; }
+  .e-alert-heading { flex-wrap: wrap; gap: 9px; }
+  .e-alert-heading > button { font-size: 13px; }
+  .e-alert-row h2 { font-size: 13px; }
+  .e-alert-row p  { font-size: 12px; }
+  .e-alert-meta { gap: 12px; }
+  .e-alert-meta time { display: block; width: 100%; }
+  .e-alert-actions { gap: 13px; flex-wrap: wrap; }
+  .e-review summary { font-size: 10px; padding-inline: 0; }
+  .e-review .icon { width: 13px; }
+  .e-page .table-footer { gap: 15px; flex-wrap: wrap; }
+  .e-inspector { width: 100%; }
+  .e-inspector-head { padding: 22px 20px; }
+  .e-inspector-body { padding: 22px 20px; }
+  .e-claim-text { font-size: 16px; }
+  .e-state { padding: 20px; }
+  .e-page .filter-button { padding: 7px 8px; }
+  .e-alert-row .e-review-badge { font-size: 10px; }
+  .e-claims-table td { grid-template-columns: 115px minmax(0, 1fr); }
+  .e-page .library-footnote { align-items: flex-start; line-height: 1.7; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .e-page *, .e-inspector * {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}

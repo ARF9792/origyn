@@ -1,33 +1,24 @@
-import React from 'react';
-import { EmptyState } from '@/components/ui/EmptyState';
+import React, { Suspense } from 'react';
 import type { Metadata } from 'next';
+import { ClaimsController } from './ClaimsController';
+import '@/styles/evidence.css';
 
 export const metadata: Metadata = {
   title: 'Claims · Origyn Workspace',
 };
 
-export default function ClaimsPlaceholder() {
+function ClaimsFallback() {
   return (
-    <>
-      <div className="page-heading">
-        <div>
-          <span className="eyebrow">Analysis</span>
-          <h1>Extracted Claims</h1>
-          <p>Global view of all claims extracted across your library.</p>
-        </div>
-      </div>
-      <div className="reserved-surface">
-        <div className="panel">
-          <EmptyState
-            icon="claims"
-            title="Claims library reserved"
-            description="This route is reserved for the Claims implementation in a future phase."
-          />
-          <div className="reserved-note">
-            The Claims view will provide a centralized interface for searching, filtering, and reviewing all atomic assertions extracted from your documents.
-          </div>
-        </div>
-      </div>
-    </>
+    <div style={{ padding: '60px 0' }}>
+      <p style={{ color: '#8a8c93', fontSize: '13px' }}>Loading claims…</p>
+    </div>
+  );
+}
+
+export default function ClaimsPage() {
+  return (
+    <Suspense fallback={<ClaimsFallback />}>
+      <ClaimsController />
+    </Suspense>
   );
 }
