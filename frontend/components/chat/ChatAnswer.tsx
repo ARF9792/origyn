@@ -10,8 +10,9 @@ interface Props {
   baseAnswer: Answer;
   sources: Document[];
   keptVersions: string[];
-  currentVersionId?: string;
-  originalVersionId?: string;
+  versionChain?: Answer[];
+  isLatestVersion?: boolean;
+  noUsableEvidence?: boolean;
   onInspectEvidence?: (answerId: string, claimId?: string) => void;
   onChangeVersion?: (answerId: string) => void;
   onKeepBoth?: (answerId: string) => void;
@@ -24,24 +25,24 @@ export function ChatAnswer({
   baseAnswer,
   sources,
   keptVersions,
-  currentVersionId,
-  originalVersionId,
+  versionChain,
+  isLatestVersion,
+  noUsableEvidence,
   onInspectEvidence,
   onChangeVersion,
   onKeepBoth,
   onRegenerate,
 }: Props) {
-  const hasUpdatedVersion = !!baseAnswer.updatedVersionId;
-  const isHistorical = hasUpdatedVersion || !!answer.previousVersionId;
-  const isReplaced = hasUpdatedVersion && answer.id === originalVersionId && currentVersionId !== originalVersionId;
+  const hasUpdatedVersion = versionChain && versionChain.length > 1;
+  const isHistorical = !isLatestVersion;
+  const isReplaced = isHistorical && answer.id !== versionChain?.[versionChain.length - 1]?.id;
 
   return (
     <div className="answer-block" id={answer.id}>
-      {hasUpdatedVersion && onChangeVersion && (
+      {hasUpdatedVersion && onChangeVersion && versionChain && (
         <AnswerVersionSwitcher
           currentAnswerId={answer.id}
-          originalAnswerId={baseAnswer.id}
-          updatedAnswerId={baseAnswer.updatedVersionId!}
+          versions={versionChain}
           keptVersions={keptVersions}
           onChangeVersion={onChangeVersion}
         />
@@ -67,12 +68,13 @@ export function ChatAnswer({
         ))}
       </div>
       
-      {answer.status === 'EVIDENCE_CHANGED' && onKeepBoth && onRegenerate && (
+      {answer.status === 'EVIDENCE_CHANGED' && isLatestVersion && onKeepBoth && onRegenerate && (
         <EvidenceChangeSummary
           answer={answer}
           keptVersions={keptVersions}
+          noUsableEvidence={noUsableEvidence}
           onKeepBoth={() => onKeepBoth(baseAnswer.id)}
-          onRegenerate={() => onRegenerate(baseAnswer.id)}
+          onRegenerate={() => onRegenerate(answer.id)}
         />
       )}
       

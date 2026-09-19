@@ -5,6 +5,7 @@ import type { Answer } from '@/lib/types';
 interface Props {
   answer: Answer;
   keptVersions: string[];
+  noUsableEvidence?: boolean;
   onKeepBoth: () => void;
   onRegenerate: () => void;
 }
@@ -13,6 +14,7 @@ interface Props {
 export function EvidenceChangeSummary({
   answer,
   keptVersions,
+  noUsableEvidence,
   onKeepBoth,
   onRegenerate,
 }: Props) {
@@ -51,27 +53,47 @@ export function EvidenceChangeSummary({
       </div>
       
       <div className="updated-actions">
-        {hasUpdated ? (
-          !isKept ? (
-            <button type="button" className="button compact" onClick={onKeepBoth}>
-              Keep both versions
+        {noUsableEvidence ? (
+          <>
+            <p style={{ color: 'var(--color-danger)', fontWeight: 500, margin: '12px 0 4px' }}>
+              All evidence supporting the latest answer is now unavailable.
+            </p>
+            <p style={{ margin: '0 0 16px', fontSize: '13px' }}>
+              No usable evidence remains to generate an updated answer.
+            </p>
+            <button
+              type="button"
+              className="text-button"
+              disabled
+            >
+              View source impact
             </button>
-          ) : null
+          </>
         ) : (
-          <button type="button" className="button primary compact" onClick={onRegenerate}>
-            Generate updated answer
-          </button>
+          <>
+            {hasUpdated ? (
+              !isKept ? (
+                <button type="button" className="button compact" onClick={onKeepBoth}>
+                  Keep both versions
+                </button>
+              ) : null
+            ) : (
+              <button type="button" className="button primary compact" onClick={onRegenerate}>
+                Generate updated answer
+              </button>
+            )}
+            <button
+              type="button"
+              className="text-button"
+              disabled
+            >
+              View source impact
+            </button>
+            <span className="caption">
+              The original answer text is locked for historical record.
+            </span>
+          </>
         )}
-        <button
-          type="button"
-          className="text-button"
-          disabled
-        >
-          View source impact
-        </button>
-        <span className="caption">
-          The original answer text is locked for historical record.
-        </span>
       </div>
     </div>
   );

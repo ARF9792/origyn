@@ -35,6 +35,7 @@ export function ChatController() {
   const [inspectedEvidence, setInspectedEvidence] = useState<EvidenceResult | null>(null);
   const [inspectedClaimId, setInspectedClaimId] = useState<string | null>(null);
   const [versionSelections, setVersionSelections] = useState<Record<string, string>>({});
+  const [noUsableEvidenceIds, setNoUsableEvidenceIds] = useState<Set<string>>(new Set());
   
   const abortControllerRef = useRef<AbortController | null>(null);
 
@@ -60,7 +61,13 @@ export function ChatController() {
         const next = { ...prev };
         for (const answer of updatedThread.answers) {
           if (!next[answer.id] && !answer.previousVersionId) {
-            next[answer.id] = answer.updatedVersionId || answer.id;
+            let latest = answer;
+            while (latest.updatedVersionId) {
+              const nextAns = updatedThread.answers.find(a => a.id === latest.updatedVersionId);
+              if (!nextAns) break;
+              latest = nextAns;
+            }
+            next[answer.id] = latest.id;
             changed = true;
           }
         }
@@ -252,7 +259,12 @@ export function ChatController() {
       refresh();
     } catch (err: any) {
       if (err.name === 'AbortError') return;
-      setPending(p => p ? { ...p, error: err.message, errorCode: err.code } : null);
+      if (err.code === 'NO_USABLE_EVIDENCE') {
+        setNoUsableEvidenceIds(prev => new Set(prev).add(answerId));
+        setPending(null);
+      } else {
+        setPending(p => p ? { ...p, error: err.message, errorCode: err.code } : null);
+      }
     }
   }
 
@@ -300,7 +312,18 @@ export function ChatController() {
   const renderedAnswers = baseAnswers.map((base) => {
     const selectedId = versionSelections[base.id] || base.id;
     const selectedAnswer = thread.answers.find((a) => a.id === selectedId) || base;
-    return { base, selectedAnswer };
+    
+    // Resolve full chain
+    const chain = [base];
+    let curr = base;
+    while (curr.updatedVersionId) {
+      const nxt = thread.answers.find(a => a.id === curr.updatedVersionId);
+      if (!nxt) break;
+      chain.push(nxt);
+      curr = nxt;
+    }
+    
+    return { base, selectedAnswer, chain };
   });
   
   // Find retracted source for banner using ONLY sources in the selected answer
@@ -379,7 +402,7 @@ export function ChatController() {
           <ChatEmptyState onSuggest={(q: string) => runGeneration(q)} />
         )}
 
-        {renderedAnswers.map(({ base, selectedAnswer }, idx) => (
+        {renderedAnswers.map(({ base, selectedAnswer, chain }, idx) => (
           <div key={base.id} className="chat-exchange">
             <div className="user-question">
               <div className="question-meta">
@@ -400,10 +423,11 @@ export function ChatController() {
             <ChatAnswer
               answer={selectedAnswer}
               baseAnswer={base}
+              versionChain={chain}
               sources={context.sources.filter(s => selectedAnswer.sourceIds.includes(s.id))}
               keptVersions={thread.keptVersions}
-              currentVersionId={selectedAnswer.id}
-              originalVersionId={base.id}
+              isLatestVersion={selectedAnswer.id === chain[chain.length - 1].id}
+              noUsableEvidence={noUsableEvidenceIds.has(selectedAnswer.id)}
               onChangeVersion={(ver: string) => handleChangeVersion(base.id, ver)}
               onKeepBoth={handleKeepBoth}
               onRegenerate={runRegeneration}
@@ -413,30 +437,7 @@ export function ChatController() {
             {pending?.answerId === base.id && (
               <div className="chat-exchange">
                 {pending.error ? (
-                  pending.errorCode === 'NO_USABLE_EVIDENCE' ? (
-                    <div className="answer-block">
-                      <div className="answer-heading">
-                        <div className="answer-byline">
-                          <span className="brand-symbol" aria-hidden="true" />
-                          Origyn
-                          <span className="answer-status insufficient">
-                            <Icon name="warning" />
-                            Insufficient evidence
-                          </span>
-                        </div>
-                      </div>
-                      <div className="answer-text">
-                        <p>{pending.error}</p>
-                      </div>
-                      <div className="unsupported-note">
-                        <p>
-                          This conclusion cannot be drawn from the remaining evidence. The original inference has been removed from this version.
-                        </p>
-                      </div>
-                    </div>
-                  ) : (
-                    <GenerationError error={pending.error} onRetry={() => runRegeneration(base.id)} />
-                  )
+                  <GenerationError error={pending.error} onRetry={() => runRegeneration(selectedAnswer.id)} />
                 ) : pending.cancelled ? (
                    <div className="chat-pending">
                      <div className="generation-stage">

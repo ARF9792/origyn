@@ -118,7 +118,8 @@ function extractTitle(
   // 1. Metadata title
   if (info.Title && info.Title.trim().length > 10) {
     // Make sure metadata title isn't just a generic placeholder like "Microsoft Word - Document1"
-    if (!info.Title.toLowerCase().includes("microsoft word") && !info.Title.toLowerCase().includes("untitled")) {
+    const lowerTitle = info.Title.toLowerCase();
+    if (!lowerTitle.includes("microsoft word") && !lowerTitle.includes("untitled") && !lowerTitle.includes("(anonymous)")) {
       return info.Title.trim().replace(/\s+/g, ' ');
     }
   }
@@ -135,7 +136,7 @@ function extractTitle(
     if (HAS_ISSN_ISBN.test(l)) continue;
 
     // Check length heuristics for first title line
-    if (l.length < 15) continue;
+    if (l.length < 8) continue;
     if (l.length > 300) continue;
 
     // Found a candidate first line

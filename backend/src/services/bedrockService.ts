@@ -236,8 +236,8 @@ export async function generateGroundedAnswer(
 ): Promise<GroundedAnswerResult> {
   const evidenceBlock = evidence
     .map(
-      (e, i) =>
-        `[CLAIM_${i + 1}] ID: ${e.claimId}\nSource: ${e.documentTitle ?? "Unknown"} (${e.documentId})\nClaim: ${e.claimText}`
+      (e) =>
+        `Claim ID: ${e.claimId}\nSource: ${e.documentTitle ?? "Unknown"} (${e.documentId})\nClaim: ${e.claimText}`
     )
     .join("\n\n");
 
