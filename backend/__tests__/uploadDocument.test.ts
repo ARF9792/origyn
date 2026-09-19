@@ -190,7 +190,7 @@ describe("uploadDocument pipeline", () => {
     expect(mockFindDoi).toHaveBeenCalledWith("10.1000/fallback");
   });
 
-  it("remains UNKNOWN if title fallback fails safely", async () => {
+  it("returns ACTIVE + retractionStatus UNKNOWN for a no-DOI local document (no Crossref match)", async () => {
     mockIdentify.mockResolvedValueOnce({
       title: "Some Ambiguous Title",
       doi: null,
@@ -204,6 +204,89 @@ describe("uploadDocument pipeline", () => {
 
     const doc = JSON.parse(res.body);
     expect(doc.doi).toBeNull();
-    expect(doc.status).toBe("UNKNOWN");
+    // No-DOI local documents must be ACTIVE, not UNKNOWN.
+    // retractionStatus UNKNOWN means "cannot verify" — not "invalid".
+    expect(doc.status).toBe("ACTIVE");
+    expect(doc.retractionStatus).toBe("UNKNOWN");
+  });
+
+  // ── No-DOI local document tests (cases 3–6 from spec) ──────────────────────
+
+  it("case 3: no-DOI PDF with a clear title and no Crossref match → ACTIVE + UNKNOWN", async () => {
+    mockIdentify.mockResolvedValueOnce({
+      title: "Remote Work and Developer Productivity",
+      doi: null,
+      identificationMethod: "title_extracted",
+    });
+    mockSearchByTitle.mockResolvedValueOnce(null); // no Crossref match
+
+    const res = await handler(createEvent());
+    expect(res.statusCode).toBe(200);
+    const doc = JSON.parse(res.body);
+    expect(doc.doi).toBeNull();
+    expect(doc.status).toBe("ACTIVE");
+    expect(doc.retractionStatus).toBe("UNKNOWN");
+    expect(doc.retractionNotice).toBeNull();
+    expect(doc.title).toBe("Remote Work and Developer Productivity");
+    // Crossref must NOT be called for retraction (no DOI to look up)
+    expect(mockCheckRetraction).not.toHaveBeenCalled();
+  });
+
+  it("case 4: no-DOI PDF with multi-line title → correct joined title", async () => {
+    // paperIdentifier.ts joins the lines; the handler just receives the result
+    mockIdentify.mockResolvedValueOnce({
+      title: "Impact of Remote Work on Software Engineering Productivity",
+      doi: null,
+      identificationMethod: "title_extracted",
+    });
+    mockSearchByTitle.mockResolvedValueOnce(null);
+
+    const res = await handler(createEvent());
+    expect(res.statusCode).toBe(200);
+    const doc = JSON.parse(res.body);
+    expect(doc.title).toBe("Impact of Remote Work on Software Engineering Productivity");
+    expect(doc.status).toBe("ACTIVE");
+    expect(doc.doi).toBeNull();
+  });
+
+  it("case 5: no-DOI PDF with weak/ambiguous Crossref title results → no DOI attached, still ACTIVE+UNKNOWN", async () => {
+    mockIdentify.mockResolvedValueOnce({
+      title: "Internal Engineering Observations",
+      doi: null,
+      identificationMethod: "title_extracted",
+    });
+    // searchByTitle returns null when similarity is below threshold or ambiguous
+    mockSearchByTitle.mockResolvedValueOnce(null);
+
+    const res = await handler(createEvent());
+    expect(res.statusCode).toBe(200);
+    const doc = JSON.parse(res.body);
+    expect(doc.doi).toBeNull();              // no DOI must be fabricated
+    expect(doc.status).toBe("ACTIVE");       // still usable
+    expect(doc.retractionStatus).toBe("UNKNOWN");
+    expect(mockCheckRetraction).not.toHaveBeenCalled();
+  });
+
+  it("case 6: no-DOI PDF with no usable title text → filename fallback used, upload succeeds", async () => {
+    mockParse.mockResolvedValueOnce({
+      filename: "remote-work-study-2026.pdf",
+      contentType: "application/pdf",
+      buffer: Buffer.from("pdf-data"),
+    });
+    mockIdentify.mockResolvedValueOnce({
+      title: null,   // paperIdentifier found nothing
+      doi: null,
+      identificationMethod: "unknown",
+    });
+    // searchByTitle not called when title is null (handler guards with `identification.title`)
+
+    const res = await handler(createEvent());
+    expect(res.statusCode).toBe(200);
+    const doc = JSON.parse(res.body);
+    expect(doc.doi).toBeNull();
+    expect(doc.status).toBe("ACTIVE");
+    expect(doc.retractionStatus).toBe("UNKNOWN");
+    // Filename fallback: "remote-work-study-2026.pdf" → "remote work study 2026"
+    expect(doc.title).toBe("remote work study 2026");
   });
 });

@@ -85,6 +85,19 @@ const INVALID_DOC: Document = {
   retractionStatus: "NONE_FOUND",
 };
 
+// Local document: no DOI, formally unverifiable retraction status, but fully ACTIVE and usable.
+// This is the correct state after the no-DOI ingestion fix.
+const NO_DOI_DOC: Document = {
+  ...ACTIVE_DOC,
+  id: "doc_no_doi",
+  filename: "internal-study.pdf",
+  title: "Remote Work and Developer Productivity",
+  doi: null,
+  status: "ACTIVE",
+  retractionStatus: "UNKNOWN",
+  retractionNotice: null,
+};
+
 const SUPPORTED_CLAIM: Claim = {
   id: "claim_abc",
   documentId: "doc_active",
@@ -263,6 +276,20 @@ describe("POST /documents/{id}/claims/extract", () => {
     const res = await extractClaimsHandler(makeEvent({ pathParameters: null }));
     expect(res.statusCode).toBe(400);
   });
+
+  // case 7: no-DOI ACTIVE document must allow claim extraction
+  it("case 7: extracts claims for ACTIVE no-DOI document (doi=null, retractionStatus=UNKNOWN)", async () => {
+    mockGetDocument.mockResolvedValue(NO_DOI_DOC);
+    mockListClaimsByDocument.mockResolvedValue([]);
+    const res = await extractClaimsHandler(makeEvent({ pathParameters: { id: "doc_no_doi" } }));
+    expect(res.statusCode).toBe(200);
+    const body = JSON.parse(res.body);
+    expect(body.cached).toBe(false);
+    expect(body.claims).toHaveLength(1);
+    // Bedrock must have been called — doc.status is ACTIVE, so it must not be blocked
+    expect(mockExtractClaimsFromText).toHaveBeenCalledTimes(1);
+    expect(mockPutClaims).toHaveBeenCalledTimes(1);
+  });
 });
 
 // ═════════════════════════════════════════════════════════════════════════════
@@ -358,6 +385,42 @@ describe("POST /chat", () => {
   it("returns 400 for invalid JSON body", async () => {
     const res = await chatHandler(makeEvent({ body: "not-json" }));
     expect(res.statusCode).toBe(400);
+  });
+
+  // case 8: claims from a no-DOI ACTIVE document must be eligible for Evidence-Locked chat
+  it("case 8: chat uses claims from no-DOI ACTIVE document (doi=null, retractionStatus=UNKNOWN)", async () => {
+    const noDoiClaim: Claim = {
+      id: "claim_no_doi",
+      documentId: "doc_no_doi",
+      sourceDocumentIds: ["doc_no_doi"],
+      text: "Remote work increases developer output by 15% on average.",
+      status: "SUPPORTED",
+      createdAt: "2026-09-18T00:00:00.000Z",
+      updatedAt: "2026-09-18T00:00:00.000Z",
+    };
+    mockListAllClaims.mockResolvedValue([noDoiClaim]);
+    mockGetDocument.mockImplementation(async (id) =>
+      id === "doc_no_doi" ? NO_DOI_DOC : null
+    );
+    mockGenerateGroundedAnswer.mockResolvedValue({
+      text: "According to the internal study, remote work increases developer output by 15%.",
+      usedClaimIds: ["claim_no_doi"],
+    });
+
+    const res = await chatHandler(
+      makeEvent({ body: JSON.stringify({ question: "What is the effect of remote work on productivity?" }) })
+    );
+    expect(res.statusCode).toBe(200);
+    const body = JSON.parse(res.body);
+    expect(body.answer.status).toBe("CURRENT");
+    expect(body.answer.claimIds).toContain("claim_no_doi");
+    expect(body.answer.sourceDocumentIds).toContain("doc_no_doi");
+    // Citation must include the no-DOI document's title and null doi
+    expect(body.citations).toHaveLength(1);
+    expect(body.citations[0].doi).toBeNull();
+    expect(body.citations[0].title).toBe("Remote Work and Developer Productivity");
+    expect(mockGenerateGroundedAnswer).toHaveBeenCalledTimes(1);
+    expect(mockPutAnswer).toHaveBeenCalledTimes(1);
   });
 });
 

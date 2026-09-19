@@ -171,14 +171,40 @@ export const handler = async (
   }
 
   // ── 9. Compute final document status ────────────────────────────────────
-  const finalStatus: DocumentStatus =
-    finalRetractionStatus === "RETRACTED"
-      ? "RETRACTED"
-      : finalRetractionStatus === "NONE_FOUND"
-        ? "ACTIVE"
-        : "UNKNOWN";
+  //
+  // PATH A — DOI PRESENT: status directly mirrors the Crossref retraction result.
+  //   RETRACTED   → formally retracted by Crossref
+  //   ACTIVE      → Crossref confirmed no retraction (NONE_FOUND)
+  //   UNKNOWN     → DOI present but Crossref was unreachable / returned ambiguous data
+  //
+  // PATH B — NO DOI: document is a local source (private report, whitepaper, etc.).
+  //   status          = ACTIVE   (document is usable as evidence)
+  //   retractionStatus = UNKNOWN  (formal retraction verification is not possible)
+  //
+  // "No DOI" is NOT the same as "invalid document". It only means that
+  // Crossref-based scholarly retraction verification cannot be performed.
+  let finalStatus: DocumentStatus;
+  if (normalizedDoi) {
+    // DOI path — preserve existing Crossref-driven logic exactly
+    finalStatus =
+      finalRetractionStatus === "RETRACTED"
+        ? "RETRACTED"
+        : finalRetractionStatus === "NONE_FOUND"
+          ? "ACTIVE"
+          : "UNKNOWN";
+  } else {
+    // No-DOI path — document is usable; retraction simply cannot be verified
+    finalStatus = "ACTIVE";
+  }
 
-  const resolvedTitle = identification.title ?? crossrefTitle ?? null;
+  // Filename-derived fallback: strip .pdf extension and replace hyphens/underscores
+  // with spaces so "remote-work-study-2026.pdf" becomes "remote-work-study-2026".
+  // Only used when neither the PDF nor Crossref yielded a title.
+  const filenameFallback = parsedFile.filename
+    .replace(/\.pdf$/i, "")
+    .replace(/[-_]+/g, " ")
+    .trim() || null;
+  const resolvedTitle = identification.title ?? crossrefTitle ?? filenameFallback;
   const finalUpdatedAt = new Date().toISOString();
 
   // ── 10. Update DynamoDB with all final metadata ────────────────────────────
