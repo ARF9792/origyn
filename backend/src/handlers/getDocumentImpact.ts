@@ -1,6 +1,7 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { getDocument, listClaimsByDocument, listAllAnswers } from "../lib/dynamo";
 import { Claim } from "../types/document";
+import { getWorkspaceId } from "../lib/workspace";
 
 function errorResponse(
   statusCode: number,
@@ -30,6 +31,7 @@ export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
   const id = event.pathParameters?.id;
+  const workspaceId = getWorkspaceId(event);
   if (!id) {
     return errorResponse(400, "DOCUMENT_NOT_FOUND", "Document ID is required.");
   }
@@ -37,7 +39,7 @@ export const handler = async (
   // ── Load document ──────────────────────────────────────────────────────────
   let document;
   try {
-    document = await getDocument(id);
+    document = await getDocument(id, workspaceId);
   } catch (err) {
     console.error(`getDocument error for ${id}:`, err);
     return errorResponse(502, "INTERNAL_ERROR", "Failed to retrieve document.");
@@ -50,7 +52,7 @@ export const handler = async (
   // ── Find unsupported claims from this document ────────────────────────────
   let claims: { id: string; text: string; status: Claim["status"] }[];
   try {
-    const allClaims = await listClaimsByDocument(id);
+    const allClaims = await listClaimsByDocument(id, workspaceId);
     claims = allClaims
       .filter((c) => c.status === "UNSUPPORTED")
       .map((c) => ({ id: c.id, text: c.text, status: c.status }));
@@ -64,7 +66,7 @@ export const handler = async (
   try {
     if (claims.length > 0) {
       const unsupportedClaimIds = new Set(claims.map((c) => c.id));
-      const allAnswers = await listAllAnswers();
+      const allAnswers = await listAllAnswers(workspaceId);
       answers = allAnswers
         .filter(
           (a) =>

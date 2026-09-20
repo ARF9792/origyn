@@ -34,6 +34,7 @@ import {
 import { generateGroundedAnswer, EvidenceItem } from "../services/bedrockService";
 import { Answer, Claim, Document } from "../types/document";
 import { v4 as uuidv4 } from "uuid";
+import { getWorkspaceId } from "../lib/workspace";
 
 function errorResponse(
   statusCode: number,
@@ -53,6 +54,7 @@ export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
   const id = event.pathParameters?.id;
+  const workspaceId = getWorkspaceId(event);
   if (!id) {
     return errorResponse(400, "BAD_REQUEST", "Missing answer ID.");
   }
@@ -60,7 +62,7 @@ export const handler = async (
   // ── 1. Load historical answer ───────────────────────────────────────────────
   let oldAnswer: Answer | null;
   try {
-    oldAnswer = await getAnswerFromDb(id);
+    oldAnswer = await getAnswerFromDb(id, workspaceId);
   } catch (err) {
     console.error(`getAnswer error for ${id}:`, err);
     return errorResponse(502, "INTERNAL_ERROR", "Failed to load answer.");
@@ -72,7 +74,7 @@ export const handler = async (
 
   // ── 2. Load referenced claims ───────────────────────────────────────────────
   const claimResults = await Promise.allSettled(
-    oldAnswer.claimIds.map((cId) => getClaim(cId))
+    oldAnswer.claimIds.map((cId) => getClaim(cId, workspaceId))
   );
 
   const originalClaims: Claim[] = claimResults
@@ -91,7 +93,7 @@ export const handler = async (
   await Promise.all(
     Array.from(distinctDocIds).map(async (docId) => {
       try {
-        const doc = await getDocument(docId);
+        const doc = await getDocument(docId, workspaceId);
         if (doc) docMap.set(docId, doc);
       } catch (err) {
         console.error(`getDocument error for ${docId}:`, err);
@@ -161,6 +163,7 @@ export const handler = async (
     id: `ans_${uuidv4().replace(/-/g, "").slice(0, 12)}`,
     question: oldAnswer.question,
     text: result.text,
+    workspaceId,
     claimIds: validClaimIds,
     sourceDocumentIds,
     status: "CURRENT",

@@ -27,6 +27,7 @@ import { getFromS3 } from "../lib/s3";
 import { extractClaimsFromText } from "../services/bedrockService";
 import { Claim } from "../types/document";
 import pdfParse from "pdf-parse";
+import { getWorkspaceId } from "../lib/workspace";
 
 function errorResponse(
   statusCode: number,
@@ -44,6 +45,7 @@ export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
   const id = event.pathParameters?.id;
+  const workspaceId = getWorkspaceId(event);
   if (!id) {
     return errorResponse(400, "BAD_REQUEST", "Missing document ID.");
   }
@@ -54,7 +56,7 @@ export const handler = async (
   // ── 1. Load Document ────────────────────────────────────────────────────────
   let document;
   try {
-    document = await getDocument(id);
+    document = await getDocument(id, workspaceId);
   } catch (err) {
     console.error(`DynamoDB getDocument error for ${id}:`, err);
     return errorResponse(502, "INTERNAL_ERROR", "Failed to load document.");
@@ -84,7 +86,7 @@ export const handler = async (
   // ── 3. Idempotency — return existing claims unless force=true ────────────────
   let existingClaims: Claim[] = [];
   try {
-    existingClaims = await listClaimsByDocument(id);
+    existingClaims = await listClaimsByDocument(id, workspaceId);
   } catch (err) {
     console.error(`listClaimsByDocument error for ${id}:`, err);
     // Non-fatal: proceed with fresh extraction
@@ -127,7 +129,10 @@ export const handler = async (
   // ── 6. Extract claims via Nova 2 Lite ───────────────────────────────────────
   let newClaims: Claim[];
   try {
-    newClaims = await extractClaimsFromText(pdfText, id);
+    newClaims = (await extractClaimsFromText(pdfText, id)).map((claim) => ({
+      ...claim,
+      workspaceId,
+    }));
   } catch (err) {
     console.error("Bedrock claim extraction error:", err);
     const message = err instanceof Error ? err.message : String(err);

@@ -6,6 +6,7 @@ import { putDocument, updateDocument, findDocumentByDoi } from "../lib/dynamo";
 import { identifyPaper } from "../services/paperIdentifier";
 import { checkRetractionStatus, searchByTitle } from "../services/crossrefService";
 import { Document, DocumentStatus, RetractionStatus } from "../types/document";
+import { getWorkspaceId } from "../lib/workspace";
 
 const ALLOWED_CONTENT_TYPES = ["application/pdf"];
 const MAX_SIZE_BYTES = 20 * 1024 * 1024; // 20 MB
@@ -47,6 +48,8 @@ function normalizeDoi(doi: string): string {
 export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
+  const workspaceId = getWorkspaceId(event);
+
   // ── 1. Parse multipart ────────────────────────────────────────────────────
   let parsedFile: Awaited<ReturnType<typeof parseMultipartFile>>;
   try {
@@ -97,7 +100,7 @@ export const handler = async (
     normalizedDoi = normalizeDoi(identification.doi);
     try {
       // Re-importing dynamically or using the imported findDocumentByDoi
-      const existingDoc = await findDocumentByDoi(normalizedDoi);
+      const existingDoc = await findDocumentByDoi(normalizedDoi, workspaceId);
       if (existingDoc) {
         return {
           statusCode: 409,
@@ -135,6 +138,7 @@ export const handler = async (
     id: documentId,
     filename: parsedFile.filename,
     s3Key,
+    workspaceId,
     title: null,
     doi: normalizedDoi, // Use normalized DOI here
     status: "PROCESSING",

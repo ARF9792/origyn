@@ -38,6 +38,7 @@ export interface Document {
   id: string;
   filename: string;
   s3Key: string;
+  workspaceId?: string;
   title: string | null;
   doi: string | null;
   status: DocumentStatus;
@@ -66,6 +67,7 @@ export type ClaimStatus = "SUPPORTED" | "UNSUPPORTED";
 export interface Claim {
   id: string;
   documentId: string;
+  workspaceId?: string;
   /** All source document IDs that support this claim (currently always [documentId]). */
   sourceDocumentIds: string[];
   text: string;
@@ -86,6 +88,7 @@ export interface Answer {
   id: string;
   question: string;
   text: string;
+  workspaceId?: string;
   claimIds: string[];
   sourceDocumentIds: string[];
   status: AnswerStatus;

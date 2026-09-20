@@ -62,6 +62,27 @@
 .answer-text { color: #bfc3cc; line-height: 1.8; font-size: 14px; }
 .answer-text p { color: inherit; line-height: inherit; overflow-wrap: anywhere; }
 .answer-text p + p { margin-top: 18px; }
+.answer-text h3 { color: #e1e3e8; font-size: 15px; line-height: 1.5; font-weight: 500; letter-spacing: -.2px; margin: 0 0 10px; }
+.answer-text ul,
+.answer-text ol { margin: 0; padding-left: 20px; }
+.answer-text ul + ul,
+.answer-text ol + ol,
+.answer-text ul + ol,
+.answer-text ol + ul,
+.answer-text p + ul,
+.answer-text p + ol,
+.answer-text ul + p,
+.answer-text ol + p,
+.answer-text blockquote + p,
+.answer-text p + blockquote,
+.answer-text pre + p { margin-top: 16px; }
+.answer-text li { color: inherit; line-height: 1.7; overflow-wrap: anywhere; }
+.answer-text li + li { margin-top: 7px; }
+.answer-text blockquote { margin: 0; padding: 0 0 0 14px; border-left: 2px solid #343740; color: #aeb4bf; }
+.answer-text blockquote p + p { margin-top: 10px; }
+.answer-text pre { margin: 0; padding: 14px 16px; border-radius: 8px; border: 1px solid #2d3139; background: #13161a; overflow: auto; }
+.answer-text pre code { display: block; font: 12px/1.7 ui-monospace, SFMono-Regular, Consolas, monospace; color: #c8ccd6; white-space: pre-wrap; overflow-wrap: anywhere; }
+.answer-text code { font: 12px/1.6 ui-monospace, SFMono-Regular, Consolas, monospace; color: #d7dbe4; background: #171a1f; border: 1px solid #2a2f37; border-radius: 4px; padding: 1px 5px; }
 
 /* ── Evidence metadata ───────────────────────────────────────────────────────── */
 .answer-evidence { margin-top: 24px; padding: 17px 0 0; border-top: 1px solid var(--line); }

@@ -1,5 +1,6 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { getAnswer } from "../lib/dynamo";
+import { getWorkspaceId } from "../lib/workspace";
 
 function errorResponse(
   statusCode: number,
@@ -23,6 +24,7 @@ export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
   const id = event.pathParameters?.id;
+  const workspaceId = getWorkspaceId(event);
 
   if (!id) {
     return errorResponse(400, "ANSWER_NOT_FOUND", "Answer ID is required.");
@@ -30,7 +32,7 @@ export const handler = async (
 
   let answer;
   try {
-    answer = await getAnswer(id);
+    answer = await getAnswer(id, workspaceId);
   } catch (err) {
     console.error(`DynamoDB getAnswer error for id ${id}:`, err);
     return errorResponse(502, "INTERNAL_ERROR", "Failed to retrieve answer.");

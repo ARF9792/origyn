@@ -6,6 +6,8 @@ export const metadata: Metadata = {
   description: "Evidence-aware research.",
 };
 
+import { AmplifyProvider } from "@/components/providers/AmplifyProvider";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -14,7 +16,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        {children}
+        <AmplifyProvider>
+          {children}
+        </AmplifyProvider>
       </body>
     </html>
   );

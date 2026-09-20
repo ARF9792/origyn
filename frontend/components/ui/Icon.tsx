@@ -32,6 +32,7 @@ const PATHS: Record<string, string> = {
   back:        '<path d="M19 12H5m5-5-5 5 5 5"/>',
   refresh:     '<path d="M20 8a8 8 0 1 0 0 8M20 3v6h-6"/>',
   link:        '<path d="m9 15 6-6M8 17l-1 1a4 4 0 0 1-6-6l5-5a4 4 0 0 1 6 0M16 7l1-1a4 4 0 0 1 6 6l-5 5a4 4 0 0 1-6 0"/>',
+  logout:      '<path d="M10 17l5-5-5-5M15 12H3"/><path d="M14 4h6v16h-6"/>',
   book:        '<path d="M12 5v15M3 3c5 0 9 2 9 2s4-2 9-2v15c-5 0-9 2-9 2s-4-2-9-2z"/>',
   info:        '<circle cx="12" cy="12" r="9"/><path d="M12 11v6m0-10v.1"/>',
   retracted_icon: '<circle cx="12" cy="12" r="9"/><path d="m6 6 12 12"/>',

@@ -1,6 +1,7 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { listAllAnswers } from "../lib/dynamo";
 import { AnswerListResponse } from "../types/document";
+import { getWorkspaceId } from "../lib/workspace";
 
 /**
  * GET /answers
@@ -9,11 +10,12 @@ import { AnswerListResponse } from "../types/document";
  * Response shape: { "items": Answer[] }
  */
 export const handler = async (
-  _event: APIGatewayProxyEvent
+  event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
+  const workspaceId = getWorkspaceId(event);
   let answers;
   try {
-    answers = await listAllAnswers();
+    answers = await listAllAnswers(workspaceId);
   } catch (err) {
     console.error("DynamoDB listAllAnswers error:", err);
     return {

@@ -16,7 +16,7 @@ Write-Host "=== Creating Origyn HTTP API ===" -ForegroundColor Cyan
 $API_JSON = & $AWS apigatewayv2 create-api `
     --name "origyn-api" `
     --protocol-type HTTP `
-    --cors-configuration "AllowOrigins=*,AllowMethods=GET,POST,DELETE,OPTIONS,AllowHeaders=Content-Type,Authorization,X-Requested-With" `
+    --cors-configuration "AllowOrigins=*,AllowMethods=GET,POST,DELETE,OPTIONS,AllowHeaders=Content-Type,Authorization,X-Requested-With,x-origyn-workspace-id" `
     --region $Region `
     --no-cli-pager `
     --output json

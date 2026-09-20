@@ -27,28 +27,32 @@ export async function putDocument(doc: Document): Promise<void> {
 }
 
 /** Fetch a single document by ID. Returns null if not found. */
-export async function getDocument(id: string): Promise<Document | null> {
+export async function getDocument(id: string, workspaceId?: string): Promise<Document | null> {
   const result = await dynamo.send(
     new GetCommand({
       TableName: config.dynamodb.documentsTable,
       Key: { id },
     })
   );
-  return (result.Item as Document) ?? null;
+  const doc = (result.Item as Document) ?? null;
+  if (!doc) return null;
+  if (workspaceId && doc.workspaceId !== workspaceId) return null;
+  return doc;
 }
 
 /** List all documents (full scan — acceptable at hackathon scale). */
-export async function listDocuments(): Promise<Document[]> {
+export async function listDocuments(workspaceId?: string): Promise<Document[]> {
   const result = await dynamo.send(
     new ScanCommand({
       TableName: config.dynamodb.documentsTable,
     })
   );
-  return (result.Items as Document[]) ?? [];
+  const items = (result.Items as Document[]) ?? [];
+  return workspaceId ? items.filter((item) => item.workspaceId === workspaceId) : items;
 }
 
 /** Find a document by exact DOI match (full scan — acceptable at hackathon scale). */
-export async function findDocumentByDoi(doi: string): Promise<Document | null> {
+export async function findDocumentByDoi(doi: string, workspaceId?: string): Promise<Document | null> {
   const result = await dynamo.send(
     new ScanCommand({
       TableName: config.dynamodb.documentsTable,
@@ -56,7 +60,10 @@ export async function findDocumentByDoi(doi: string): Promise<Document | null> {
       ExpressionAttributeValues: { ":doi": doi },
     })
   );
-  return (result.Items && result.Items.length > 0) ? (result.Items[0] as Document) : null;
+  const item = (result.Items && result.Items.length > 0) ? (result.Items[0] as Document) : null;
+  if (!item) return null;
+  if (workspaceId && item.workspaceId !== workspaceId) return null;
+  return item;
 }
 
 /**
@@ -109,21 +116,24 @@ export async function putClaims(claims: Claim[]): Promise<void> {
 }
 
 /** Fetch a single claim by ID. Returns null if not found. */
-export async function getClaim(id: string): Promise<Claim | null> {
+export async function getClaim(id: string, workspaceId?: string): Promise<Claim | null> {
   const result = await dynamo.send(
     new GetCommand({
       TableName: config.dynamodb.claimsTable,
       Key: { id },
     })
   );
-  return (result.Item as Claim) ?? null;
+  const claim = (result.Item as Claim) ?? null;
+  if (!claim) return null;
+  if (workspaceId && claim.workspaceId !== workspaceId) return null;
+  return claim;
 }
 
 /**
  * List all claims for a given document (full scan, filtered server-side).
  * Acceptable at hackathon scale; would need a GSI on documentId at production.
  */
-export async function listClaimsByDocument(documentId: string): Promise<Claim[]> {
+export async function listClaimsByDocument(documentId: string, workspaceId?: string): Promise<Claim[]> {
   const result = await dynamo.send(
     new ScanCommand({
       TableName: config.dynamodb.claimsTable,
@@ -131,17 +141,19 @@ export async function listClaimsByDocument(documentId: string): Promise<Claim[]>
       ExpressionAttributeValues: { ":docId": documentId },
     })
   );
-  return (result.Items as Claim[]) ?? [];
+  const items = (result.Items as Claim[]) ?? [];
+  return workspaceId ? items.filter((item) => item.workspaceId === workspaceId) : items;
 }
 
 /** List ALL claims across all documents (used by chat and graph). */
-export async function listAllClaims(): Promise<Claim[]> {
+export async function listAllClaims(workspaceId?: string): Promise<Claim[]> {
   const result = await dynamo.send(
     new ScanCommand({
       TableName: config.dynamodb.claimsTable,
     })
   );
-  return (result.Items as Claim[]) ?? [];
+  const items = (result.Items as Claim[]) ?? [];
+  return workspaceId ? items.filter((item) => item.workspaceId === workspaceId) : items;
 }
 
 /**
@@ -179,24 +191,28 @@ export async function putAnswer(answer: Answer): Promise<void> {
 }
 
 /** Fetch a single answer by ID. Returns null if not found. */
-export async function getAnswer(id: string): Promise<Answer | null> {
+export async function getAnswer(id: string, workspaceId?: string): Promise<Answer | null> {
   const result = await dynamo.send(
     new GetCommand({
       TableName: config.dynamodb.answersTable,
       Key: { id },
     })
   );
-  return (result.Item as Answer) ?? null;
+  const answer = (result.Item as Answer) ?? null;
+  if (!answer) return null;
+  if (workspaceId && answer.workspaceId !== workspaceId) return null;
+  return answer;
 }
 
 /** List all answers (used by GET /answers and impact traversal). */
-export async function listAllAnswers(): Promise<Answer[]> {
+export async function listAllAnswers(workspaceId?: string): Promise<Answer[]> {
   const result = await dynamo.send(
     new ScanCommand({
       TableName: config.dynamodb.answersTable,
     })
   );
-  return (result.Items as Answer[]) ?? [];
+  const items = (result.Items as Answer[]) ?? [];
+  return workspaceId ? items.filter((item) => item.workspaceId === workspaceId) : items;
 }
 
 /**

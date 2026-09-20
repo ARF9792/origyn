@@ -1,6 +1,7 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { getDocument, listClaimsByDocument } from "../lib/dynamo";
 import { Claim } from "../types/document";
+import { getWorkspaceId } from "../lib/workspace";
 
 function errorResponse(
   statusCode: number,
@@ -27,6 +28,7 @@ export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
   const id = event.pathParameters?.id;
+  const workspaceId = getWorkspaceId(event);
 
   if (!id) {
     return errorResponse(400, "DOCUMENT_NOT_FOUND", "Document ID is required.");
@@ -34,7 +36,7 @@ export const handler = async (
 
   let document;
   try {
-    document = await getDocument(id);
+    document = await getDocument(id, workspaceId);
   } catch (err) {
     console.error(`DynamoDB getDocument error for id ${id}:`, err);
     return errorResponse(502, "INTERNAL_ERROR", "Failed to retrieve document.");
@@ -48,7 +50,7 @@ export const handler = async (
   // Falls back to [] gracefully if the table is empty or the lookup fails.
   let claims: Claim[];
   try {
-    claims = await listClaimsByDocument(id);
+    claims = await listClaimsByDocument(id, workspaceId);
   } catch (err) {
     console.error(`DynamoDB listClaimsByDocument error for document ${id}:`, err);
     claims = [];

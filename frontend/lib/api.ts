@@ -38,6 +38,7 @@ import {
   queryDocuments,
   fixtureForState,
 } from './mock-api';
+import { getWorkspaceId } from './workspace';
 
 // Re-export client-side helpers that work the same in both modes
 export { queryDocuments, fixtureForState };
@@ -50,7 +51,11 @@ export const isMock = API_MODE !== 'real';
 
 // ─── Real API base fetch ──────────────────────────────────────────────────────
 async function realFetch<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(`${API_BASE}${path}`, {
+  const workspaceId = await getWorkspaceId();
+  const url = new URL(path, API_BASE);
+  url.searchParams.set('workspaceId', workspaceId);
+
+  const res = await fetch(url.toString(), {
     ...init,
     headers: {
       'Content-Type': 'application/json',
@@ -87,6 +92,8 @@ export async function checkHealth(): Promise<{ status: string }> {
 export async function uploadDocument(file: File, options?: UploadOptions): Promise<Document> {
   if (isMock) return mockUploadDocument(file, options);
 
+  const workspaceId = await getWorkspaceId();
+
   // Client-side size validation (below Lambda/API Gateway limit)
   const MAX_BYTES = 9.5 * 1024 * 1024;
   if (file.size > MAX_BYTES) {
@@ -100,8 +107,11 @@ export async function uploadDocument(file: File, options?: UploadOptions): Promi
   const formData = new FormData();
   formData.append('file', file);
 
+  const uploadUrl = new URL('/documents', API_BASE);
+  uploadUrl.searchParams.set('workspaceId', workspaceId);
+
   // DO NOT manually set Content-Type — browser sets it with multipart boundary
-  const res = await fetch(`${API_BASE}/documents`, {
+  const res = await fetch(uploadUrl.toString(), {
     method: 'POST',
     body: formData,
     signal: options?.signal,

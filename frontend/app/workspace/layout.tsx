@@ -13,8 +13,19 @@ export default function WorkspaceLayout({
 }) {
   const [isNavOpen, setIsNavOpen] = useState(false);
 
-  // Close nav on escape key
+  // Auth guard and escape key
   useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const { getCurrentUser } = await import('aws-amplify/auth');
+        await getCurrentUser();
+      } catch (err) {
+        // Not authenticated, redirect to login
+        window.location.href = '/login';
+      }
+    };
+    checkAuth();
+
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setIsNavOpen(false);
     };

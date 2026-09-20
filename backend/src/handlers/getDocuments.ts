@@ -1,6 +1,7 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { listDocuments } from "../lib/dynamo";
 import { DocumentSummary } from "../types/document";
+import { getWorkspaceId } from "../lib/workspace";
 
 /**
  * GET /documents
@@ -12,11 +13,12 @@ import { DocumentSummary } from "../types/document";
  * to keep the payload compact for the source health dashboard.
  */
 export const handler = async (
-  _event: APIGatewayProxyEvent
+  event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
+  const workspaceId = getWorkspaceId(event);
   let documents;
   try {
-    documents = await listDocuments();
+    documents = await listDocuments(workspaceId);
   } catch (err) {
     console.error("DynamoDB listDocuments error:", err);
     return {

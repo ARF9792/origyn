@@ -14,9 +14,25 @@ import type {
   ApiErrorCode,
 } from './types';
 import { MOCK_DOCUMENTS, ANALYSIS_STAGES } from './mock-data';
+import { getWorkspaceId } from './workspace';
 
-// In-memory store — clone so mutations do not corrupt the fixture
-let sources: Document[] = MOCK_DOCUMENTS.map((d) => ({ ...d, claims: [...d.claims] }));
+// In-memory store — partitioned by workspace so signups do not share state
+const sourceStores = new Map<string, Document[]>();
+
+function cloneDocument(doc: Document): Document {
+  return {
+    ...doc,
+    claims: doc.claims.map((claim) => ({ ...claim })),
+  };
+}
+
+async function getSources(): Promise<Document[]> {
+  const workspaceId = await getWorkspaceId();
+  if (!sourceStores.has(workspaceId)) {
+    sourceStores.set(workspaceId, MOCK_DOCUMENTS.map(cloneDocument));
+  }
+  return sourceStores.get(workspaceId)!;
+}
 
 // ─── Error factory ────────────────────────────────────────────────────────────
 function apiError(code: ApiErrorCode, message: string): Error {
@@ -41,15 +57,17 @@ function wait(ms: number, signal?: AbortSignal): Promise<void> {
 // ─── getDocuments ─────────────────────────────────────────────────────────────
 export async function mockGetDocuments(): Promise<DocumentsResponse> {
   // In Day 1, the mock returns full documents so the table can display authors, usage, etc.
+  const sources = await getSources();
   const items = sources as unknown as DocumentSummary[];
   return { items };
 }
 
 // ─── getDocument ─────────────────────────────────────────────────────────────
 export async function mockGetDocument(id: string): Promise<Document> {
+  const sources = await getSources();
   const doc = sources.find((d) => d.id === id);
   if (!doc) throw apiError('DOCUMENT_NOT_FOUND', 'This source is not in the current session.');
-  return { ...doc, claims: [...doc.claims] };
+  return cloneDocument(doc);
 }
 
 // ─── validatePDF (client-side pre-check only) ─────────────────────────────────
@@ -100,13 +118,15 @@ export async function mockUploadDocument(
     lastChecked: new Date().toISOString(),
   };
 
-  // Prepend to in-memory store
-  sources = [doc, ...sources];
+  // Prepend to the current workspace store
+  const sources = await getSources();
+  sources.unshift(doc);
   return doc;
 }
 
 // ─── getGraph ─────────────────────────────────────────────────────────────────
 export async function mockGetGraph(): Promise<GraphData> {
+  const sources = await getSources();
   return {
     nodes: sources
       .filter((d) => d.status !== 'PROCESSING')
