@@ -66,7 +66,7 @@ export default function LandingPage() {
           </div>
           
           <div className="product-window hero-window" role="img" aria-label="Illustrative Origyn evidence workspace preview">
-            <aside className="sidebar">
+            <aside className="demo-sidebar">
               <b>◩ &nbsp; Workspace <span>⌄</span></b>
               <div>⌁ &nbsp; Overview</div>
               <div>▧ &nbsp; Sources</div>
