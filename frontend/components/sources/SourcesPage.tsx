@@ -4,7 +4,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 
-import { getDocuments, queryDocuments } from '@/lib/api';
+import { getDocuments, queryDocuments, deleteDocument } from '@/lib/api';
 
 import { Icon } from '@/components/ui/Icon';
 import { SourceTable } from './SourceTable';
@@ -75,6 +75,15 @@ export function SourcesPage() {
     updateQuery({
       q: searchValue || null,
     });
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteDocument(id);
+      setAllDocs((prev) => prev.filter((d) => d.id !== id));
+    } catch (err: any) {
+      setError(err.message || 'Failed to delete source.');
+    }
   };
 
   const filteredDocs = useMemo(() => {
@@ -238,6 +247,7 @@ export function SourcesPage() {
       <SourceTable
         documents={filteredDocs}
         searchQuery={querySearch}
+        onDelete={handleDelete}
       />
 
       <div className="table-footer">
