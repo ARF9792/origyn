@@ -2,12 +2,15 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+
 import { getDocuments } from '@/lib/api';
 import { RECENT_ACTIVITY } from '@/lib/mock-data';
+
 import { Icon } from '@/components/ui/Icon';
 import { SourceStatusBadge } from '@/components/ui/SourceStatusBadge';
 import { LoadingSkeleton } from '@/components/ui/LoadingSkeleton';
 import { ErrorState } from '@/components/ui/ErrorState';
+
 import type { DocumentSummary } from '@/lib/types';
 
 export function Overview() {
@@ -27,19 +30,28 @@ export function Overview() {
       });
   }, []);
 
-  if (isLoading) return <LoadingSkeleton lines={5} />;
-  if (error) return <ErrorState message={error} />;
+  if (isLoading) {
+    return <LoadingSkeleton lines={5} />;
+  }
+
+  if (error) {
+    return <ErrorState message={error} />;
+  }
 
   const counts = {
     total: docs.length,
-    active: docs.filter(d => d.status === 'ACTIVE').length,
-    retracted: docs.filter(d => d.status === 'RETRACTED' || d.status === 'INVALID').length,
-    unknown: docs.filter(d => d.status === 'UNKNOWN').length,
-    processing: docs.filter(d => d.status === 'PROCESSING').length,
+    active: docs.filter((doc) => doc.status === 'ACTIVE').length,
+    retracted: docs.filter((doc) => doc.status === 'RETRACTED').length,
+    invalid: docs.filter((doc) => doc.status === 'INVALID').length,
+    unknown: docs.filter((doc) => doc.status === 'UNKNOWN').length,
+    processing: docs.filter((doc) => doc.status === 'PROCESSING').length,
   };
 
   const needsAttention = docs.filter(
-    d => d.status === 'RETRACTED' || d.status === 'UNKNOWN' || d.status === 'INVALID'
+    (doc) =>
+      doc.status === 'RETRACTED' ||
+      doc.status === 'UNKNOWN' ||
+      doc.status === 'INVALID'
   );
 
   return (
@@ -47,8 +59,13 @@ export function Overview() {
       <div className="page-heading">
         <div>
           <span className="eyebrow">Workspace Overview</span>
+
           <h1>Literature status</h1>
-          <p>Continuous status monitoring for {counts.total} items in your workspace.</p>
+
+          <p>
+            Continuous status monitoring for {counts.total} items in your
+            workspace.
+          </p>
         </div>
       </div>
 
@@ -57,35 +74,96 @@ export function Overview() {
           <div className="total">
             <b>{counts.total}</b> sources monitored
           </div>
-          <Link href="/workspace/sources" className="button compact quiet">
+
+          <Link
+            href="/workspace/sources"
+            className="button compact quiet"
+          >
             View all
           </Link>
         </div>
-        
+
         <div className="health-bar">
-          <i style={{ '--count': counts.active } as React.CSSProperties} />
-          {counts.retracted > 0 && <i className="retracted" style={{ '--count': counts.retracted } as React.CSSProperties} />}
-          {counts.unknown > 0 && <i className="unknown" style={{ '--count': counts.unknown } as React.CSSProperties} />}
-          {counts.processing > 0 && <i className="processing" style={{ '--count': counts.processing } as React.CSSProperties} />}
+          <i
+            style={
+              {
+                '--count': counts.active,
+              } as React.CSSProperties
+            }
+          />
+
+          {counts.retracted > 0 && (
+            <i
+              className="retracted"
+              style={
+                {
+                  '--count': counts.retracted,
+                } as React.CSSProperties
+              }
+            />
+          )}
+
+          {counts.invalid > 0 && (
+            <i
+              className="retracted"
+              style={
+                {
+                  '--count': counts.invalid,
+                } as React.CSSProperties
+              }
+            />
+          )}
+
+          {counts.unknown > 0 && (
+            <i
+              className="unknown"
+              style={
+                {
+                  '--count': counts.unknown,
+                } as React.CSSProperties
+              }
+            />
+          )}
+
+          {counts.processing > 0 && (
+            <i
+              className="processing"
+              style={
+                {
+                  '--count': counts.processing,
+                } as React.CSSProperties
+              }
+            />
+          )}
         </div>
-        
+
         <div className="health-legend">
           <Link href="/workspace/sources?status=ACTIVE">
             <SourceStatusBadge status="ACTIVE" />
             <b>{counts.active}</b>
           </Link>
+
           {counts.retracted > 0 && (
             <Link href="/workspace/sources?status=RETRACTED">
               <SourceStatusBadge status="RETRACTED" />
               <b>{counts.retracted}</b>
             </Link>
           )}
+
+          {counts.invalid > 0 && (
+            <Link href="/workspace/sources?status=INVALID">
+              <SourceStatusBadge status="INVALID" />
+              <b>{counts.invalid}</b>
+            </Link>
+          )}
+
           {counts.unknown > 0 && (
             <Link href="/workspace/sources?status=UNKNOWN">
               <SourceStatusBadge status="UNKNOWN" />
               <b>{counts.unknown}</b>
             </Link>
           )}
+
           {counts.processing > 0 && (
             <Link href="/workspace/sources?status=PROCESSING">
               <SourceStatusBadge status="PROCESSING" />
@@ -93,9 +171,11 @@ export function Overview() {
             </Link>
           )}
         </div>
-        
+
         <p className="health-note">
-          Note: "No retraction found" indicates a check against known metadata registries (e.g. Crossref). It is not an assessment of scientific validity.
+          Note: "No retraction found" indicates a check against known metadata
+          registries (e.g. Crossref). It is not an assessment of scientific
+          validity.
         </p>
       </div>
 
@@ -105,26 +185,50 @@ export function Overview() {
             <h2>Needs attention</h2>
             <span>{needsAttention.length} sources</span>
           </div>
+
           {needsAttention.length === 0 ? (
             <div className="inline-empty">
               <h3>All clear</h3>
-              <p>No retracted or unverified sources require your attention.</p>
+
+              <p>
+                No retracted, invalidated, or unverified sources require your
+                attention.
+              </p>
             </div>
           ) : (
             needsAttention.map((doc) => (
               <div
                 key={doc.id}
-                className={`attention-item ${doc.status === 'RETRACTED' ? 'critical' : ''}`}
+                className={`attention-item ${
+                  doc.status === 'RETRACTED' || doc.status === 'INVALID'
+                    ? 'critical'
+                    : ''
+                }`}
               >
-                <Icon name={doc.status === 'RETRACTED' ? 'warning' : 'unknown'} />
+                <Icon
+                  name={
+                    doc.status === 'RETRACTED' ||
+                    doc.status === 'INVALID'
+                      ? 'warning'
+                      : 'unknown'
+                  }
+                />
+
                 <div>
                   <h3>{doc.title || doc.filename}</h3>
+
                   <p>
                     {doc.status === 'RETRACTED'
                       ? 'This paper has been marked as retracted. Review downstream claims that may be affected.'
-                      : 'The authoritative status of this source could not be verified automatically.'}
+                      : doc.status === 'INVALID'
+                        ? 'This source has been invalidated and should no longer be used as active evidence.'
+                        : 'The authoritative status of this source could not be verified automatically.'}
                   </p>
-                  <Link href={`/workspace/sources/${doc.id}`} className="text-link">
+
+                  <Link
+                    href={`/workspace/sources/${encodeURIComponent(doc.id)}`}
+                    className="text-link"
+                  >
                     Review source <span>→</span>
                   </Link>
                 </div>
@@ -137,16 +241,27 @@ export function Overview() {
           <div className="section-heading">
             <h2>Recent activity</h2>
           </div>
+
           <div className="activity-list">
             {RECENT_ACTIVITY.map((activity) => (
-              <div key={activity.id} className="activity-item">
+              <div
+                key={activity.id}
+                className="activity-item"
+              >
                 <div className="event-icon">
-                  <Icon name={
-                    activity.type === 'retracted' ? 'warning' :
-                    activity.type === 'unknown' ? 'unknown' :
-                    activity.type === 'claims' ? 'claims' : 'sources'
-                  } />
+                  <Icon
+                    name={
+                      activity.type === 'retracted'
+                        ? 'warning'
+                        : activity.type === 'unknown'
+                          ? 'unknown'
+                          : activity.type === 'claims'
+                            ? 'claims'
+                            : 'sources'
+                    }
+                  />
                 </div>
+
                 <div>
                   <h3>{activity.title}</h3>
                   <p>{activity.description}</p>
@@ -158,15 +273,13 @@ export function Overview() {
 
           <div className="quick-actions">
             <span className="subtle">Quick actions</span>
-            <Link href="/workspace/upload" className="button compact quiet">
-              <Icon name="plus" /> Add source
-            </Link>
-            <button className="button compact quiet">
-              <Icon name="search" /> Search library
-            </button>
-            <button className="button compact quiet" disabled>
+
+            <Link
+              href="/workspace/chat"
+              className="button compact quiet"
+            >
               <Icon name="chat" /> Start chat
-            </button>
+            </Link>
           </div>
         </div>
       </div>

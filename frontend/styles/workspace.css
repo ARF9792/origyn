@@ -343,10 +343,26 @@ p { line-height: 1.6; color: var(--muted); }
 .review-grid .button { justify-content: flex-start; white-space: normal; text-align: left; }
 
 /* ── Upload page (non-modal) ── */
-.upload-page { max-width: 650px; margin: 0 auto; }
-.upload-page .dialog-header { padding-top: 0; }
-.upload-page .panel { padding-top: 26px; }
-.upload-page .upload-body { padding-bottom: 24px; }
+.upload-page {
+  max-width: 650px;
+  margin: 0 auto;
+}
+
+.upload-page .dialog-header {
+  padding: 28px 28px 0;
+}
+
+.upload-page .dialog-header h2 {
+  margin: 0;
+}
+
+.upload-page .dialog-header p {
+  margin-top: 9px;
+}
+
+.upload-page .upload-body {
+  padding: 24px 28px 28px;
+}
 
 /* ── Responsive — workspace ── */
 @media (max-width: 1150px) {
