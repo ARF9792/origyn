@@ -12,10 +12,12 @@ From paper to claim to answer — with the provenance intact.
 [![Amazon Bedrock](https://img.shields.io/badge/Amazon-Bedrock-orange?logo=amazonaws)](https://aws.amazon.com/bedrock)
 [![Amplify](https://img.shields.io/badge/AWS-Amplify-orange?logo=awsamplify)](https://aws.amazon.com/amplify)
 
-**[Live Demo](https://main.dp329woyjanli.amplifyapp.com)** — no account required  
-**[Demo Video](https://youtu.be/N-cvKtMDTh0)** — YouTube demo (max 3 minutes)
-**[AWS Builder Center Blog — Parth Malhotra](https://builder.aws.com/content/3Jasyte35BEeMNg7OslJq1wjvR7/the-paper-got-retracted-our-ai-answer-didnt-get-the-memo-building-origyn-on-aws)**<br>
-**[AWS Builder Center Blog — Abdull Farooqui](https://builder.aws.com/content/3JanazHhI0rn6OotgEoYlBqtd4b/the-paper-got-retracted-our-ai-answer-didnt-get-the-memo-building-origyn-on-aws)**
+## Project links
+
+- **Live Demo:** [Open Origyn](https://main.dp329woyjanli.amplifyapp.com/) — no signup required
+- **Demo Video:** [Watch on YouTube](https://youtu.be/N-cvKtMDTh0)
+- **AWS Builder Center Blog — Parth Malhotra:** [Read the article](https://builder.aws.com/content/3Jasyte35BEeMNg7OslJq1wjvR7/the-paper-got-retracted-our-ai-answer-didnt-get-the-memo-building-origyn-on-aws)
+- **AWS Builder Center Blog — Abdul Farooqui:** [Read the article](https://builder.aws.com/content/3JanazHhI0rn6OotgEoYlBqtd4b/the-paper-got-retracted-our-ai-answer-didnt-get-the-memo-building-origyn-on-aws)
 
 </div>
 
@@ -36,7 +38,7 @@ This is not a hypothetical edge case. Published research shows that retracted wo
 - A 2022 study examined 7,813 retracted papers and 169,434 citations. Among 13,252 citations that occurred *after* retraction, only approximately **5.4% acknowledged the retraction**.¹
 - In a separate study of retracted systematic reviews, **60.8% of identified post-retraction citations occurred after the retraction date**.²
 
-LLMs introduce a related pressure: a 2023 Nature study found that in its experimental setup, **55% of GPT-3.5 citations and 18% of GPT-4 citations were fabricated** — references that look plausible but do not exist.³ (These figures apply to that study''s specific conditions, not universally.)
+LLMs introduce a related pressure: a 2023 Nature study found that in its experimental setup, **55% of GPT-3.5 citations and 18% of GPT-4 citations were fabricated** — references that look plausible but do not exist.³ (These figures apply to that study's specific conditions, not universally.)
 
 Tools like [Crossref](https://www.crossref.org) expose scholarly metadata and retraction information via API. That part exists. What we found less addressed is the question that follows: **once evidence changes, what happens to the AI answers that already used it?**
 
@@ -299,7 +301,7 @@ Live: **https://main.dp329woyjanli.amplifyapp.com**
 
 ## Provenance-aware deletion
 
-Deleting a source from the library marks its document record as `DELETED` and propagates impact to dependent claims and answers. The historical record of which answers used which sources is preserved in DynamoDB. An answer''s `sourceDocumentIds` continues to point to the deleted document so the provenance trail is readable even after the file is gone.
+Deleting a source from the library marks its document record as `DELETED` and propagates impact to dependent claims and answers. The historical record of which answers used which sources is preserved in DynamoDB. An answer's `sourceDocumentIds` continues to point to the deleted document so the provenance trail is readable even after the file is gone.
 
 ---
 
@@ -358,24 +360,6 @@ Getting Bedrock working involved a sequence of: region availability check, model
 **https://main.dp329woyjanli.amplifyapp.com**
 
 No account or signup required. Open the workspace, upload a PDF, and the pipeline runs.
-
-Demo video: [Watch the Origyn demo](https://youtu.be/N-cvKtMDTh0)
-
-<!-- Suggested demo sequence:
-Maximum length: 3 minutes.
-Keep the YouTube video Public or Unlisted.
-Suggested sequence:
-1. 15 sec — state the problem
-2. Upload a source and show the status
-3. Show extracted claims
-4. Ask a question — show the evidence-grounded answer
-5. Open the Evidence Graph
-6. Invalidate / recheck / delete a source
-7. Show EVIDENCE_CHANGED state on the affected answer
-8. Trigger regeneration
-9. Show NO_USABLE_EVIDENCE if demoable
-10. 15 sec — AWS architecture overview
--->
 
 ---
 
@@ -549,7 +533,7 @@ None of these are currently built.
 
 Parth built the entire backend infrastructure. The core data model — Document → Claim → Answer with full provenance tracking — is his design. He wrote all 15 Lambda handlers, including the upload pipeline (S3 storage, PDF parsing, DOI extraction, Crossref check), the Bedrock claim extraction and answer generation service, and the evidence propagation logic that cascades status changes from a document through its claims and into affected answers.
 
-He set up the API Gateway, DynamoDB tables, S3 bucket, IAM roles, and CloudWatch logging, and wrote the deployment scripts. The `recheckDocument`, `invalidateDocument`, and `regenerateAnswer` handlers — which are the heart of Origyn''s evidence-change workflow — are his work. So is the Crossref integration that does the actual retraction lookup.
+He set up the API Gateway, DynamoDB tables, S3 bucket, IAM roles, and CloudWatch logging, and wrote the deployment scripts. The `recheckDocument`, `invalidateDocument`, and `regenerateAnswer` handlers — which are the heart of Origyn's evidence-change workflow — are his work. So is the Crossref integration that does the actual retraction lookup.
 
 Contact: +91 7009205889
 
