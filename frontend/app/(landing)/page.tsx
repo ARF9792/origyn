@@ -196,7 +196,7 @@ export default function LandingPage() {
           <section id="intake" className="section capability wrap">
             <div className="section-head reveal">
               <div>
-                <span className="eyebrow"><i className="section-dot dot-1"></i> Tracking</span>
+               
                 <h2>Source status<br/>at a glance</h2>
               </div>
               <div>
@@ -360,7 +360,7 @@ export default function LandingPage() {
           <section id="planning" className="section capability wrap">
             <div className="section-head reveal">
               <div>
-                <span className="eyebrow"><i className="section-dot dot-2"></i> Extraction</span>
+                
                 <h2>Claim-level<br/>granularity</h2>
               </div>
               <div>
@@ -460,7 +460,7 @@ export default function LandingPage() {
           <section id="automation" className="section capability wrap">
             <div className="section-head reveal">
               <div>
-                <span className="eyebrow"><i className="section-dot dot-3"></i> Provenance</span>
+                
                 <h2>Traceable<br/>answers</h2>
               </div>
               <div>
@@ -556,7 +556,7 @@ export default function LandingPage() {
           <section id="build" className="section capability wrap">
             <div className="section-head reveal">
               <div>
-                <span className="eyebrow"><i className="section-dot dot-4"></i> Review</span>
+                
                 <h2>Inspect,<br/>review, and trace</h2>
               </div>
               <div>
