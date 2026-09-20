@@ -9,3 +9,244 @@
 .quotes{grid-template-columns:2fr 1fr;gap:10px}.quotes figure,.quotes figure+figure{padding:30px;border:1px solid #fff2;border-radius:10px;min-height:370px;display:flex;flex-direction:column;background:linear-gradient(135deg,#d4e8fb,#e9e0fc);color:#17191d}.quotes figure+figure{background:#e4f824}.quotes .quote-logo{order:2;margin-top:auto;color:#22252b;font-size:29px;gap:9px}.quotes .quote-logo span{font-size:16px}.quotes blockquote{margin:0 0 45px;color:#202127;font-size:29px;line-height:1.2;max-width:500px;letter-spacing:-.04em}.quotes figcaption{order:3;margin-top:15px;color:#272a31}.quotes figcaption>span+span{color:#575d67}.quotes figure+figure blockquote{font-size:27px}.floating-thread{left:4%;right:auto}.chart-card{width:400px;bottom:35px;right:6%}
 @media(max-width:1000px){.quotes figure,.quotes figure+figure{padding:25px}.quotes blockquote,.quotes figure+figure blockquote{font-size:25px}}
 @media(max-width:650px){.quotes{grid-template-columns:1fr;gap:15px}.quotes figure,.quotes figure+figure{min-height:320px;padding:25px}.quotes blockquote,.quotes figure+figure blockquote{font-size:27px}.floating-thread{left:18px;right:auto}.chart-card{width:250px;bottom:22px;right:20px}}
+
+
+/* =========================================================
+   ORIGYN — PARTICLE WAVE V1
+   Full-page dark particle environment
+   ========================================================= */
+
+body {
+  background:
+    #070708 !important;
+}
+
+
+/* =========================================================
+   FIXED 3D BACKGROUND
+   ========================================================= */
+
+.origyn-particle-bg {
+  position:
+    fixed;
+
+  inset:
+    0;
+
+  z-index:
+    0;
+
+  width:
+    100vw;
+
+  height:
+    100dvh;
+
+  overflow:
+    hidden;
+
+  pointer-events:
+    none;
+
+  background:
+    radial-gradient(
+      ellipse 78% 58%
+      at 50% 52%,
+      rgba(
+        43,
+        49,
+        61,
+        .14
+      ),
+      rgba(
+        17,
+        19,
+        24,
+        .05
+      ) 42%,
+      transparent 72%
+    ),
+    #070708;
+}
+
+
+.origyn-particle-bg canvas {
+  display:
+    block;
+
+  width:
+    100% !important;
+
+  height:
+    100% !important;
+}
+
+
+/* =========================================================
+   PAGE CONTENT ABOVE CANVAS
+   ========================================================= */
+
+.header {
+  position:
+    sticky;
+
+  z-index:
+    30;
+}
+
+
+#main,
+#footer {
+  position:
+    relative;
+
+  z-index:
+    1;
+}
+
+
+/*
+ * Keep the page itself transparent so
+ * the particle field can remain visible
+ * between sections.
+ */
+
+#main {
+  background:
+    transparent;
+}
+
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+.header {
+  background:
+    rgba(
+      11,
+      12,
+      13,
+      .83
+    ) !important;
+
+  backdrop-filter:
+    blur(20px);
+
+  -webkit-backdrop-filter:
+    blur(20px);
+}
+
+
+/* =========================================================
+   PRODUCT WINDOWS
+   ========================================================= */
+
+.product-window,
+.visual-panel {
+  box-shadow:
+    0 0 0 1px
+    rgba(
+      255,
+      255,
+      255,
+      .012
+    ),
+
+    0 30px 90px
+    rgba(
+      0,
+      0,
+      0,
+      .48
+    ) !important;
+}
+
+
+/* =========================================================
+   SUBTLE READABILITY POCKETS
+
+   Not visible as obvious gradients.
+   ========================================================= */
+
+.hero,
+.section,
+.closing {
+  position:
+    relative;
+}
+
+
+.hero::before,
+.section::before,
+.closing::before {
+  content:
+    "";
+
+  position:
+    absolute;
+
+  z-index:
+    -1;
+
+  pointer-events:
+    none;
+
+  inset:
+    4% -5%;
+
+  background:
+    radial-gradient(
+      ellipse at center,
+      rgba(
+        7,
+        7,
+        8,
+        .23
+      ),
+      rgba(
+        7,
+        7,
+        8,
+        .07
+      ) 50%,
+      transparent 78%
+    );
+
+  filter:
+    blur(24px);
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (
+  max-width:
+  650px
+) {
+
+  .origyn-particle-bg {
+    opacity:
+      .78;
+  }
+
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media (
+  prefers-reduced-motion:
+  reduce
+) {
+
+  .origyn-particle-bg {
+    opacity:
+      .55;
+  }
+
+}

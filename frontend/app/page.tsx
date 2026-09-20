@@ -1,11 +1,11 @@
 import React from 'react';
 import Link from 'next/link';
-
+import ParticleWave from '@/components/landing/ParticleWave';
 export default function LandingPage() {
   return (
     <>
       <a className="skip" href="#main">Skip to content</a>
-      
+      <ParticleWave />
       <header className="header">
         <nav className="nav wrap" aria-label="Main navigation">
           <Link className="brand" href="#" data-content="brand">
