@@ -69,6 +69,8 @@ $INT_CHAT     = Add-Integration "origyn-chat"
 $INT_REGEN    = Add-Integration "origyn-regenerateAnswer"
 $INT_RECHECK  = Add-Integration "origyn-recheckDocument"
 $INT_INVALID  = Add-Integration "origyn-invalidateDocument"
+$INT_DELETE   = Add-Integration "origyn-deleteDocument"
+$INT_URL      = Add-Integration "origyn-getDocumentUrl"
 $INT_IMPACT   = Add-Integration "origyn-getDocumentImpact"
 
 Write-Host "`n>>> Creating routes..." -ForegroundColor Cyan
@@ -80,6 +82,8 @@ Add-Route "GET"  "/documents/{id}"                  $INT_DETAIL
 Add-Route "POST" "/documents/{id}/claims/extract"   $INT_EXTRACT
 Add-Route "POST" "/documents/{id}/recheck"          $INT_RECHECK
 Add-Route "POST" "/documents/{id}/invalidate"       $INT_INVALID
+Add-Route "DELETE" "/documents/{id}"                $INT_DELETE
+Add-Route "GET"  "/documents/{id}/url"              $INT_URL
 Add-Route "GET"  "/documents/{id}/impact"           $INT_IMPACT
 Add-Route "GET"  "/graph"                           $INT_GRAPH
 Add-Route "GET"  "/answers"                         $INT_ANSWERS
@@ -104,7 +108,8 @@ $FUNCTIONS = @(
     "origyn-getDocument", "origyn-getGraph", "origyn-getAnswers",
     "origyn-getAnswer", "origyn-extractClaims", "origyn-chat",
     "origyn-regenerateAnswer", "origyn-recheckDocument",
-    "origyn-invalidateDocument", "origyn-getDocumentImpact"
+    "origyn-invalidateDocument", "origyn-deleteDocument", 
+    "origyn-getDocumentUrl", "origyn-getDocumentImpact"
 )
 
 foreach ($F in $FUNCTIONS) {

@@ -34,5 +34,7 @@ Create-Lambda "origyn-uploadDocument"  "handlers/uploadDocument.handler"
 Create-Lambda "origyn-getDocuments"    "handlers/getDocuments.handler"
 Create-Lambda "origyn-getDocument"     "handlers/getDocument.handler"
 Create-Lambda "origyn-getGraph"        "handlers/getGraph.handler"
+Create-Lambda "origyn-deleteDocument"  "handlers/deleteDocument.handler"
+Create-Lambda "origyn-getDocumentUrl"  "handlers/getDocumentUrl.handler"
 
 Write-Host "`nAll Lambda functions created." -ForegroundColor Green
