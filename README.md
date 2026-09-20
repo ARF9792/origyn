@@ -14,16 +14,12 @@ From paper to claim to answer — with the provenance intact.
 
 **[Live Demo](https://main.dp329woyjanli.amplifyapp.com)** — no account required  
 **[Demo Video](#)** — [PLACEHOLDER: Add final YouTube URL — max 3 minutes]  
-**[AWS Builder Center Blog](#)** — [PLACEHOLDER: Add final article URL]
+**[AWS Builder Center Blog — Parth Malhotra](https://builder.aws.com/content/3Jasyte35BEeMNg7OslJq1wjvR7/the-paper-got-retracted-our-ai-answer-didnt-get-the-memo-building-origyn-on-aws)**<br>
+**[AWS Builder Center Blog — Abdull Farooqui](https://builder.aws.com/content/3JanazHhI0rn6OotgEoYlBqtd4b/the-paper-got-retracted-our-ai-answer-didnt-get-the-memo-building-origyn-on-aws)**
 
 </div>
 
-<!-- SCREENSHOT PLACEHOLDER
-Image: Origyn landing page
-Suggested file: docs/images/origyn-landing.png
-Recommended purpose: First visual directly below hero description
-Suggested alt text: "Origyn landing page showing the evidence-memory research workspace"
--->
+![Origyn landing page showing the evidence-memory research workspace](docs/images/origyn-landing.png)
 
 ---
 
@@ -166,44 +162,19 @@ Answer V1 is preserved in history. It is not deleted; it just reflects that its 
 | View original source | Presigned S3 URLs give time-limited access to the uploaded PDF |
 | `NO_USABLE_EVIDENCE` state | System can explicitly abstain rather than fabricate an answer |
 
-<!-- SCREENSHOT PLACEHOLDER
-Image: Sources library
-Suggested file: docs/images/sources-library.png
-Show: uploaded research sources, status labels, Add Source, delete action
-Suggested alt text: "Origyn Sources library showing research papers and evidence status"
--->
+![Origyn Sources library showing research papers and evidence status](docs/images/sources-library.png)
 
-<!-- SCREENSHOT PLACEHOLDER
-Image: Source detail
-Suggested file: docs/images/source-detail.png
-Show: source metadata, status, extracted claims, View Source and evidence actions
-Suggested alt text: "Origyn source detail showing status, extracted claims and provenance actions"
--->
+![Origyn source detail showing status, extracted claims and provenance actions](docs/images/source-detail.png)
 
-<!-- SCREENSHOT PLACEHOLDER
-Image: Evidence-aware chat
-Suggested file: docs/images/evidence-chat.png
-Show: formatted answer with evidence context / answer state
-Suggested alt text: "Origyn evidence-aware research chat"
--->
+![Origyn evidence-aware research chat](docs/images/evidence-chat.png)
 
-<!-- SCREENSHOT PLACEHOLDER
-Image: Evidence Changed state
-Suggested file: docs/images/evidence-changed.png
-Show: affected answer and regeneration workflow
-Suggested alt text: "Origyn showing an answer affected by changed evidence"
--->
+![Origyn showing an answer affected by changed evidence](docs/images/evidence-changed.png)
 
 ---
 
 ## Evidence Graph
 
-<!-- SCREENSHOT PLACEHOLDER
-Image: Evidence Graph
-Suggested file: docs/images/evidence-graph.png
-Show: Document to Claim to Answer lineage graph
-Suggested alt text: "Origyn Evidence Graph connecting documents, claims and generated answers"
--->
+![Origyn Evidence Graph connecting documents, claims and generated answers](docs/images/evidence-graph.png)
 
 The graph makes the full lineage inspectable. Every node — document, claim, answer — is visible, and the edges show how evidence flows. Clicking a node navigates to the relevant detail view. The graph supports zoom, pan, and focused navigation.
 
@@ -231,30 +202,7 @@ AWS Lambda (15 serverless handlers)
 Observability: AWS CloudWatch
 ```
 
-<!-- DIAGRAM PLACEHOLDER
-Image: AWS architecture
-Suggested file: docs/images/aws-architecture.png
-
-Suggested diagram structure:
-
-User
-  ↓
-AWS Amplify Hosting / Next.js
-  ↓
-Amazon API Gateway
-  ↓
-AWS Lambda
-  ├── Amazon DynamoDB
-  ├── Amazon S3
-  ├── Amazon Bedrock
-  └── Crossref API
-
-Observability:
-AWS CloudWatch
-
-Suggested alt text:
-"Origyn AWS architecture using Amplify, API Gateway, Lambda, DynamoDB, S3, Bedrock and CloudWatch"
--->
+![Origyn AWS architecture using Amplify, API Gateway, Lambda, DynamoDB, S3, Bedrock and CloudWatch](docs/images/aws-architecture.png)
 
 ### AWS Lambda
 
@@ -298,14 +246,12 @@ PDFs uploaded by users are stored in a private S3 bucket. When a user wants to v
 
 ### Amazon Bedrock
 
-Bedrock handles two tasks:
+Origyn uses Amazon Bedrock as its managed generative AI layer.
 
-1. **Claim extraction** — given the full text of a document, extract discrete factual claims
-2. **Answer generation** — given a question and a filtered set of usable claims, produce an evidence-grounded answer
+- `BEDROCK_CLAIM_MODEL_ID` configures the Amazon Nova model used for extracting structured claims from research papers.
+- `BEDROCK_REASONING_MODEL_ID` configures the Amazon Nova model used for evidence-grounded reasoning and answer generation.
 
-The distinction matters: Bedrock generates. Origyn governs which evidence is usable before Bedrock is called.
-
-Model used: `us.anthropic.claude-3-haiku-20240307-v1:0` via cross-region inference profile.
+Keeping these models configurable allows claim extraction and reasoning to evolve independently without changing the rest of the application architecture.
 
 ### Amazon CloudWatch
 
@@ -329,7 +275,7 @@ Live: **https://main.dp329woyjanli.amplifyapp.com**
 | Backend runtime | Node.js on AWS Lambda |
 | Backend language | TypeScript (compiled to JS for deployment) |
 | API layer | Amazon API Gateway (HTTP API) |
-| AI / generation | Amazon Bedrock — Claude 3 Haiku |
+| AI / Reasoning | Amazon Bedrock — Amazon Nova models for claim extraction and evidence-grounded answer generation |
 | Database | Amazon DynamoDB |
 | File storage | Amazon S3 |
 | Scholarly metadata | Crossref REST API |
@@ -494,7 +440,8 @@ npm test           # run Jest test suite
 | `DYNAMODB_DOCUMENTS_TABLE` | Yes | DynamoDB table for document records |
 | `DYNAMODB_CLAIMS_TABLE` | Yes | DynamoDB table for extracted claims |
 | `DYNAMODB_ANSWERS_TABLE` | Yes | DynamoDB table for generated answers |
-| `BEDROCK_MODEL_ID` | Yes | Cross-region inference profile ID for Claude |
+| `BEDROCK_CLAIM_MODEL_ID` | Yes | Amazon Bedrock model ID used for claim extraction |
+| `BEDROCK_REASONING_MODEL_ID` | Yes | Amazon Bedrock model ID used for reasoning and answer generation |
 | `CROSSREF_CONTACT_EMAIL` | Yes | Polite pool email for Crossref API requests |
 | `CROSSREF_BASE_URL` | No | Defaults to `https://api.crossref.org` |
 
