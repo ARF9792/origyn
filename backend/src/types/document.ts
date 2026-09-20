@@ -54,7 +54,7 @@ export interface Document {
 export type DocumentSummary = Pick<
   Document,
   "id" | "filename" | "title" | "doi" | "status" | "retractionStatus"
->;
+> & { claimCount: number };
 
 // ─── Claim ────────────────────────────────────────────────────────────────────
 

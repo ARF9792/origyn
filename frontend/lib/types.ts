@@ -66,6 +66,7 @@ export interface DocumentSummary {
   retractionStatus: RetractionStatus;
   createdAt: string;
   updatedAt: string;
+  claimCount?: number;
 }
 
 // ─── Document (full detail) ───────────────────────────────────────────────────

@@ -207,6 +207,12 @@ p { line-height: 1.6; color: var(--muted); }
 .publication span { color: #484d56; }
 .detail-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-top: 25px; margin-bottom: 34px; }
 .action-divider { height: 18px; width: 1px; background: var(--line); margin: 0 7px; }
+.invalidation-form { max-width: 620px; margin: -14px 0 34px; padding: 14px; border: 1px solid var(--line); border-radius: 6px; background: #111214; }
+.invalidation-form label { display: block; color: #a6a9b3; font-size: 12px; margin-bottom: 8px; }
+.invalidation-form textarea { display: block; width: 100%; resize: vertical; min-height: 54px; border: 1px solid var(--line); border-radius: 5px; background: #0b0c0d; color: #e1e3e8; padding: 9px 10px; outline: 0; font-size: 12px; }
+.invalidation-form textarea:focus { border-color: #827aab; outline: 1px solid #827aab; }
+.invalidation-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px; }
+.invalidation-error { color: var(--red); font-size: 11px; margin-top: 7px; }
 .notice { display: flex; gap: 14px; padding: 22px 24px; border: 1px solid #34353e; background: #14151a; border-radius: 8px; margin-bottom: 37px; }
 .notice > .icon { color: #9894b9; margin-top: 2px; }
 .notice h2 { font-size: 14px; margin-bottom: 8px; }

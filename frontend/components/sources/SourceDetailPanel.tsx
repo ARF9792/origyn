@@ -23,6 +23,9 @@ export function SourceDetailPanel({ id }: Props) {
   const [isExtracting, setIsExtracting] = useState(false);
   const [isRechecking, setIsRechecking] = useState(false);
   const [isInvalidating, setIsInvalidating] = useState(false);
+  const [isInvalidationFormOpen, setIsInvalidationFormOpen] = useState(false);
+  const [invalidationReason, setInvalidationReason] = useState('');
+  const [invalidationError, setInvalidationError] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const router = useRouter();
 
@@ -67,17 +70,29 @@ export function SourceDetailPanel({ id }: Props) {
   };
 
   const handleInvalidate = async () => {
-    const reason = window.prompt('Provide a reason for invalidation:');
-    if (!reason) return;
+    const reason = invalidationReason.trim();
+    if (!reason) {
+      setInvalidationError('A reason is required.');
+      return;
+    }
     setIsInvalidating(true);
+    setInvalidationError(null);
     try {
       await invalidateDocument(id, reason);
+      setIsInvalidationFormOpen(false);
+      setInvalidationReason('');
       fetchDoc();
     } catch (err: any) {
-      setError(err.message || 'Failed to invalidate document.');
+      setInvalidationError(err.message || 'Failed to invalidate document.');
     } finally {
       setIsInvalidating(false);
     }
+  };
+
+  const cancelInvalidation = () => {
+    setIsInvalidationFormOpen(false);
+    setInvalidationReason('');
+    setInvalidationError(null);
   };
 
   const handleDelete = async () => {
@@ -155,7 +170,7 @@ export function SourceDetailPanel({ id }: Props) {
               <Icon name="refresh" /> {isRechecking ? 'Rechecking...' : 'Recheck status'}
             </button>
             {doc.status !== 'INVALID' && doc.status !== 'DELETED' && (
-              <button className="button compact quiet" onClick={handleInvalidate} disabled={isInvalidating} style={{ color: '#d92d20' }}>
+              <button className="button compact quiet" onClick={() => { setIsInvalidationFormOpen(true); setInvalidationError(null); }} disabled={isInvalidating} style={{ color: '#d92d20' }}>
                 <Icon name="warning" /> {isInvalidating ? 'Invalidating...' : 'Invalidate source'}
               </button>
             )}
@@ -172,6 +187,27 @@ export function SourceDetailPanel({ id }: Props) {
         </button>
 
       </div>
+
+      {isInvalidationFormOpen && (
+        <form className="invalidation-form" onSubmit={(event) => { event.preventDefault(); void handleInvalidate(); }}>
+          <label htmlFor="invalidation-reason">Reason for invalidation</label>
+          <textarea
+            id="invalidation-reason"
+            value={invalidationReason}
+            onChange={(event) => setInvalidationReason(event.target.value)}
+            placeholder="Enter why this source should no longer be trusted"
+            rows={2}
+            disabled={isInvalidating}
+          />
+          {invalidationError && <p className="invalidation-error">{invalidationError}</p>}
+          <div className="invalidation-actions">
+            <button type="button" className="button compact quiet" onClick={cancelInvalidation} disabled={isInvalidating}>Cancel</button>
+            <button type="submit" className="button compact" disabled={isInvalidating || !invalidationReason.trim()}>
+              {isInvalidating ? 'Invalidating...' : 'Invalidate source'}
+            </button>
+          </div>
+        </form>
+      )}
 
       {isRetracted && doc.retractionNotice && (
         <div className="notice critical-notice">

@@ -67,6 +67,7 @@ beforeEach(() => {
 describe("GET /documents", () => {
   it("returns 200 with items array", async () => {
     mockListDocuments.mockResolvedValue([sampleDoc]);
+    mockListAllClaims.mockResolvedValue([]);
     const result = await getDocumentsHandler(mockEvent);
     expect(result.statusCode).toBe(200);
     const body = JSON.parse(result.body);
@@ -75,6 +76,7 @@ describe("GET /documents", () => {
 
   it("returns only DocumentSummary fields (no retractionNotice, no claims, no timestamps)", async () => {
     mockListDocuments.mockResolvedValue([sampleDoc]);
+    mockListAllClaims.mockResolvedValue([]);
     const result = await getDocumentsHandler(mockEvent);
     const item = JSON.parse(result.body).items[0];
 
@@ -84,6 +86,7 @@ describe("GET /documents", () => {
     expect(item.doi).toBe("10.1038/nature12373");
     expect(item.status).toBe("ACTIVE");
     expect(item.retractionStatus).toBe("NONE_FOUND");
+    expect(item.claimCount).toBe(0);
 
     // Must NOT expose these in list view
     expect(item.retractionNotice).toBeUndefined();
@@ -102,11 +105,16 @@ describe("GET /documents", () => {
 
   it("handles multiple documents including retracted ones", async () => {
     mockListDocuments.mockResolvedValue([sampleDoc, retractedDoc]);
+    mockListAllClaims.mockResolvedValue([
+      { id: "claim_1", documentId: "doc_abc123" },
+      { id: "claim_2", documentId: "doc_abc123" },
+    ] as any);
     const result = await getDocumentsHandler(mockEvent);
     const items = JSON.parse(result.body).items;
     expect(items).toHaveLength(2);
     expect(items.find((i: { id: string }) => i.id === "doc_xyz789").status).toBe("RETRACTED");
     expect(items.find((i: { id: string }) => i.id === "doc_xyz789").retractionStatus).toBe("RETRACTED");
+    expect(items.find((i: { id: string }) => i.id === "doc_abc123").claimCount).toBe(2);
   });
 
   it("returns 502 on DynamoDB error", async () => {

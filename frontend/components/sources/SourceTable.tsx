@@ -62,7 +62,7 @@ export function SourceTable({ documents, searchQuery = '', onDelete }: Props) {
                 </span>
               </td>
               <td className="numeric">
-                {doc.usage?.claims ?? 0}
+                {doc.claimCount ?? doc.usage?.claims ?? 0}
               </td>
               <td>
                 <span className="checked-time">

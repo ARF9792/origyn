@@ -1,5 +1,5 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import { listDocuments } from "../lib/dynamo";
+import { listAllClaims, listDocuments } from "../lib/dynamo";
 import { DocumentSummary } from "../types/document";
 import { getWorkspaceId } from "../lib/auth";
 
@@ -17,8 +17,12 @@ export const handler = async (
 ): Promise<APIGatewayProxyResult> => {
   const ownerId = getWorkspaceId(event);
   let documents;
+  let claims;
   try {
-    documents = await listDocuments(ownerId);
+    [documents, claims] = await Promise.all([
+      listDocuments(ownerId),
+      listAllClaims(ownerId),
+    ]);
   } catch (err) {
     console.error("DynamoDB listDocuments error:", err);
     return {
@@ -42,6 +46,7 @@ export const handler = async (
       doi: doc.doi,
       status: doc.status,
       retractionStatus: doc.retractionStatus,
+      claimCount: claims.filter((claim) => claim.documentId === doc.id).length,
     }));
 
   return {
