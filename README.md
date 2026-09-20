@@ -1,4 +1,5 @@
 <div align="center">
+  <img src="docs/images/origyn-landing.png" alt="Origyn Header" width="100%" />
 
 # Origyn
 
@@ -20,8 +21,6 @@ From paper to claim to answer — with the provenance intact.
 - **AWS Builder Center Blog — Abdul Farooqui:** [Read the article](https://builder.aws.com/content/3JanazHhI0rn6OotgEoYlBqtd4b/the-paper-got-retracted-our-ai-answer-didnt-get-the-memo-building-origyn-on-aws)
 
 </div>
-
-![Origyn landing page showing the evidence-memory research workspace](docs/images/origyn-landing.png)
 
 ---
 
@@ -164,19 +163,23 @@ Answer V1 is preserved in history. It is not deleted; it just reflects that its 
 | View original source | Presigned S3 URLs give time-limited access to the uploaded PDF |
 | `NO_USABLE_EVIDENCE` state | System can explicitly abstain rather than fabricate an answer |
 
-![Origyn Sources library showing research papers and evidence status](docs/images/sources-library.png)
-
-![Origyn source detail showing status, extracted claims and provenance actions](docs/images/source-detail.png)
-
-![Origyn evidence-aware research chat](docs/images/evidence-chat.png)
-
-![Origyn showing an answer affected by changed evidence](docs/images/evidence-changed.png)
+<div align="center">
+  <img src="docs/images/sources-library.png" alt="Origyn Sources library showing research papers and evidence status" width="100%" />
+  <br/><br/>
+  <img src="docs/images/source-detail.png" alt="Origyn source detail showing status, extracted claims and provenance actions" width="100%" />
+  <br/><br/>
+  <img src="docs/images/evidence-chat.png" alt="Origyn evidence-aware research chat" width="100%" />
+  <br/><br/>
+  <img src="docs/images/evidence-changed.png" alt="Origyn showing an answer affected by changed evidence" width="100%" />
+</div>
 
 ---
 
 ## Evidence Graph
 
-![Origyn Evidence Graph connecting documents, claims and generated answers](docs/images/evidence-graph.png)
+<div align="center">
+  <img src="docs/images/evidence-graph.png" alt="Origyn Evidence Graph connecting documents, claims and generated answers" width="100%" />
+</div>
 
 The graph makes the full lineage inspectable. Every node — document, claim, answer — is visible, and the edges show how evidence flows. Clicking a node navigates to the relevant detail view. The graph supports zoom, pan, and focused navigation.
 
@@ -204,7 +207,9 @@ AWS Lambda (15 serverless handlers)
 Observability: AWS CloudWatch
 ```
 
-![Origyn AWS architecture using Amplify, API Gateway, Lambda, DynamoDB, S3, Bedrock and CloudWatch](docs/images/aws-architecture.png)
+<div align="center">
+  <img src="docs/images/aws-architecture.png" alt="Origyn AWS architecture using Amplify, API Gateway, Lambda, DynamoDB, S3, Bedrock and CloudWatch" width="80%" />
+</div>
 
 ### AWS Lambda
 
@@ -535,7 +540,7 @@ Parth built the entire backend infrastructure. The core data model — Document 
 
 He set up the API Gateway, DynamoDB tables, S3 bucket, IAM roles, and CloudWatch logging, and wrote the deployment scripts. The `recheckDocument`, `invalidateDocument`, and `regenerateAnswer` handlers — which are the heart of Origyn's evidence-change workflow — are his work. So is the Crossref integration that does the actual retraction lookup.
 
-Contact: +91 7009205889
+
 
 ### Abdul Farooqui — Frontend, UX & Product
 
@@ -543,7 +548,7 @@ Abdul built the frontend from the landing page through every workspace view. He 
 
 He also drove the product direction and problem framing early on, which led to the evidence-memory positioning rather than building a generic document chat tool. He handled the frontend-backend integration, the evidence-state representation in the UI (status badges, `EVIDENCE_CHANGED` alerts, regeneration flow), and regression testing across workspace views.
 
-Contact: +91 9793848072
+
 
 ---
 
@@ -564,7 +569,7 @@ Contact: +91 9793848072
 **College:** International Institute of Information Technology Bangalore (IIIT Bangalore)  
 **Year:** Pre-final year  
 
-| Member | Role | Contact |
-|--------|------|---------|
-| Parth Malhotra | Backend & AWS | +91 7009205889 |
-| Abdul Farooqui | Frontend, UX & Product | +91 9793848072 |
+| Member | Role |
+|--------|------|
+| Parth Malhotra | Backend & AWS |
+| Abdul Farooqui | Frontend, UX & Product |
