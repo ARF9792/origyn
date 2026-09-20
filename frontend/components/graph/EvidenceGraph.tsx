@@ -363,7 +363,7 @@ export function EvidenceGraph() {
             >
               −
             </button>
-            <output id="g-zoom" aria-live="polite">100%</output>
+            <output id="g-zoom" aria-live="polite">{Math.round(camera.z * 100)}%</output>
             <button
               className="icon-button"
               aria-label="Zoom in"

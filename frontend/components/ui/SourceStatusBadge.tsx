@@ -13,6 +13,7 @@ const STATUS_ICON: Record<DocumentStatus, string> = {
   UNKNOWN:    'unknown',
   PROCESSING: 'clock',
   INVALID:    'retracted',
+  DELETED:    'trash',
 };
 
 export function SourceStatusBadge({ status }: Props) {

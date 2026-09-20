@@ -102,20 +102,6 @@ export function SourceDetailPanel({ id }: Props) {
     }
   };
 
-  const handleDownload = async () => {
-    try {
-      const { url } = await getDocumentUrl(id);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = doc?.filename || 'document.pdf';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    } catch (err: any) {
-      setError(err.message || 'Failed to generate download URL.');
-    }
-  };
-
   if (isLoading) return <LoadingSkeleton lines={10} />;
   if (error || !doc) return <ErrorState message={error || 'Document not found.'} />;
 
@@ -184,9 +170,7 @@ export function SourceDetailPanel({ id }: Props) {
         <button className="button compact quiet" onClick={handleView}>
           <Icon name="external" /> View source
         </button>
-        <button className="button compact quiet" onClick={handleDownload}>
-          <Icon name="download" /> Download
-        </button>
+
       </div>
 
       {isRetracted && doc.retractionNotice && (

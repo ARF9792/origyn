@@ -40,7 +40,6 @@ export const GraphCanvas = forwardRef<GraphCanvasHandle, GraphCanvasProps>(
   function GraphCanvas({ view, state, camera, onCameraChange, onSelect }, ref) {
     const canvasRef   = useRef<HTMLDivElement>(null);
     const worldRef    = useRef<HTMLDivElement>(null);
-    const zoomOutputRef = useRef<HTMLOutputElement>(null);
     const dragRef     = useRef<{ x: number; y: number; cx: number; cy: number } | null>(null);
     const camRef      = useRef<CameraState>(camera);
 
@@ -51,9 +50,6 @@ export const GraphCanvas = forwardRef<GraphCanvasHandle, GraphCanvasProps>(
     const applyCamera = useCallback((cam: CameraState) => {
       if (worldRef.current) {
         worldRef.current.style.transform = `translate(${cam.x}px,${cam.y}px) scale(${cam.z})`;
-      }
-      if (zoomOutputRef.current) {
-        zoomOutputRef.current.textContent = `${Math.round(cam.z * 100)}%`;
       }
     }, []);
 
@@ -309,10 +305,6 @@ export const GraphCanvas = forwardRef<GraphCanvasHandle, GraphCanvasProps>(
           ))}
         </div>
 
-        {/* Zoom output for screen readers — placed outside world so it's always visible */}
-        <output id="g-zoom" aria-live="polite" ref={zoomOutputRef} style={{ display: 'none' }}>
-          {Math.round(camera.z * 100)}%
-        </output>
       </div>
     );
   }

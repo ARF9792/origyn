@@ -13,7 +13,8 @@ export type DocumentStatus =
   | 'ACTIVE'
   | 'RETRACTED'
   | 'UNKNOWN'
-  | 'INVALID';
+  | 'INVALID'
+  | 'DELETED';
 
 // ─── Retraction status ───────────────────────────────────────────────────────
 // NONE_FOUND means no known retraction was found.
@@ -248,6 +249,7 @@ export const STATUS_LABELS: Record<DocumentStatus, string> = {
   UNKNOWN: 'Unable to verify',
   PROCESSING: 'Processing',
   INVALID: 'Invalid',
+  DELETED: 'Deleted',
 };
 
 // ─── Query parameters ─────────────────────────────────────────────────────────
