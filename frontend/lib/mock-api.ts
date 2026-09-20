@@ -72,6 +72,7 @@ export async function mockGetDocument(id: string): Promise<Document> {
 
 // ─── deleteDocument (mock) ───────────────────────────────────────────────────
 export async function mockDeleteDocument(id: string): Promise<void> {
+  const sources = await getSources();
   const index = sources.findIndex((d) => d.id === id);
   if (index === -1) throw apiError('DOCUMENT_NOT_FOUND', 'This source is not in the current session.');
   sources[index] = { ...sources[index], status: 'DELETED' };
@@ -79,6 +80,7 @@ export async function mockDeleteDocument(id: string): Promise<void> {
 
 // ─── getDocumentUrl (mock) ───────────────────────────────────────────────────
 export async function mockGetDocumentUrl(id: string): Promise<{ url: string }> {
+  const sources = await getSources();
   const doc = sources.find((d) => d.id === id);
   if (!doc) throw apiError('DOCUMENT_NOT_FOUND', 'This source is not in the current session.');
   return { url: '#' }; // Return dummy URL for mock mode

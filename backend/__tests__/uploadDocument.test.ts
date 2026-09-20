@@ -187,7 +187,7 @@ describe("uploadDocument pipeline", () => {
     
     expect(mockSearchByTitle).toHaveBeenCalledWith("Some Fallback Title");
     // Duplicate check must be called AFTER the fallback resolves the DOI
-    expect(mockFindDoi).toHaveBeenCalledWith("10.1000/fallback");
+    expect(mockFindDoi).toHaveBeenCalledWith("10.1000/fallback", "legacy");
   });
 
   it("returns ACTIVE + retractionStatus UNKNOWN for a no-DOI local document (no Crossref match)", async () => {
