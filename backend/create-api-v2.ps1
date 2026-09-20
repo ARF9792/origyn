@@ -27,6 +27,22 @@ $API = $API_JSON | ConvertFrom-Json
 $API_ID = $API.ApiId
 Write-Host "API ID: $API_ID" -ForegroundColor Green
 
+# ── JWT Authorizer ────────────────────────────────────────────────────────────
+Write-Host "`n>>> Creating Cognito JWT Authorizer..." -ForegroundColor Cyan
+$AUTH_JSON = & $AWS apigatewayv2 create-authorizer `
+    --api-id $API_ID `
+    --authorizer-type JWT `
+    --name "CognitoAuthorizer" `
+    --identity-source "`$request.header.Authorization" `
+    --jwt-configuration "Audience=5sisa1ud23ofo8emmflc4n6t6c,Issuer=https://cognito-idp.us-east-1.amazonaws.com/us-east-1_XdvCkNjOY" `
+    --region $Region `
+    --no-cli-pager `
+    --output json
+
+$AUTH = $AUTH_JSON | ConvertFrom-Json
+$AUTH_ID = $AUTH.AuthorizerId
+Write-Host "Authorizer ID: $AUTH_ID" -ForegroundColor Green
+
 # ── Integration factory ───────────────────────────────────────────────────────
 function Add-Integration {
     param($FunctionName)
@@ -45,14 +61,23 @@ function Add-Integration {
 
 # ── Route factory ─────────────────────────────────────────────────────────────
 function Add-Route {
-    param($Method, $Path, $IntId)
-    & $AWS apigatewayv2 create-route `
-        --api-id $API_ID `
-        --route-key "$Method $Path" `
-        --target "integrations/$IntId" `
-        --region $Region `
-        --no-cli-pager | Out-Null
-    Write-Host "  $Method $Path" -ForegroundColor Gray
+    param($Method, $Path, $IntId, $RequireAuth = $true)
+    
+    $routeArgs = @(
+        "--api-id", $API_ID,
+        "--route-key", "$Method $Path",
+        "--target", "integrations/$IntId",
+        "--region", $Region,
+        "--no-cli-pager"
+    )
+
+    if ($RequireAuth) {
+        $routeArgs += "--authorization-type", "JWT"
+        $routeArgs += "--authorizer-id", $AUTH_ID
+    }
+
+    & $AWS apigatewayv2 create-route @routeArgs | Out-Null
+    Write-Host "  $Method $Path (Auth: $RequireAuth)" -ForegroundColor Gray
 }
 
 Write-Host "`n>>> Creating integrations..." -ForegroundColor Cyan
@@ -69,27 +94,42 @@ $INT_CHAT     = Add-Integration "origyn-chat"
 $INT_REGEN    = Add-Integration "origyn-regenerateAnswer"
 $INT_RECHECK  = Add-Integration "origyn-recheckDocument"
 $INT_INVALID  = Add-Integration "origyn-invalidateDocument"
-$INT_DELETE   = Add-Integration "origyn-deleteDocument"
-$INT_URL      = Add-Integration "origyn-getDocumentUrl"
-$INT_IMPACT   = Add-Integration "origyn-getDocumentImpact"
+$INT_HEALTH         = Add-Integration "origyn-health"
+$INT_UPLOAD         = Add-Integration "origyn-uploadDocument"
+$INT_GET_DOCUMENTS  = Add-Integration "origyn-getDocuments"
+$INT_GET_DOCUMENT   = Add-Integration "origyn-getDocument"
+$INT_GRAPHEGEN      = Add-Integration "origyn-getGraph"
+$INT_GET_ANSWERS    = Add-Integration "origyn-getAnswers"
+$INT_GET_ANSWER     = Add-Integration "origyn-getAnswer"
+$INT_EXTRACT        = Add-Integration "origyn-extractClaims"
+$INT_CHAT           = Add-Integration "origyn-chat"
+$INT_REGENERATE     = Add-Integration "origyn-regenerateAnswer"
+$INT_RECHECK        = Add-Integration "origyn-recheckDocument"
+$INT_INVALIDATE     = Add-Integration "origyn-invalidateDocument"
+$INT_DELETE         = Add-Integration "origyn-deleteDocument"
+$INT_GET_URL        = Add-Integration "origyn-getDocumentUrl"
+$INT_IMPACT         = Add-Integration "origyn-getDocumentImpact"
 
 Write-Host "`n>>> Creating routes..." -ForegroundColor Cyan
 
-Add-Route "GET"  "/health"                          $INT_HEALTH
-Add-Route "POST" "/documents"                       $INT_UPLOAD
-Add-Route "GET"  "/documents"                       $INT_LIST
-Add-Route "GET"  "/documents/{id}"                  $INT_DETAIL
-Add-Route "POST" "/documents/{id}/claims/extract"   $INT_EXTRACT
-Add-Route "POST" "/documents/{id}/recheck"          $INT_RECHECK
-Add-Route "POST" "/documents/{id}/invalidate"       $INT_INVALID
-Add-Route "DELETE" "/documents/{id}"                $INT_DELETE
-Add-Route "GET"  "/documents/{id}/url"              $INT_URL
-Add-Route "GET"  "/documents/{id}/impact"           $INT_IMPACT
-Add-Route "GET"  "/graph"                           $INT_GRAPH
-Add-Route "GET"  "/answers"                         $INT_ANSWERS
-Add-Route "GET"  "/answers/{id}"                    $INT_ANSWER
-Add-Route "POST" "/chat"                            $INT_CHAT
-Add-Route "POST" "/answers/{id}/regenerate"         $INT_REGEN
+Add-Route "GET"    "/health"                            $INT_HEALTH -RequireAuth $false
+
+Add-Route "GET"    "/documents"                         $INT_GET_DOCUMENTS
+Add-Route "POST"   "/documents"                         $INT_UPLOAD
+Add-Route "GET"    "/documents/{id}"                    $INT_GET_DOCUMENT
+Add-Route "DELETE" "/documents/{id}"                    $INT_DELETE
+Add-Route "GET"    "/documents/{id}/url"                $INT_GET_URL
+Add-Route "POST"   "/documents/{id}/claims/extract"     $INT_EXTRACT
+Add-Route "POST"   "/documents/{id}/recheck"            $INT_RECHECK
+Add-Route "POST"   "/documents/{id}/invalidate"         $INT_INVALIDATE
+Add-Route "GET"    "/documents/{id}/impact"             $INT_IMPACT
+
+Add-Route "GET"    "/answers"                           $INT_GET_ANSWERS
+Add-Route "GET"    "/answers/{id}"                      $INT_GET_ANSWER
+Add-Route "POST"   "/answers/{id}/regenerate"           $INT_REGENERATE
+
+Add-Route "POST"   "/chat"                              $INT_CHAT
+Add-Route "GET"    "/graph"                             $INT_GRAPHEGEN
 
 # ── Deploy stage ──────────────────────────────────────────────────────────────
 Write-Host "`n>>> Deploying to `$default stage..." -ForegroundColor Cyan

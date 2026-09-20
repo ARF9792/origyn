@@ -39,9 +39,9 @@ export interface ImpactResult {
  * @param documentId - The document that is now RETRACTED or INVALID.
  * @returns ImpactResult listing every affected claim and answer ID.
  */
-export async function applyDocumentImpact(documentId: string, workspaceId?: string): Promise<ImpactResult> {
+export async function applyDocumentImpact(documentId: string, ownerId: string): Promise<ImpactResult> {
   // ── Step 1: Find claims sourced from this document ──────────────────────────
-  const allClaims = await listAllClaims(workspaceId);
+  const allClaims = await listAllClaims(ownerId);
   const affectedClaims = allClaims.filter(
     (c) =>
       c.sourceDocumentIds.includes(documentId) &&
@@ -62,7 +62,7 @@ export async function applyDocumentImpact(documentId: string, workspaceId?: stri
   }
 
   const claimIdSet = new Set(affectedClaimIds);
-  const allAnswers = await listAllAnswers(workspaceId);
+  const allAnswers = await listAllAnswers(ownerId);
   const affectedAnswers = allAnswers.filter(
     (a) =>
       a.status === "CURRENT" &&
@@ -90,13 +90,13 @@ export async function applyDocumentImpact(documentId: string, workspaceId?: stri
  *
  * @param documentId - The document to inspect.
  */
-export async function getDocumentImpactView(documentId: string, workspaceId?: string): Promise<{
+export async function getDocumentImpactView(documentId: string, ownerId: string): Promise<{
   claimIds: string[];
   answerIds: string[];
   claimCount: number;
   answerCount: number;
 }> {
-  const allClaims = await listAllClaims(workspaceId);
+  const allClaims = await listAllClaims(ownerId);
   const affectedClaims = allClaims.filter(
     (c) =>
       c.sourceDocumentIds.includes(documentId) &&
@@ -109,7 +109,7 @@ export async function getDocumentImpactView(documentId: string, workspaceId?: st
   }
 
   const claimIdSet = new Set(affectedClaimIds);
-  const allAnswers = await listAllAnswers(workspaceId);
+  const allAnswers = await listAllAnswers(ownerId);
   const affectedAnswers = allAnswers.filter(
     (a) =>
       a.status === "EVIDENCE_CHANGED" &&

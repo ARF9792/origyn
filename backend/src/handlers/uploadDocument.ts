@@ -6,7 +6,7 @@ import { putDocument, updateDocument, findDocumentByDoi } from "../lib/dynamo";
 import { identifyPaper } from "../services/paperIdentifier";
 import { checkRetractionStatus, searchByTitle } from "../services/crossrefService";
 import { Document, DocumentStatus, RetractionStatus } from "../types/document";
-import { getWorkspaceId } from "../lib/workspace";
+import { getAuthenticatedOwnerId } from "../lib/auth";
 
 const ALLOWED_CONTENT_TYPES = ["application/pdf"];
 const MAX_SIZE_BYTES = 20 * 1024 * 1024; // 20 MB
@@ -48,7 +48,7 @@ function normalizeDoi(doi: string): string {
 export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
-  const workspaceId = getWorkspaceId(event);
+  const ownerId = getAuthenticatedOwnerId(event);
 
   // ── 1. Parse multipart ────────────────────────────────────────────────────
   let parsedFile: Awaited<ReturnType<typeof parseMultipartFile>>;
@@ -100,7 +100,7 @@ export const handler = async (
     normalizedDoi = normalizeDoi(identification.doi);
     try {
       // Re-importing dynamically or using the imported findDocumentByDoi
-      const existingDoc = await findDocumentByDoi(normalizedDoi, workspaceId);
+      const existingDoc = await findDocumentByDoi(normalizedDoi, ownerId);
       if (existingDoc) {
         return {
           statusCode: 409,
@@ -122,7 +122,7 @@ export const handler = async (
 
   // ── 5. Generate IDs ───────────────────────────────────────────────────────
   const documentId = `doc_${uuidv4().replace(/-/g, "").slice(0, 12)}`;
-  const s3Key = `uploads/${documentId}.pdf`;
+  const s3Key = `users/${ownerId}/documents/${documentId}.pdf`;
   const now = new Date().toISOString();
 
   // ── 6. Upload to S3 ───────────────────────────────────────────────────────
@@ -138,7 +138,7 @@ export const handler = async (
     id: documentId,
     filename: parsedFile.filename,
     s3Key,
-    workspaceId,
+    ownerId,
     title: null,
     doi: normalizedDoi, // Use normalized DOI here
     status: "PROCESSING",

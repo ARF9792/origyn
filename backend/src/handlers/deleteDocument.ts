@@ -1,5 +1,6 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { getDocument, updateDocument } from "../lib/dynamo";
+import { getAuthenticatedOwnerId } from "../lib/auth";
 import { applyDocumentImpact } from "../services/impactService";
 
 function errorResponse(
@@ -29,9 +30,11 @@ export const handler = async (
 
 
   // ── Load document ──────────────────────────────────────────────────────────
+  const ownerId = getAuthenticatedOwnerId(event);
+
   let document;
   try {
-    document = await getDocument(id);
+    document = await getDocument(id, ownerId);
   } catch (err) {
     console.error(`getDocument error for ${id}:`, err);
     return errorResponse(502, "INTERNAL_ERROR", "Failed to retrieve document.");
@@ -65,7 +68,7 @@ export const handler = async (
   // ── Propagate impact to claims and answers ────────────────────────────────
   let impact = { claimIds: [] as string[], answerIds: [] as string[], claimCount: 0, answerCount: 0 };
   try {
-    impact = await applyDocumentImpact(id);
+    impact = await applyDocumentImpact(id, ownerId);
   } catch (err) {
     console.error(`Impact traversal error for ${id}:`, err);
     // Non-fatal — document is already DELETED; report partial impact.

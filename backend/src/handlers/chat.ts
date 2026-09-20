@@ -27,7 +27,7 @@ import { listAllClaims, getDocument, putAnswer, listDocuments } from "../lib/dyn
 import { generateGroundedAnswer, EvidenceItem } from "../services/bedrockService";
 import { Answer, Claim, Document } from "../types/document";
 import { v4 as uuidv4 } from "uuid";
-import { getWorkspaceId } from "../lib/workspace";
+import { getAuthenticatedOwnerId } from "../lib/auth";
 
 function errorResponse(
   statusCode: number,
@@ -47,7 +47,7 @@ const UNUSABLE_STATUSES = new Set(["RETRACTED", "INVALID"]);
 export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
-  const workspaceId = getWorkspaceId(event);
+  const ownerId = getAuthenticatedOwnerId(event);
 
   // ── 1. Parse and validate input ─────────────────────────────────────────────
   let question: string;
@@ -69,7 +69,7 @@ export const handler = async (
   // ── 2. Load all claims ──────────────────────────────────────────────────────
   let allClaims: Claim[];
   try {
-    allClaims = await listAllClaims(workspaceId);
+    allClaims = await listAllClaims(ownerId);
   } catch (err) {
     console.error("listAllClaims error:", err);
     return errorResponse(502, "INTERNAL_ERROR", "Failed to load evidence.");
@@ -92,7 +92,7 @@ export const handler = async (
   await Promise.all(
     Array.from(distinctDocIds).map(async (docId) => {
       try {
-        const doc = await getDocument(docId, workspaceId);
+        const doc = await getDocument(docId, ownerId);
         if (doc) docMap.set(docId, doc);
       } catch (err) {
         console.error(`getDocument error for ${docId}:`, err);
@@ -150,7 +150,7 @@ export const handler = async (
     id: `ans_${uuidv4().replace(/-/g, "").slice(0, 12)}`,
     question,
     text: result.text,
-    workspaceId,
+    ownerId,
     claimIds: validClaimIds,
     sourceDocumentIds,
     status: "CURRENT",

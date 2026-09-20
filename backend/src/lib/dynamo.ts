@@ -27,7 +27,7 @@ export async function putDocument(doc: Document): Promise<void> {
 }
 
 /** Fetch a single document by ID. Returns null if not found. */
-export async function getDocument(id: string, workspaceId?: string): Promise<Document | null> {
+export async function getDocument(id: string, ownerId: string): Promise<Document | null> {
   const result = await dynamo.send(
     new GetCommand({
       TableName: config.dynamodb.documentsTable,
@@ -36,33 +36,35 @@ export async function getDocument(id: string, workspaceId?: string): Promise<Doc
   );
   const doc = (result.Item as Document) ?? null;
   if (!doc) return null;
-  if (workspaceId && doc.workspaceId !== workspaceId) return null;
+  if (doc.ownerId !== ownerId) return null;
   return doc;
 }
 
-/** List all documents (full scan — acceptable at hackathon scale). */
-export async function listDocuments(workspaceId?: string): Promise<Document[]> {
+/** List all documents for the owner. */
+export async function listDocuments(ownerId: string): Promise<Document[]> {
   const result = await dynamo.send(
-    new ScanCommand({
+    new QueryCommand({
       TableName: config.dynamodb.documentsTable,
+      IndexName: "ownerId-index",
+      KeyConditionExpression: "ownerId = :ownerId",
+      ExpressionAttributeValues: { ":ownerId": ownerId },
     })
   );
-  const items = (result.Items as Document[]) ?? [];
-  return workspaceId ? items.filter((item) => item.workspaceId === workspaceId) : items;
+  return (result.Items as Document[]) ?? [];
 }
 
-/** Find a document by exact DOI match (full scan — acceptable at hackathon scale). */
-export async function findDocumentByDoi(doi: string, workspaceId?: string): Promise<Document | null> {
+/** Find a document by exact DOI match for the owner. */
+export async function findDocumentByDoi(doi: string, ownerId: string): Promise<Document | null> {
   const result = await dynamo.send(
-    new ScanCommand({
+    new QueryCommand({
       TableName: config.dynamodb.documentsTable,
+      IndexName: "ownerId-index",
+      KeyConditionExpression: "ownerId = :ownerId",
       FilterExpression: "doi = :doi",
-      ExpressionAttributeValues: { ":doi": doi },
+      ExpressionAttributeValues: { ":ownerId": ownerId, ":doi": doi },
     })
   );
   const item = (result.Items && result.Items.length > 0) ? (result.Items[0] as Document) : null;
-  if (!item) return null;
-  if (workspaceId && item.workspaceId !== workspaceId) return null;
   return item;
 }
 
@@ -116,7 +118,7 @@ export async function putClaims(claims: Claim[]): Promise<void> {
 }
 
 /** Fetch a single claim by ID. Returns null if not found. */
-export async function getClaim(id: string, workspaceId?: string): Promise<Claim | null> {
+export async function getClaim(id: string, ownerId: string): Promise<Claim | null> {
   const result = await dynamo.send(
     new GetCommand({
       TableName: config.dynamodb.claimsTable,
@@ -125,35 +127,37 @@ export async function getClaim(id: string, workspaceId?: string): Promise<Claim 
   );
   const claim = (result.Item as Claim) ?? null;
   if (!claim) return null;
-  if (workspaceId && claim.workspaceId !== workspaceId) return null;
+  if (claim.ownerId !== ownerId) return null;
   return claim;
 }
 
 /**
- * List all claims for a given document (full scan, filtered server-side).
- * Acceptable at hackathon scale; would need a GSI on documentId at production.
+ * List all claims for a given document for the owner.
  */
-export async function listClaimsByDocument(documentId: string, workspaceId?: string): Promise<Claim[]> {
+export async function listClaimsByDocument(documentId: string, ownerId: string): Promise<Claim[]> {
   const result = await dynamo.send(
-    new ScanCommand({
+    new QueryCommand({
       TableName: config.dynamodb.claimsTable,
+      IndexName: "ownerId-index",
+      KeyConditionExpression: "ownerId = :ownerId",
       FilterExpression: "documentId = :docId",
-      ExpressionAttributeValues: { ":docId": documentId },
+      ExpressionAttributeValues: { ":ownerId": ownerId, ":docId": documentId },
     })
   );
-  const items = (result.Items as Claim[]) ?? [];
-  return workspaceId ? items.filter((item) => item.workspaceId === workspaceId) : items;
+  return (result.Items as Claim[]) ?? [];
 }
 
-/** List ALL claims across all documents (used by chat and graph). */
-export async function listAllClaims(workspaceId?: string): Promise<Claim[]> {
+/** List ALL claims for the owner (used by chat and graph). */
+export async function listAllClaims(ownerId: string): Promise<Claim[]> {
   const result = await dynamo.send(
-    new ScanCommand({
+    new QueryCommand({
       TableName: config.dynamodb.claimsTable,
+      IndexName: "ownerId-index",
+      KeyConditionExpression: "ownerId = :ownerId",
+      ExpressionAttributeValues: { ":ownerId": ownerId },
     })
   );
-  const items = (result.Items as Claim[]) ?? [];
-  return workspaceId ? items.filter((item) => item.workspaceId === workspaceId) : items;
+  return (result.Items as Claim[]) ?? [];
 }
 
 /**
@@ -191,7 +195,7 @@ export async function putAnswer(answer: Answer): Promise<void> {
 }
 
 /** Fetch a single answer by ID. Returns null if not found. */
-export async function getAnswer(id: string, workspaceId?: string): Promise<Answer | null> {
+export async function getAnswer(id: string, ownerId: string): Promise<Answer | null> {
   const result = await dynamo.send(
     new GetCommand({
       TableName: config.dynamodb.answersTable,
@@ -200,19 +204,21 @@ export async function getAnswer(id: string, workspaceId?: string): Promise<Answe
   );
   const answer = (result.Item as Answer) ?? null;
   if (!answer) return null;
-  if (workspaceId && answer.workspaceId !== workspaceId) return null;
+  if (answer.ownerId !== ownerId) return null;
   return answer;
 }
 
-/** List all answers (used by GET /answers and impact traversal). */
-export async function listAllAnswers(workspaceId?: string): Promise<Answer[]> {
+/** List all answers for the owner (used by GET /answers and impact traversal). */
+export async function listAllAnswers(ownerId: string): Promise<Answer[]> {
   const result = await dynamo.send(
-    new ScanCommand({
+    new QueryCommand({
       TableName: config.dynamodb.answersTable,
+      IndexName: "ownerId-index",
+      KeyConditionExpression: "ownerId = :ownerId",
+      ExpressionAttributeValues: { ":ownerId": ownerId },
     })
   );
-  const items = (result.Items as Answer[]) ?? [];
-  return workspaceId ? items.filter((item) => item.workspaceId === workspaceId) : items;
+  return (result.Items as Answer[]) ?? [];
 }
 
 /**

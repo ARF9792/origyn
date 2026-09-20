@@ -127,7 +127,8 @@ function isRawClaimOutput(value: unknown): value is RawClaimOutput {
  */
 export async function extractClaimsFromText(
   text: string,
-  documentId: string
+  documentId: string,
+  ownerId: string
 ): Promise<Claim[]> {
   // Truncate to ~80 000 characters to stay within Nova 2 Lite context limits.
   const MAX_CHARS = 80_000;
@@ -182,6 +183,7 @@ ${truncated}`;
     .map((c) => ({
       id: `claim_${uuidv4().replace(/-/g, "").slice(0, 12)}`,
       documentId,
+      ownerId,
       sourceDocumentIds: [documentId],
       text: c.text.trim(),
       status: "SUPPORTED" as const,

@@ -1,5 +1,6 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { getDocument } from "../lib/dynamo";
+import { getAuthenticatedOwnerId } from "../lib/auth";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { GetObjectCommand } from "@aws-sdk/client-s3";
 import { s3Client } from "../lib/s3";
@@ -31,9 +32,11 @@ export const handler = async (
     return errorResponse(400, "DOCUMENT_NOT_FOUND", "Document ID is required.");
   }
 
+  const ownerId = getAuthenticatedOwnerId(event);
+
   let document;
   try {
-    document = await getDocument(id);
+    document = await getDocument(id, ownerId);
   } catch (err) {
     console.error(`DynamoDB getDocument error for id ${id}:`, err);
     return errorResponse(502, "INTERNAL_ERROR", "Failed to retrieve document.");

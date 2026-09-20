@@ -1,7 +1,7 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { listDocuments, listAllClaims, listAllAnswers } from "../lib/dynamo";
 import { GraphResponse, GraphNode, GraphEdge } from "../types/document";
-import { getWorkspaceId } from "../lib/workspace";
+import { getAuthenticatedOwnerId } from "../lib/auth";
 
 /**
  * GET /graph
@@ -24,14 +24,14 @@ import { getWorkspaceId } from "../lib/workspace";
 export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
-  const workspaceId = getWorkspaceId(event);
+  const ownerId = getAuthenticatedOwnerId(event);
   // ── Fetch all three entity types in parallel ──────────────────────────────
   let documents, claims, answers;
   try {
     [documents, claims, answers] = await Promise.all([
-      listDocuments(workspaceId),
-      listAllClaims(workspaceId),
-      listAllAnswers(workspaceId),
+      listDocuments(ownerId),
+      listAllClaims(ownerId),
+      listAllAnswers(ownerId),
     ]);
   } catch (err) {
     console.error("DynamoDB graph fetch error:", err);
