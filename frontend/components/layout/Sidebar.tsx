@@ -6,6 +6,8 @@ import { usePathname } from 'next/navigation';
 import { useRouter } from 'next/navigation';
 import { Icon } from '../ui/Icon';
 
+import Image from 'next/image';
+
 interface Props {
   onCloseMobile?: () => void;
 }
@@ -26,12 +28,21 @@ export function Sidebar({ onCloseMobile }: Props) {
     <nav className="sidebar">
       <Link
         href="/"
-        className="identity"
+        className="brand-logo-link"
+        style={{ position: 'relative', width: 140, height: 40, display: 'block', margin: '0 12px' }}
         onClick={onCloseMobile}
         aria-label="Go to Origyn home"
       >
-        <span className="brand-symbol" />
-        Origyn
+        <span className="brand-logo-frame">
+          <Image
+            src="/origyn-logo.png"
+            alt="Origyn"
+            fill
+            priority
+            sizes="140px"
+            className="brand-logo-image"
+          />
+        </span>
       </Link>
 
       <p className="workspace-label">Current workspace</p>
