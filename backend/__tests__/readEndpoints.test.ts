@@ -20,7 +20,7 @@ const mockListAllAnswers = listAllAnswers as jest.MockedFunction<typeof listAllA
 const mockEvent = {} as APIGatewayProxyEvent;
 
 const sampleDoc: Document = {
-  id: "doc_abc123",
+  id: "doc_abc123", ownerId: "public",
   filename: "nature-paper.pdf",
   s3Key: "uploads/doc_abc123.pdf",
   title: "The Nature of Things",
@@ -34,7 +34,7 @@ const sampleDoc: Document = {
 };
 
 const retractedDoc: Document = {
-  id: "doc_xyz789",
+  id: "doc_xyz789", ownerId: "public",
   filename: "retracted-paper.pdf",
   s3Key: "uploads/doc_xyz789.pdf",
   title: "Retracted Research Paper",

@@ -65,7 +65,7 @@ const mockSearchByTitle = searchByTitle as jest.MockedFunction<typeof searchByTi
 
 /** A correctly ingested no-DOI local document (after the fix). */
 const NO_DOI_DOC: Document = {
-  id: "doc_local_001",
+  id: "doc_local_001", ownerId: "public",
   filename: "internal-study.pdf",
   s3Key: "uploads/doc_local_001.pdf",
   title: "Remote Work and Developer Productivity",
@@ -79,7 +79,7 @@ const NO_DOI_DOC: Document = {
 };
 
 const NO_DOI_CLAIM: Claim = {
-  id: "claim_local_001",
+  id: "claim_local_001", ownerId: "public",
   documentId: "doc_local_001",
   sourceDocumentIds: ["doc_local_001"],
   text: "Remote work increased developer productivity by 15% over six weeks.",
@@ -89,7 +89,7 @@ const NO_DOI_CLAIM: Claim = {
 };
 
 const ANSWER_USING_LOCAL_CLAIM: Answer = {
-  id: "ans_local_001",
+  id: "ans_local_001", ownerId: "public",
   question: "What is the effect of remote work on productivity?",
   text: "According to the internal study, remote work increased developer productivity by 15%.",
   claimIds: ["claim_local_001"],
@@ -103,7 +103,7 @@ const ANSWER_USING_LOCAL_CLAIM: Answer = {
 
 /** A classic scholarly DOI-based ACTIVE document. */
 const DOI_DOC: Document = {
-  id: "doc_doi_001",
+  id: "doc_doi_001", ownerId: "public",
   filename: "eurocall.pdf",
   s3Key: "uploads/doc_doi_001.pdf",
   title: "A look at advanced learners' use of mobile devices for English language study: Insights from interview data",
@@ -117,7 +117,7 @@ const DOI_DOC: Document = {
 };
 
 const DOI_CLAIM: Claim = {
-  id: "claim_doi_001",
+  id: "claim_doi_001", ownerId: "public",
   documentId: "doc_doi_001",
   sourceDocumentIds: ["doc_doi_001"],
   text: "Mobile devices support vocabulary acquisition among advanced English learners.",

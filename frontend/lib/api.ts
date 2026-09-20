@@ -40,7 +40,6 @@ import {
   queryDocuments,
   fixtureForState,
 } from './mock-api';
-import { fetchAuthSession } from 'aws-amplify/auth';
 
 // Re-export client-side helpers that work the same in both modes
 export { queryDocuments, fixtureForState };
@@ -53,18 +52,12 @@ export const isMock = API_MODE !== 'real';
 
 // ─── Real API base fetch ──────────────────────────────────────────────────────
 async function realFetch<T>(path: string, init?: RequestInit): Promise<T> {
-  const session = await fetchAuthSession();
-  const token = session.tokens?.idToken?.toString();
   const url = new URL(path, API_BASE);
 
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     ...(init?.headers as Record<string, string> ?? {}),
   };
-
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
-  }
 
   const res = await fetch(url.toString(), {
     ...init,
@@ -100,8 +93,7 @@ export async function checkHealth(): Promise<{ status: string }> {
 export async function uploadDocument(file: File, options?: UploadOptions): Promise<Document> {
   if (isMock) return mockUploadDocument(file, options);
 
-  const session = await fetchAuthSession();
-  const token = session.tokens?.idToken?.toString();
+
 
   // Client-side size validation (below Lambda/API Gateway limit)
   const MAX_BYTES = 9.5 * 1024 * 1024;
@@ -119,9 +111,6 @@ export async function uploadDocument(file: File, options?: UploadOptions): Promi
   const uploadUrl = new URL('/documents', API_BASE);
 
   const headers: Record<string, string> = {};
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
-  }
 
   // DO NOT manually set Content-Type — browser sets it with multipart boundary
   const res = await fetch(uploadUrl.toString(), {

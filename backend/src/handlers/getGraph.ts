@@ -1,7 +1,7 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { listDocuments, listAllClaims, listAllAnswers } from "../lib/dynamo";
 import { GraphResponse, GraphNode, GraphEdge } from "../types/document";
-import { getAuthenticatedOwnerId } from "../lib/auth";
+import { getWorkspaceId } from "../lib/auth";
 
 /**
  * GET /graph
@@ -24,7 +24,7 @@ import { getAuthenticatedOwnerId } from "../lib/auth";
 export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
-  const ownerId = getAuthenticatedOwnerId(event);
+  const ownerId = getWorkspaceId(event);
   // ── Fetch all three entity types in parallel ──────────────────────────────
   let documents, claims, answers;
   try {

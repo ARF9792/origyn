@@ -4,7 +4,6 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useRouter } from 'next/navigation';
-import { signOut } from 'aws-amplify/auth';
 import { Icon } from '../ui/Icon';
 
 interface Props {
@@ -14,16 +13,6 @@ interface Props {
 export function Sidebar({ onCloseMobile }: Props) {
   const pathname = usePathname();
   const router = useRouter();
-
-  async function handleSignOut() {
-    try {
-      await signOut();
-    } finally {
-      router.push('/login');
-      onCloseMobile?.();
-    }
-  }
-
   const links = [
     { label: 'Overview', href: '/workspace', icon: 'overview', exact: true },
     { label: 'Sources', href: '/workspace/sources', icon: 'sources' },
@@ -65,13 +54,6 @@ export function Sidebar({ onCloseMobile }: Props) {
         );
       })}
 
-        <div className="sidebar-bottom">
-          <button type="button" className="nav-item nav-button" onClick={handleSignOut}>
-            <Icon name="logout" />
-            Sign out
-          </button>
-          <p>Signing out ends the current Cognito session and returns you to the login screen.</p>
-        </div>
       </nav>
   );
 }

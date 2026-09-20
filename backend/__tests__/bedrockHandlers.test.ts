@@ -58,7 +58,7 @@ const mockGenerateGroundedAnswer = generateGroundedAnswer as jest.MockedFunction
 import { Document, Claim, Answer } from "../src/types/document";
 
 const ACTIVE_DOC: Document = {
-  id: "doc_active",
+  id: "doc_active", ownerId: "public",
   filename: "paper.pdf",
   s3Key: "docs/paper.pdf",
   title: "Test Paper",
@@ -73,14 +73,14 @@ const ACTIVE_DOC: Document = {
 
 const RETRACTED_DOC: Document = {
   ...ACTIVE_DOC,
-  id: "doc_retracted",
+  id: "doc_retracted", ownerId: "public",
   status: "RETRACTED",
   retractionStatus: "RETRACTED",
 };
 
 const INVALID_DOC: Document = {
   ...ACTIVE_DOC,
-  id: "doc_invalid",
+  id: "doc_invalid", ownerId: "public",
   status: "INVALID",
   retractionStatus: "NONE_FOUND",
 };
@@ -89,7 +89,7 @@ const INVALID_DOC: Document = {
 // This is the correct state after the no-DOI ingestion fix.
 const NO_DOI_DOC: Document = {
   ...ACTIVE_DOC,
-  id: "doc_no_doi",
+  id: "doc_no_doi", ownerId: "public",
   filename: "internal-study.pdf",
   title: "Remote Work and Developer Productivity",
   doi: null,
@@ -99,7 +99,7 @@ const NO_DOI_DOC: Document = {
 };
 
 const SUPPORTED_CLAIM: Claim = {
-  id: "claim_abc",
+  id: "claim_abc", ownerId: "public",
   documentId: "doc_active",
   sourceDocumentIds: ["doc_active"],
   text: "The intervention reduced mortality by 23%.",
@@ -110,26 +110,26 @@ const SUPPORTED_CLAIM: Claim = {
 
 const UNSUPPORTED_CLAIM: Claim = {
   ...SUPPORTED_CLAIM,
-  id: "claim_bad",
+  id: "claim_bad", ownerId: "public",
   status: "UNSUPPORTED",
 };
 
 const CLAIM_FROM_RETRACTED: Claim = {
   ...SUPPORTED_CLAIM,
-  id: "claim_retracted_src",
+  id: "claim_retracted_src", ownerId: "public",
   documentId: "doc_retracted",
   sourceDocumentIds: ["doc_retracted"],
 };
 
 const CLAIM_FROM_INVALID: Claim = {
   ...SUPPORTED_CLAIM,
-  id: "claim_invalid_src",
+  id: "claim_invalid_src", ownerId: "public",
   documentId: "doc_invalid",
   sourceDocumentIds: ["doc_invalid"],
 };
 
 const CURRENT_ANSWER: Answer = {
-  id: "ans_001",
+  id: "ans_001", ownerId: "public",
   question: "What does the evidence say about mortality?",
   text: "Based on the evidence, mortality was reduced by 23%.",
   claimIds: ["claim_abc"],
@@ -143,7 +143,7 @@ const CURRENT_ANSWER: Answer = {
 
 const EVIDENCE_CHANGED_ANSWER: Answer = {
   ...CURRENT_ANSWER,
-  id: "ans_002",
+  id: "ans_002", ownerId: "public",
   status: "EVIDENCE_CHANGED",
 };
 
@@ -390,7 +390,7 @@ describe("POST /chat", () => {
   // case 8: claims from a no-DOI ACTIVE document must be eligible for Evidence-Locked chat
   it("case 8: chat uses claims from no-DOI ACTIVE document (doi=null, retractionStatus=UNKNOWN)", async () => {
     const noDoiClaim: Claim = {
-      id: "claim_no_doi",
+      id: "claim_no_doi", ownerId: "public",
       documentId: "doc_no_doi",
       sourceDocumentIds: ["doc_no_doi"],
       text: "Remote work increases developer output by 15% on average.",

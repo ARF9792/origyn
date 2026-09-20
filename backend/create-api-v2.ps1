@@ -27,21 +27,7 @@ $API = $API_JSON | ConvertFrom-Json
 $API_ID = $API.ApiId
 Write-Host "API ID: $API_ID" -ForegroundColor Green
 
-# ── JWT Authorizer ────────────────────────────────────────────────────────────
-Write-Host "`n>>> Creating Cognito JWT Authorizer..." -ForegroundColor Cyan
-$AUTH_JSON = & $AWS apigatewayv2 create-authorizer `
-    --api-id $API_ID `
-    --authorizer-type JWT `
-    --name "CognitoAuthorizer" `
-    --identity-source "`$request.header.Authorization" `
-    --jwt-configuration "Audience=5sisa1ud23ofo8emmflc4n6t6c,Issuer=https://cognito-idp.us-east-1.amazonaws.com/us-east-1_XdvCkNjOY" `
-    --region $Region `
-    --no-cli-pager `
-    --output json
-
-$AUTH = $AUTH_JSON | ConvertFrom-Json
-$AUTH_ID = $AUTH.AuthorizerId
-Write-Host "Authorizer ID: $AUTH_ID" -ForegroundColor Green
+# ── Authorizer removed (public workspace) ──────────────────────────────────
 
 # ── Integration factory ───────────────────────────────────────────────────────
 function Add-Integration {
@@ -61,7 +47,7 @@ function Add-Integration {
 
 # ── Route factory ─────────────────────────────────────────────────────────────
 function Add-Route {
-    param($Method, $Path, $IntId, $RequireAuth = $true)
+    param($Method, $Path, $IntId)
     
     $routeArgs = @(
         "--api-id", $API_ID,
@@ -71,13 +57,8 @@ function Add-Route {
         "--no-cli-pager"
     )
 
-    if ($RequireAuth) {
-        $routeArgs += "--authorization-type", "JWT"
-        $routeArgs += "--authorizer-id", $AUTH_ID
-    }
-
     & $AWS apigatewayv2 create-route @routeArgs | Out-Null
-    Write-Host "  $Method $Path (Auth: $RequireAuth)" -ForegroundColor Gray
+    Write-Host "  $Method $Path" -ForegroundColor Gray
 }
 
 Write-Host "`n>>> Creating integrations..." -ForegroundColor Cyan
@@ -112,7 +93,7 @@ $INT_IMPACT         = Add-Integration "origyn-getDocumentImpact"
 
 Write-Host "`n>>> Creating routes..." -ForegroundColor Cyan
 
-Add-Route "GET"    "/health"                            $INT_HEALTH -RequireAuth $false
+Add-Route "GET"    "/health"                            $INT_HEALTH
 
 Add-Route "GET"    "/documents"                         $INT_GET_DOCUMENTS
 Add-Route "POST"   "/documents"                         $INT_UPLOAD

@@ -1,6 +1,6 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { getAnswer } from "../lib/dynamo";
-import { getAuthenticatedOwnerId } from "../lib/auth";
+import { getWorkspaceId } from "../lib/auth";
 
 function errorResponse(
   statusCode: number,
@@ -24,7 +24,7 @@ export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
   const id = event.pathParameters?.id;
-  const ownerId = getAuthenticatedOwnerId(event);
+  const ownerId = getWorkspaceId(event);
 
   if (!id) {
     return errorResponse(400, "ANSWER_NOT_FOUND", "Answer ID is required.");

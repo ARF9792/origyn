@@ -1,6 +1,6 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { getDocument } from "../lib/dynamo";
-import { getAuthenticatedOwnerId } from "../lib/auth";
+import { getWorkspaceId } from "../lib/auth";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { GetObjectCommand } from "@aws-sdk/client-s3";
 import { s3Client } from "../lib/s3";
@@ -32,7 +32,7 @@ export const handler = async (
     return errorResponse(400, "DOCUMENT_NOT_FOUND", "Document ID is required.");
   }
 
-  const ownerId = getAuthenticatedOwnerId(event);
+  const ownerId = getWorkspaceId(event);
 
   let document;
   try {

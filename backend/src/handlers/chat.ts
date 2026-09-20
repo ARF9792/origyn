@@ -27,7 +27,7 @@ import { listAllClaims, getDocument, putAnswer, listDocuments } from "../lib/dyn
 import { generateGroundedAnswer, EvidenceItem } from "../services/bedrockService";
 import { Answer, Claim, Document } from "../types/document";
 import { v4 as uuidv4 } from "uuid";
-import { getAuthenticatedOwnerId } from "../lib/auth";
+import { getWorkspaceId } from "../lib/auth";
 
 function errorResponse(
   statusCode: number,
@@ -47,7 +47,7 @@ const UNUSABLE_STATUSES = new Set(["RETRACTED", "INVALID"]);
 export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
-  const ownerId = getAuthenticatedOwnerId(event);
+  const ownerId = getWorkspaceId(event);
 
   // ── 1. Parse and validate input ─────────────────────────────────────────────
   let question: string;

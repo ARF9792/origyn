@@ -1,6 +1,6 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { getDocument, updateDocument } from "../lib/dynamo";
-import { getAuthenticatedOwnerId } from "../lib/auth";
+import { getWorkspaceId } from "../lib/auth";
 import { applyDocumentImpact } from "../services/impactService";
 
 function errorResponse(
@@ -30,7 +30,7 @@ export const handler = async (
 
 
   // ── Load document ──────────────────────────────────────────────────────────
-  const ownerId = getAuthenticatedOwnerId(event);
+  const ownerId = getWorkspaceId(event);
 
   let document;
   try {

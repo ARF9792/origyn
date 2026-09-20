@@ -27,7 +27,7 @@ import { getFromS3 } from "../lib/s3";
 import { extractClaimsFromText } from "../services/bedrockService";
 import { Claim } from "../types/document";
 import pdfParse from "pdf-parse";
-import { getAuthenticatedOwnerId } from "../lib/auth";
+import { getWorkspaceId } from "../lib/auth";
 
 function errorResponse(
   statusCode: number,
@@ -45,7 +45,7 @@ export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
   const id = event.pathParameters?.id;
-  const ownerId = getAuthenticatedOwnerId(event);
+  const ownerId = getWorkspaceId(event);
   if (!id) {
     return errorResponse(400, "BAD_REQUEST", "Missing document ID.");
   }

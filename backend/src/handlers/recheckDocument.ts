@@ -3,7 +3,7 @@ import { getDocument, updateDocument } from "../lib/dynamo";
 import { checkRetractionStatus } from "../services/crossrefService";
 import { applyDocumentImpact } from "../services/impactService";
 import { DocumentStatus, RetractionStatus } from "../types/document";
-import { getAuthenticatedOwnerId } from "../lib/auth";
+import { getWorkspaceId } from "../lib/auth";
 
 function errorResponse(
   statusCode: number,
@@ -33,7 +33,7 @@ export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
   const id = event.pathParameters?.id;
-  const ownerId = getAuthenticatedOwnerId(event);
+  const ownerId = getWorkspaceId(event);
   if (!id) {
     return errorResponse(400, "DOCUMENT_NOT_FOUND", "Document ID is required.");
   }

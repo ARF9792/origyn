@@ -6,7 +6,7 @@ import { putDocument, updateDocument, findDocumentByDoi } from "../lib/dynamo";
 import { identifyPaper } from "../services/paperIdentifier";
 import { checkRetractionStatus, searchByTitle } from "../services/crossrefService";
 import { Document, DocumentStatus, RetractionStatus } from "../types/document";
-import { getAuthenticatedOwnerId } from "../lib/auth";
+import { getWorkspaceId } from "../lib/auth";
 
 const ALLOWED_CONTENT_TYPES = ["application/pdf"];
 const MAX_SIZE_BYTES = 20 * 1024 * 1024; // 20 MB
@@ -48,7 +48,7 @@ function normalizeDoi(doi: string): string {
 export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
-  const ownerId = getAuthenticatedOwnerId(event);
+  const ownerId = getWorkspaceId(event);
 
   // ── 1. Parse multipart ────────────────────────────────────────────────────
   let parsedFile: Awaited<ReturnType<typeof parseMultipartFile>>;
