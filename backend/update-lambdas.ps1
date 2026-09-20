@@ -1,11 +1,12 @@
 #!/usr/bin/env pwsh
 # update-lambdas.ps1
-# Compiles TS, validates dist, packages zip with dist preserved, and updates Lambdas.
+# Compiles TS, validates dist, packages zip with dist preserved, and updates Lambdas via S3.
 
 $ErrorActionPreference = "Stop"
 $AWS = "C:\Users\am\AppData\Local\Programs\Amazon\AWSCLIV2\aws.exe"
 $ZIP = "origyn-backend.zip"
-$ZIP_URI = "fileb://$ZIP"
+$S3_BUCKET = "origyn-documents-015524245486"
+$S3_KEY = "deployments/origyn-backend.zip"
 
 Write-Host "1. Compiling TypeScript..." -ForegroundColor Cyan
 npm run build:js
@@ -15,40 +16,6 @@ if (-not (Test-Path "dist")) {
     Write-Error "dist/ directory not found! Compilation failed?"
     exit 1
 }
-
-Write-Host "3. Verifying expected handler JS files exist..." -ForegroundColor Cyan
-$expectedHandlers = @(
-    "dist/handlers/getAnswers.js",
-    "dist/handlers/health.js",
-    "dist/handlers/extractClaims.js",
-    "dist/handlers/getGraph.js",
-    "dist/handlers/getDocument.js",
-    "dist/handlers/invalidateDocument.js",
-    "dist/handlers/recheckDocument.js",
-    "dist/handlers/regenerateAnswer.js",
-    "dist/handlers/getAnswer.js",
-    "dist/handlers/getDocumentUrl.js",
-    "dist/handlers/deleteDocument.js",
-    "dist/handlers/chat.js",
-    "dist/handlers/getDocumentImpact.js",
-    "dist/handlers/uploadDocument.js",
-    "dist/handlers/getDocuments.js"
-)
-
-foreach ($handler in $expectedHandlers) {
-    if (-not (Test-Path $handler)) {
-        Write-Error "Missing handler entrypoint: $handler"
-        exit 1
-    }
-}
-Write-Host "All expected handlers found." -ForegroundColor Green
-
-Write-Host "4. Packaging ZIP..." -ForegroundColor Cyan
-if (Test-Path $ZIP) {
-    Remove-Item $ZIP -Force
-}
-# Compress-Archive preserves the top-level directories when given directory names.
-Compress-Archive -Path dist, node_modules -DestinationPath $ZIP
 
 $functions = @(
     "origyn-getAnswers",
@@ -68,24 +35,75 @@ $functions = @(
     "origyn-getDocuments"
 )
 
-Write-Host "5. Updating Lambda functions..." -ForegroundColor Cyan
+Write-Host "3. Packaging ZIP (preserving dist/ structure)..." -ForegroundColor Cyan
+if (Test-Path $ZIP) { Remove-Item $ZIP -Force }
+
+# Use Python to ensure correct structure and forward-slashes in the ZIP
+python -c "
+import zipfile, os
+
+zip_path = '$ZIP'
+with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as z:
+    for d in ['dist', 'node_modules']:
+        for root, dirs, files in os.walk(d):
+            # Skip .bin directory in node_modules
+            dirs[:] = [dir_name for dir_name in dirs if dir_name != '.bin' or root != 'node_modules']
+            for f in files:
+                full = os.path.join(root, f)
+                # Ensure forward slashes for AWS Lambda
+                arc = full.replace(os.sep, '/')
+                z.write(full, arc)
+"
+if ($LASTEXITCODE -ne 0) { Write-Error "ZIP creation failed!"; exit 1 }
+Write-Host "ZIP created successfully." -ForegroundColor Green
+
+Write-Host "4. Automated Handler Validation..." -ForegroundColor Cyan
+$MissingHandlers = 0
 foreach ($func in $functions) {
-    Write-Host "Updating $func..."
-    # First, ensure the handler configuration matches our dist/ zip structure exactly
     $handlerName = $func.Replace("origyn-", "")
-    $handlerPath = "dist/handlers/$handlerName.handler"
-    & $AWS lambda update-function-configuration --function-name $func --handler $handlerPath --no-cli-pager | Out-Null
+    $expectedJs = "dist/handlers/${handlerName}.js"
     
-    # Wait for configuration update to finish
-    & $AWS lambda wait function-updated --function-name $func
-    
-    # Now update the code
-    & $AWS lambda update-function-code --function-name $func --zip-file $ZIP_URI --no-cli-pager | Out-Null
-    
+    # Check if the expected JS file is physically in the ZIP
+    $exists = python -c "
+import zipfile, sys
+z = zipfile.ZipFile('$ZIP')
+sys.exit(0 if '$expectedJs' in z.namelist() else 1)
+"
     if ($LASTEXITCODE -ne 0) {
-        Write-Error "Failed to update $func"
-    } else {
-        Write-Host "OK: $func" -ForegroundColor Green
+        Write-Host "ERROR: Lambda $func expects handler file $expectedJs, but deployment artifact does not contain it." -ForegroundColor Red
+        $MissingHandlers++
     }
 }
-Write-Host "Done"
+
+if ($MissingHandlers -gt 0) {
+    Write-Error "ABORTING DEPLOYMENT: $MissingHandlers handlers are missing from the artifact."
+    exit 1
+}
+Write-Host "Validated $($functions.Count) handlers successfully in artifact." -ForegroundColor Green
+
+Write-Host "5. Uploading deployment artifact to S3 ($S3_BUCKET/$S3_KEY)..." -ForegroundColor Cyan
+& $AWS s3 cp $ZIP s3://${S3_BUCKET}/${S3_KEY} --region us-east-1
+if ($LASTEXITCODE -ne 0) { Write-Error "S3 upload failed!"; exit 1 }
+
+Write-Host "6. Updating Lambda functions from S3..." -ForegroundColor Cyan
+$jobs = @()
+foreach ($func in $functions) {
+    $handlerName = $func.Replace("origyn-", "")
+    $handlerPath = "dist/handlers/${handlerName}.handler"
+
+    # Update configuration
+    & $AWS lambda update-function-configuration --function-name $func --handler $handlerPath --no-cli-pager | Out-Null
+
+    # Spawn background job for the code update to run them in parallel
+    $jobs += Start-Job -ScriptBlock {
+        param($aws_exe, $fn, $bucket, $key)
+        & $aws_exe lambda update-function-code --function-name $fn --s3-bucket $bucket --s3-key $key --no-cli-pager 2>&1 | Out-Null
+        Write-Output "OK: $fn"
+    } -ArgumentList $AWS, $func, $S3_BUCKET, $S3_KEY
+}
+
+Write-Host "Waiting for parallel Lambda updates to complete..."
+$jobs | Wait-Job | Receive-Job
+$jobs | Remove-Job
+
+Write-Host "Done! Deployment successful." -ForegroundColor Green
