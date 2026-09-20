@@ -13,7 +13,7 @@ From paper to claim to answer — with the provenance intact.
 [![Amplify](https://img.shields.io/badge/AWS-Amplify-orange?logo=awsamplify)](https://aws.amazon.com/amplify)
 
 **[Live Demo](https://main.dp329woyjanli.amplifyapp.com)** — no account required  
-**[Demo Video](#)** — [PLACEHOLDER: Add final YouTube URL — max 3 minutes]  
+**[Demo Video](https://youtu.be/N-cvKtMDTh0)** — YouTube demo (max 3 minutes)
 **[AWS Builder Center Blog — Parth Malhotra](https://builder.aws.com/content/3Jasyte35BEeMNg7OslJq1wjvR7/the-paper-got-retracted-our-ai-answer-didnt-get-the-memo-building-origyn-on-aws)**<br>
 **[AWS Builder Center Blog — Abdull Farooqui](https://builder.aws.com/content/3JanazHhI0rn6OotgEoYlBqtd4b/the-paper-got-retracted-our-ai-answer-didnt-get-the-memo-building-origyn-on-aws)**
 
@@ -359,11 +359,10 @@ Getting Bedrock working involved a sequence of: region availability check, model
 
 No account or signup required. Open the workspace, upload a PDF, and the pipeline runs.
 
-Demo video: [PLACEHOLDER: Add final YouTube URL — max 3 minutes]
+Demo video: [Watch the Origyn demo](https://youtu.be/N-cvKtMDTh0)
 
-<!-- VIDEO PLACEHOLDER
-Add the final YouTube demo URL here.
-Hackathon requirement: maximum 3 minutes.
+<!-- Suggested demo sequence:
+Maximum length: 3 minutes.
 Keep the YouTube video Public or Unlisted.
 Suggested sequence:
 1. 15 sec — state the problem
