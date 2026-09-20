@@ -35,6 +35,8 @@ import {
   mockUploadDocument,
   mockGetGraph,
   mockValidatePDF,
+  mockDeleteDocument,
+  mockGetDocumentUrl,
   queryDocuments,
   fixtureForState,
 } from './mock-api';
@@ -142,7 +144,11 @@ export async function uploadDocument(file: File, options?: UploadOptions): Promi
 // ─── getDocuments (lightweight list) ─────────────────────────────────────────
 export async function getDocuments(): Promise<DocumentsResponse> {
   if (isMock) return mockGetDocuments();
-  return realFetch<DocumentsResponse>('/documents');
+  const res = await realFetch<DocumentsResponse>('/documents');
+  return {
+    ...res,
+    items: res.items.filter((doc) => doc.status !== 'DELETED'),
+  };
 }
 
 // ─── getDocument (full detail, returned directly not wrapped) ─────────────────
@@ -225,6 +231,25 @@ export async function invalidateDocument(id: string, reason: string): Promise<vo
     `/documents/${encodeURIComponent(id)}/invalidate`,
     { method: 'POST', body: JSON.stringify({ reason }) }
   );
+}
+
+// ─── deleteDocument ───────────────────────────────────────────────────────────
+export async function deleteDocument(id: string): Promise<void> {
+  if (isMock) {
+    return mockDeleteDocument(id);
+  }
+  await realFetch<unknown>(
+    `/documents/${encodeURIComponent(id)}`,
+    { method: 'DELETE' }
+  );
+}
+
+// ─── getDocumentUrl ───────────────────────────────────────────────────────────
+export async function getDocumentUrl(id: string): Promise<{ url: string }> {
+  if (isMock) {
+    return mockGetDocumentUrl(id);
+  }
+  return realFetch<{ url: string }>(`/documents/${encodeURIComponent(id)}/url`);
 }
 
 // ─── getDocumentImpact ────────────────────────────────────────────────────────

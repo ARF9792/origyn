@@ -2,7 +2,8 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { getDocument, extractClaims, recheckDocument, invalidateDocument } from '@/lib/api';
+import { useRouter } from 'next/navigation';
+import { getDocument, extractClaims, recheckDocument, invalidateDocument, deleteDocument, getDocumentUrl } from '@/lib/api';
 import { Icon } from '@/components/ui/Icon';
 import { SourceStatusBadge } from '@/components/ui/SourceStatusBadge';
 import { ClaimBadge } from '@/components/ui/ClaimBadge';
@@ -22,6 +23,8 @@ export function SourceDetailPanel({ id }: Props) {
   const [isExtracting, setIsExtracting] = useState(false);
   const [isRechecking, setIsRechecking] = useState(false);
   const [isInvalidating, setIsInvalidating] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const router = useRouter();
 
   const fetchDoc = () => {
     getDocument(id)
@@ -45,7 +48,7 @@ export function SourceDetailPanel({ id }: Props) {
       await extractClaims(id);
       fetchDoc();
     } catch (err: any) {
-      alert(err.message || 'Failed to extract claims.');
+      setError(err.message || 'Failed to extract claims.');
     } finally {
       setIsExtracting(false);
     }
@@ -57,7 +60,7 @@ export function SourceDetailPanel({ id }: Props) {
       await recheckDocument(id);
       fetchDoc();
     } catch (err: any) {
-      alert(err.message || 'Failed to recheck document.');
+      setError(err.message || 'Failed to recheck document.');
     } finally {
       setIsRechecking(false);
     }
@@ -71,9 +74,31 @@ export function SourceDetailPanel({ id }: Props) {
       await invalidateDocument(id, reason);
       fetchDoc();
     } catch (err: any) {
-      alert(err.message || 'Failed to invalidate document.');
+      setError(err.message || 'Failed to invalidate document.');
     } finally {
       setIsInvalidating(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    const confirm = window.confirm('Are you sure you want to delete this source? This will mark downstream claims as unsupported.');
+    if (!confirm) return;
+    setIsDeleting(true);
+    try {
+      await deleteDocument(id);
+      router.push('/workspace/sources');
+    } catch (err: any) {
+      setError(err.message || 'Failed to delete source.');
+      setIsDeleting(false);
+    }
+  };
+
+  const handleView = async () => {
+    try {
+      const { url } = await getDocumentUrl(id);
+      window.open(url, '_blank');
+    } catch (err: any) {
+      setError(err.message || 'Failed to generate view URL.');
     }
   };
 
@@ -129,13 +154,23 @@ export function SourceDetailPanel({ id }: Props) {
             <button className="button compact quiet" onClick={handleRecheck} disabled={isRechecking}>
               <Icon name="refresh" /> {isRechecking ? 'Rechecking...' : 'Recheck status'}
             </button>
-            {doc.status !== 'INVALID' && (
+            {doc.status !== 'INVALID' && doc.status !== 'DELETED' && (
               <button className="button compact quiet" onClick={handleInvalidate} disabled={isInvalidating} style={{ color: '#d92d20' }}>
                 <Icon name="warning" /> {isInvalidating ? 'Invalidating...' : 'Invalidate source'}
               </button>
             )}
+            {doc.status !== 'DELETED' && (
+              <button className="button compact quiet" onClick={handleDelete} disabled={isDeleting} style={{ color: '#d92d20' }}>
+                <Icon name="trash" /> {isDeleting ? 'Deleting...' : 'Delete source'}
+              </button>
+            )}
           </>
         )}
+        <div className="action-divider" />
+        <button className="button compact quiet" onClick={handleView}>
+          <Icon name="external" /> View source
+        </button>
+
       </div>
 
       {isRetracted && doc.retractionNotice && (

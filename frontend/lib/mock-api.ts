@@ -70,6 +70,20 @@ export async function mockGetDocument(id: string): Promise<Document> {
   return cloneDocument(doc);
 }
 
+// ─── deleteDocument (mock) ───────────────────────────────────────────────────
+export async function mockDeleteDocument(id: string): Promise<void> {
+  const index = sources.findIndex((d) => d.id === id);
+  if (index === -1) throw apiError('DOCUMENT_NOT_FOUND', 'This source is not in the current session.');
+  sources[index] = { ...sources[index], status: 'DELETED' };
+}
+
+// ─── getDocumentUrl (mock) ───────────────────────────────────────────────────
+export async function mockGetDocumentUrl(id: string): Promise<{ url: string }> {
+  const doc = sources.find((d) => d.id === id);
+  if (!doc) throw apiError('DOCUMENT_NOT_FOUND', 'This source is not in the current session.');
+  return { url: '#' }; // Return dummy URL for mock mode
+}
+
 // ─── validatePDF (client-side pre-check only) ─────────────────────────────────
 export async function mockValidatePDF(file: File): Promise<File> {
   if (!file) throw apiError('INVALID_FILE', 'Choose a PDF to continue.');
@@ -147,7 +161,7 @@ export function queryDocuments(
 ): Document[] {
   let result = items.filter(
     (d) =>
-      (status === 'ALL' || d.status === status) &&
+      ((status === 'ALL' && d.status !== 'DELETED') || d.status === status) &&
       [d.title, d.filename, d.authors, d.doi]
         .filter(Boolean)
         .join(' ')

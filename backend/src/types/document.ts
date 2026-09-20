@@ -15,7 +15,8 @@ export type DocumentStatus =
   | "ACTIVE"      // no known retraction found, usable as evidence
   | "RETRACTED"   // known retraction detected via Crossref or manual flag
   | "UNKNOWN"     // paper could not be identified with confidence
-  | "INVALID";    // manually invalidated by the workspace owner
+  | "INVALID"     // manually invalidated by the workspace owner
+  | "DELETED";    // softly deleted by the user
 
 /** Result of a Crossref retraction check. */
 export type RetractionStatus =

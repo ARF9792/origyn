@@ -8,9 +8,10 @@ import type { Document } from '@/lib/types';
 interface Props {
   documents: Document[];
   searchQuery?: string;
+  onDelete?: (id: string) => void;
 }
 
-export function SourceTable({ documents, searchQuery = '' }: Props) {
+export function SourceTable({ documents, searchQuery = '', onDelete }: Props) {
   if (documents.length === 0) {
     return (
       <EmptyState
@@ -78,6 +79,21 @@ export function SourceTable({ documents, searchQuery = '' }: Props) {
                 >
                   <Icon name="chevron" />
                 </Link>
+                {onDelete && (
+                  <button
+                    className="icon-button"
+                    aria-label={`Delete ${doc.title || doc.filename}`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      if (confirm('Are you sure you want to delete this source? This will mark downstream claims as unsupported.')) {
+                        onDelete(doc.id);
+                      }
+                    }}
+                    title="Delete source"
+                  >
+                    <Icon name="trash" />
+                  </button>
+                )}
               </td>
             </tr>
           ))}

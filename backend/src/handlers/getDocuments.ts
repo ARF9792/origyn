@@ -33,14 +33,16 @@ export const handler = async (
     };
   }
 
-  const items: DocumentSummary[] = documents.map((doc) => ({
-    id: doc.id,
-    filename: doc.filename,
-    title: doc.title,
-    doi: doc.doi,
-    status: doc.status,
-    retractionStatus: doc.retractionStatus,
-  }));
+  const items: DocumentSummary[] = documents
+    .filter((doc) => doc.status !== "DELETED")
+    .map((doc) => ({
+      id: doc.id,
+      filename: doc.filename,
+      title: doc.title,
+      doi: doc.doi,
+      status: doc.status,
+      retractionStatus: doc.retractionStatus,
+    }));
 
   return {
     statusCode: 200,

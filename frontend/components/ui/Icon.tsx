@@ -37,6 +37,8 @@ const PATHS: Record<string, string> = {
   info:        '<circle cx="12" cy="12" r="9"/><path d="M12 11v6m0-10v.1"/>',
   retracted_icon: '<circle cx="12" cy="12" r="9"/><path d="m6 6 12 12"/>',
   upload_icon: '<path d="M12 16V3m-5 5 5-5 5 5M4 15v6h16v-6"/>',
+  trash:       '<path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6"/>',
+  download:    '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4m4-5 5 5 5-5m-5 5V3"/>',
 };
 
 interface IconProps {
