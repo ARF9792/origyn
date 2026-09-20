@@ -134,20 +134,68 @@ export function visibleGraph(
 
 // ─── Layout ───────────────────────────────────────────────────────────────────
 
+/** Keep a large workspace navigable by showing one provenance path at a time. */
+export function scopedGraph(
+  graph: InternalGraphData,
+  anchorId: string,
+  page: number,
+  pageSize = 3
+): { graph: InternalGraphData; claimCount: number; pageCount: number; page: number } {
+  const anchor = graph.nodes.find((node) => node.id === anchorId);
+  if (!anchor) return { graph, claimCount: 0, pageCount: 1, page: 0 };
+
+  const path = anchor.type === 'document'
+    ? traverse(graph, anchorId)
+    : anchor.type === 'answer'
+      ? traverse(graph, anchorId, 'upstream')
+      : new Set([
+          ...Array.from(traverse(graph, anchorId, 'upstream')),
+          ...Array.from(traverse(graph, anchorId)),
+        ]);
+  const claims = graph.nodes.filter((node) => path.has(node.id) && node.type === 'claim');
+  const pageCount = Math.max(1, Math.ceil(claims.length / pageSize));
+  const currentPage = Math.min(Math.max(0, page), pageCount - 1);
+  const ids = new Set<string>([
+    anchorId,
+    ...claims.slice(currentPage * pageSize, (currentPage + 1) * pageSize).map((node) => node.id),
+  ]);
+  const nodeType = new Map(graph.nodes.map((node) => [node.id, node.type]));
+
+  // Bring in the documents and answers adjacent to this page of claims.
+  for (const edge of graph.edges) {
+    if (ids.has(edge.from) && path.has(edge.to) && nodeType.get(edge.to) !== 'claim') ids.add(edge.to);
+    if (ids.has(edge.to) && path.has(edge.from) && nodeType.get(edge.from) !== 'claim') ids.add(edge.from);
+  }
+
+  return {
+    graph: {
+      ...graph,
+      nodes: graph.nodes.filter((node) => ids.has(node.id)),
+      edges: graph.edges.filter((edge) => ids.has(edge.from) && ids.has(edge.to)),
+    },
+    claimCount: claims.length,
+    pageCount,
+    page: currentPage,
+  };
+}
+
 export function layoutGraph(graph: InternalGraphData): InternalGraphData {
+  const totals: Record<string, number> = { document: 0, claim: 0, answer: 0 };
+  for (const node of graph.nodes) totals[node.type]++;
+  const maxCount = Math.max(...Object.values(totals));
   const count: Record<string, number> = { document: 0, claim: 0, answer: 0 };
   const nodes: GraphInternalNode[] = graph.nodes.map((n) => ({
     ...n,
     x:
       GRAPH_LAYOUT.padding +
       NODE_TYPES[n.type].column * (GRAPH_LAYOUT.nodeWidth + GRAPH_LAYOUT.columnGap),
-    y: 58 + count[n.type]++ * (GRAPH_LAYOUT.nodeHeight + GRAPH_LAYOUT.rowGap),
+    y: 58 + (count[n.type]++ + (maxCount - totals[n.type]) / 2) *
+      (GRAPH_LAYOUT.nodeHeight + GRAPH_LAYOUT.rowGap),
   }));
-  const maxCount = Math.max(...Object.values(count));
   return {
     ...graph,
     nodes,
-    width: 1020,
+    width: GRAPH_LAYOUT.width,
     height: Math.max(420, 58 + maxCount * (GRAPH_LAYOUT.nodeHeight + GRAPH_LAYOUT.rowGap)),
   };
 }

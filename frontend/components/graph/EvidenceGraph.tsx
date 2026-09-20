@@ -33,7 +33,7 @@ import { GraphLegend } from './GraphLegend';
 import { ImpactSummary } from './ImpactSummary';
 import { MobileLineageList } from './MobileLineageList';
 import { activeGraphService as graphService } from '@/lib/service-selector';
-import { traverse, visibleGraph, layoutGraph } from '@/lib/graph-service';
+import { traverse, visibleGraph, layoutGraph, scopedGraph } from '@/lib/graph-service';
 import {
   defaultViewState,
 } from '@/lib/graph-types';
@@ -73,6 +73,45 @@ export function EvidenceGraph() {
   const [camera, setCamera]       = useState<CameraState>({ x: 0, y: 0, z: 1 });
   const [inspectedNode, setInspectedNode] = useState<GraphInternalNode | null>(null);
   const [loading, setLoading]     = useState(true);
+  const [pathId, setPathId]       = useState<string | null>(null);
+  const [claimPage, setClaimPage] = useState(0);
+  const [searchResult, setSearchResult] = useState(0);
+
+  const answers = graph?.nodes.filter((node) => node.type === 'answer').sort((a, b) => {
+    const date = (node: GraphInternalNode) =>
+      String((node.record as { createdAt?: string }).createdAt ?? '');
+    return date(b).localeCompare(date(a));
+  }) ?? [];
+  const documents = graph?.nodes.filter((node) => node.type === 'document') ?? [];
+  const needsFocusedView = (graph?.nodes.length ?? 0) > 30;
+  const claimIds = new Set(graph?.nodes.filter((node) => node.type === 'claim').map((node) => node.id) ?? []);
+  const connectedAnswers = answers.filter((node) => graph?.edges.some((edge) =>
+    edge.to === node.id && claimIds.has(edge.from)
+  ));
+  const startingAnswer = connectedAnswers.find((node) =>
+    node.status === 'CURRENT' &&
+    node.title.length >= 65 &&
+    /^(what|how|which)\b/i.test(node.title.trim())
+  ) ?? connectedAnswers.find((node) =>
+    node.title.length >= 65 && /^(what|how|which)\b/i.test(node.title.trim())
+  ) ?? connectedAnswers[0];
+  const startingDocument = documents.find((node) => graph?.edges.some((edge) =>
+    edge.from === node.id && claimIds.has(edge.to)
+  )) ?? documents[0];
+  const focusedId = state.focus && graph?.nodes.some((node) => node.id === state.focus)
+    ? state.focus : null;
+  const activePathId = focusedId ?? pathId ??
+    (needsFocusedView ? startingAnswer?.id ?? startingDocument?.id ?? null : null);
+  const query = state.search.trim().toLowerCase();
+  const searchMatches = query ? graph?.nodes.filter((node) => {
+    const record = node.record as unknown as Record<string, unknown>;
+    return [node.title, node.id, record.label, record.doi, record.authors]
+      .filter(Boolean).join(' ').toLowerCase().includes(query);
+  }) ?? [] : [];
+  const displayedPathId = query
+    ? searchMatches[Math.min(searchResult, searchMatches.length - 1)]?.id ?? null
+    : activePathId;
+  const pathView = graph && displayedPathId ? scopedGraph(graph, displayedPathId, claimPage) : null;
 
   const canvasRef  = useRef<GraphCanvasHandle>(null);
   const triggerRef = useRef<HTMLElement | null>(null);
@@ -119,7 +158,10 @@ export function EvidenceGraph() {
       nextState.focusIds = null;
     }
 
-    let filtered = visibleGraph(graph, nextState);
+    const working = displayedPathId
+      ? scopedGraph(graph, displayedPathId, claimPage).graph
+      : graph;
+    let filtered = visibleGraph(working, nextState);
 
     // Partial demo: omit one CURRENT answer
     if (nextState.demo === 'partial') {
@@ -139,7 +181,7 @@ export function EvidenceGraph() {
       setState(nextState);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [graph, state.search, state.type, state.status, state.focus, state.direction, state.demo]);
+  }, [graph, state.search, state.type, state.status, state.focus, state.direction, state.demo, displayedPathId, claimPage]);
 
   // ── Open inspector when selected node is available on initial deep-link ──
   const didAutoOpen = useRef(false);
@@ -171,6 +213,7 @@ export function EvidenceGraph() {
   function handleFocus(id: string, direction: 'upstream' | 'downstream') {
     const node = graph?.nodes.find((n) => n.id === id);
     if (!node) return;
+    setClaimPage(0);
     setState((prev) => ({
       ...prev,
       focus: id,
@@ -191,6 +234,7 @@ export function EvidenceGraph() {
   }
 
   function handleClearFocus() {
+    setClaimPage(0);
     setState((prev) => ({
       ...prev,
       focus: null,
@@ -202,6 +246,8 @@ export function EvidenceGraph() {
   }
 
   function handleResetFilters() {
+    setSearchResult(0);
+    setClaimPage(0);
     setState((prev) => ({
       ...prev,
       search: '',
@@ -212,6 +258,8 @@ export function EvidenceGraph() {
 
   async function handleDemoChange(demo: GraphDemoState) {
     setInspectedNode(null);
+    setPathId(null);
+    setClaimPage(0);
     const next: GraphViewState = { ...defaultViewState(), demo };
 
     if (demo === 'before') {
@@ -265,7 +313,11 @@ export function EvidenceGraph() {
       {/* Controls: title + demo picker + toolbar */}
       <GraphControls
         state={state}
-        onSearchChange={(v) => setState((prev) => ({ ...prev, search: v }))}
+        onSearchChange={(v) => {
+          setSearchResult(0);
+          setClaimPage(0);
+          setState((prev) => ({ ...prev, search: v }));
+        }}
         onTypeChange={(v) => setState((prev) => ({ ...prev, type: v }))}
         onStatusChange={(v) => setState((prev) => ({ ...prev, status: v }))}
         onDemoChange={handleDemoChange}
@@ -300,7 +352,7 @@ export function EvidenceGraph() {
               ? '0 records · 0 relationships'
               : state.demo === 'error'
               ? 'Relationships unavailable'
-              : `${view?.nodes.length ?? 0} records · ${view?.edges.length ?? 0} relationships`}
+              : `${view?.nodes.length ?? 0} record${view?.nodes.length === 1 ? '' : 's'} · ${view?.edges.length ?? 0} relationship${view?.edges.length === 1 ? '' : 's'}`}
             {state.demo === 'partial' ? ' · Partial view' : ''}
           </span>
           <div className="g-view-controls" hidden={!showGraph}>
@@ -327,6 +379,65 @@ export function EvidenceGraph() {
             </button>
           </div>
         </div>
+
+        {showGraph && needsFocusedView && graph && (
+          <div className="g-pathbar">
+            <div className="g-pathbar-picker">
+              <label htmlFor="g-path">{query ? 'Search result' : 'Explore a lineage'}</label>
+              <select
+                id="g-path"
+                value={query ? displayedPathId ?? '' : activePathId ?? ''}
+                onChange={(event) => {
+                  if (query) {
+                    setSearchResult(Math.max(0, searchMatches.findIndex((node) => node.id === event.target.value)));
+                    setClaimPage(0);
+                    return;
+                  }
+                  setPathId(event.target.value);
+                  setClaimPage(0);
+                  setSearchResult(0);
+                  setInspectedNode(null);
+                  setState((prev) => ({ ...prev, focus: null, selected: null, focusIds: null, search: '' }));
+                  window.history.replaceState({}, '', '/workspace/graph');
+                }}
+              >
+                {query ? searchMatches.map((node) => (
+                  <option key={node.id} value={node.id}>{node.type === 'document' ? 'Source' : node.type === 'claim' ? 'Claim' : 'Answer'} · {node.title}</option>
+                )) : (
+                  <>
+                    <optgroup label="Answers">
+                      {answers.map((node) => <option key={node.id} value={node.id}>{node.title} · {node.status === 'EVIDENCE_CHANGED' ? 'Evidence changed' : node.status === 'CURRENT' ? 'Current' : 'Needs review'} · {node.id.slice(-6)}</option>)}
+                    </optgroup>
+                    <optgroup label="Sources">
+                      {documents.map((node) => <option key={node.id} value={node.id}>{node.title}</option>)}
+                    </optgroup>
+                  </>
+                )}
+              </select>
+            </div>
+            <span className="g-pathbar-context">
+              {query
+                ? `${searchMatches.length} matching records · ${graph.nodes.length} workspace records`
+                : (pathView?.claimCount ?? 0) === 0
+                  ? 'No claim links recorded for this path'
+                  : `${pathView?.claimCount ?? 0} connected claims · ${graph.nodes.length} workspace records`}
+            </span>
+            {query && searchMatches.length > 1 && (
+              <div className="g-pathbar-pages" aria-label="Search results">
+                <button className="button quiet compact" disabled={searchResult === 0} onClick={() => { setSearchResult((index) => index - 1); setClaimPage(0); }}>Previous</button>
+                <span>Result {searchResult + 1} of {searchMatches.length}</span>
+                <button className="button quiet compact" disabled={searchResult >= searchMatches.length - 1} onClick={() => { setSearchResult((index) => index + 1); setClaimPage(0); }}>Next</button>
+              </div>
+            )}
+            {(pathView?.pageCount ?? 1) > 1 && (
+              <div className="g-pathbar-pages" aria-label="Claim pages">
+                <button className="button quiet compact" disabled={pathView?.page === 0} onClick={() => setClaimPage((page) => page - 1)}>Previous</button>
+                <span>Page {(pathView?.page ?? 0) + 1} of {pathView?.pageCount}</span>
+                <button className="button quiet compact" disabled={(pathView?.page ?? 0) >= (pathView?.pageCount ?? 1) - 1} onClick={() => setClaimPage((page) => page + 1)}>Next</button>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Missing deep-link note */}
         {graph?.missing && (
@@ -419,7 +530,7 @@ export function EvidenceGraph() {
       {/* Footnote */}
       <p className="g-footnote">
         {state.search
-          ? 'Search includes matching records and their connected lineage.'
+          ? 'Search shows each matching record with its connected lineage.'
           : 'A focused view of recorded answer provenance, not the entire source library.'}
         {' '}
         <span className="g-desktop-note">Drag to pan · + / − to zoom · 0 to fit</span>

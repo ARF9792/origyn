@@ -101,7 +101,7 @@ export const GraphCanvas = forwardRef<GraphCanvasHandle, GraphCanvasProps>(
     // ── Initial fit + re-fit on view change ────────────────────────────────
     useEffect(() => {
       fit();
-    }, [fit]);
+    }, [fit, view.nodes]);
 
     // ── Pointer drag (pan) ─────────────────────────────────────────────────
     useEffect(() => {

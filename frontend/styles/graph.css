@@ -40,6 +40,14 @@
 .g-view-controls { display: flex; align-items: center; gap: 4px; }
 .g-view-controls output { font: 10px ui-monospace, monospace; color: var(--muted); min-width: 35px; text-align: center; }
 .g-view-controls .icon-button { font-size: 19px; }
+.g-pathbar { display: flex; align-items: flex-end; gap: 18px; padding: 13px 17px; border-bottom: 1px solid var(--line); background: var(--surface); }
+.g-pathbar-picker { display: grid; gap: 6px; min-width: 0; }
+.g-pathbar-picker label { font-size: 10px; color: var(--muted); }
+.g-pathbar-picker select { width: clamp(240px, 30vw, 420px); min-width: 0; overflow: hidden; text-overflow: ellipsis; color: var(--text); }
+.g-pathbar-context { color: var(--muted); font-size: 11px; line-height: 33px; white-space: nowrap; }
+.g-pathbar-pages { display: flex; align-items: center; gap: 8px; margin-left: auto; white-space: nowrap; }
+.g-pathbar-pages span { color: var(--muted); font-size: 11px; }
+.g-pathbar-pages button:disabled { opacity: .4; cursor: default; }
 
 /* ─── Canvas ─────────────────────────────────────────────────────────────────── */
 .g-canvas { height: clamp(620px, 70vh, 780px); overflow: hidden; position: relative; touch-action: none; cursor: grab; isolation: isolate; background: var(--bg); }
@@ -163,6 +171,10 @@
 
 /* ─── Responsive — 1100px ────────────────────────────────────────────────────── */
 @media (max-width: 1100px) {
+  .g-pathbar { flex-wrap: wrap; align-items: center; gap: 10px 16px; }
+  .g-pathbar-picker select { width: min(48vw, 420px); }
+  .g-pathbar-context { line-height: 1.5; }
+  .g-pathbar-pages { margin-left: 0; }
   .g-footnote { display: block; }
   .g-desktop-note { display: block; margin-top: 5px; }
   .g-legend > div { margin-left: 0; flex-basis: 100%; margin-top: 5px; }
@@ -171,6 +183,8 @@
 
 /* ─── Responsive — 1050px (mobile fallback) ──────────────────────────────────── */
 @media (max-width: 1050px) {
+  .g-pathbar-picker { width: 100%; }
+  .g-pathbar-picker select { width: 100%; }
   .content.graph-content { padding: 25px 18px 40px; }
   .graph-page .page-heading h1 { font-size: 24px; }
   .graph-page .page-heading { gap: 12px; }
