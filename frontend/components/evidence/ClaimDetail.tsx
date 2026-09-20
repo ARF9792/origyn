@@ -8,6 +8,7 @@
 
 'use client';
 
+import { formatEvidenceDate } from '@/lib/format-evidence-date';
 import React, { useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { Icon } from '@/components/ui/Icon';
@@ -212,7 +213,7 @@ export function ClaimDetail({ claim, onClose, triggerRef, scrollToAnswers }: Pro
             <p className="caption">
               Last evaluated ·{' '}
               {claim.lastEvaluated
-                ? '18 Sep 2026, 08:40 UTC'
+                ? formatEvidenceDate(claim.lastEvaluated)
                 : 'Not evaluated yet'}
               . Usage counts reflect recorded Chat answers, including preserved historical versions.
             </p>

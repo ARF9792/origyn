@@ -235,10 +235,6 @@ export function GraphInspector({
               {docRecord.retractionNotice && (
                 <>
                   <div>
-                    <dt>Retraction detected</dt>
-                    <dd>18 Sep 2026</dd>
-                  </div>
-                  <div>
                     <dt>Notice date</dt>
                     <dd>{(docRecord.retractionNotice as RetractionNotice).date}</dd>
                   </div>

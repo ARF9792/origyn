@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Icon } from '../ui/Icon';
 import { MOCK_WORKSPACE } from '@/lib/mock-data';
+import { isMock } from '@/lib/api';
 
 interface Props {
   onToggleMobile: () => void;
@@ -38,7 +39,7 @@ export function TopBar({ onToggleMobile }: Props) {
       </div>
 
       <div className="top-actions">
-        <span className="snapshot">Snapshot: {MOCK_WORKSPACE.snapshot}</span>
+        <span className="snapshot">{isMock ? `Snapshot: ${MOCK_WORKSPACE.snapshot}` : 'Current workspace data'}</span>
         <Link href="/workspace/upload" className="button primary compact">
           <Icon name="plus" /> Add source
         </Link>

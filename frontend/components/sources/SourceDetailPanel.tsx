@@ -120,7 +120,7 @@ export function SourceDetailPanel({ id }: Props) {
           </>
         )}
         <div className="action-divider" />
-        <Link href="/workspace/graph" className="button compact quiet">
+        <Link href={`/workspace/graph?source=${encodeURIComponent(id)}`} className="button compact quiet">
           <Icon name="graph" /> View in evidence graph
         </Link>
         {process.env.NEXT_PUBLIC_API_MODE === 'real' && (
@@ -148,9 +148,7 @@ export function SourceDetailPanel({ id }: Props) {
               <span className="notice-title">{doc.retractionNotice.title}</span><br />
               Issued {new Date(doc.retractionNotice.date).toLocaleDateString()} · Registered via {doc.retractionNotice.source}
             </div>
-            <button className="text-button">
-              View Crossref record <Icon name="external" />
-            </button>
+
           </div>
         </div>
       )}
@@ -163,7 +161,7 @@ export function SourceDetailPanel({ id }: Props) {
             <p>
               Origyn could not definitively match this uploaded document to a known DOI or authoritative metadata record. It has not been checked for retractions.
             </p>
-            <button className="text-button">Identify source manually</button>
+
           </div>
         </div>
       )}
@@ -273,12 +271,7 @@ export function SourceDetailPanel({ id }: Props) {
             <Icon name="claims" /> Assertions supported
             <b>{doc.usage?.claims || 0}</b>
           </div>
-          <div className="usage-row">
-            <Icon name="overview" /> Background summaries
-            <b>{doc.usage?.summaries || 0}</b>
-          </div>
-
-          <Link href="/workspace/graph" className="button full-width">
+          <Link href={`/workspace/graph?source=${encodeURIComponent(id)}`} className="button full-width">
             View evidence lineage
           </Link>
 
@@ -295,7 +288,7 @@ export function SourceDetailPanel({ id }: Props) {
             <div>
               <Icon name="info" /> Traceable provenance
             </div>
-            <p>Origyn guarantees that generated answers maintain cryptographic or persistent database links to these specific extracted claims.</p>
+            <p>The workspace records source, claim, and answer references where available. Inspect linked evidence before relying on an answer.</p>
           </div>
         </div>
       </div>

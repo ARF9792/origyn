@@ -1,72 +1,94 @@
 import React from 'react';
 import Link from 'next/link';
 import ParticleWave from '@/components/landing/ParticleWave';
+import LandingMotion from "@/components/landing/LandingMotion";
+import Image from "next/image";
 export default function LandingPage() {
   return (
     <>
       <a className="skip" href="#main">Skip to content</a>
       <ParticleWave />
+      <LandingMotion />
       <header className="header">
-        <nav className="nav wrap" aria-label="Main navigation">
-          <Link className="brand" href="#" data-content="brand">
-            <i className="brand-mark" aria-hidden="true"></i>
-            <span>Origyn</span>
-          </Link>
-          <div className="nav-links">
-            <Link href="#overview">Product</Link>
-            <Link href="#updates">Resources</Link>
-            <Link href="#customers">Customers</Link>
-            <Link href="#closing">Pricing</Link>
-            <Link href="#updates">News</Link>
-            <Link href="#closing">Contact</Link>
-          </div>
-          <Link className="login" href="/workspace">Log in</Link>
-          <Link className="button small" href="/workspace">Open workspace</Link>
-          <button className="menu" aria-label="Open navigation" aria-expanded="false" aria-controls="mobile-nav">☰</button>
-        </nav>
-        <div id="mobile-nav" hidden>
-          <Link href="#overview">Product</Link>
-          <Link href="#planning">Planning</Link>
-          <Link href="#automation">Automation</Link>
-          <Link href="#customers">Customers</Link>
-          <Link href="#closing">Get started</Link>
-        </div>
-      </header>
+  <nav className="nav wrap" aria-label="Main navigation">
+
+    <Link
+  className="brand brand-logo-link"
+  href="#main"
+  aria-label="Origyn home"
+>
+  <span className="brand-logo-frame">
+    <Image
+      src="/origyn-logo.png"
+      alt="Origyn"
+      fill
+      priority
+      sizes="180px"
+      className="brand-logo-image"
+    />
+  </span>
+</Link>
+
+    <div className="nav-actions">
+      <Link
+        className="nav-contact"
+        href="#why-origyn"
+      >
+        Why Origyn
+      </Link>
+
+      <Link
+        className="nav-login"
+        href="#overview"
+      >
+        Explore
+      </Link>
+
+      <Link
+        className="nav-workspace"
+        href="/workspace"
+      >
+        Open workspace
+      </Link>
+    </div>
+
+  </nav>
+</header>
       
       <main id="main">
         <section className="hero wrap">
-          <h1 data-content="hero.title">Evidence-aware research,<br/>from paper to claim to answer.</h1>
+          <h1 data-content="hero.title">Evidence memory layer,<br/>from paper to claim to answer.</h1>
           <div className="hero-sub">
-            <p data-content="hero.description">Upload scientific papers. Origyn tracks retraction status,<br/>extracts claims, and keeps answers traceable to current evidence.</p>
-            <Link className="text-link" href="#automation">
-              <strong>New</strong> &nbsp; Workspace API <span>→</span>
+            <p data-content="hero.description">Explore PDF sources, extracted claims, and answers with their evidence trail visible in one workspace.</p>
+            <Link className="text-link" href="/workspace/graph">
+              <strong>Explore</strong> &nbsp; Evidence graph <span>→</span>
             </Link>
           </div>
           
-          <div className="product-window hero-window" role="img" aria-label="Product dashboard layout placeholder">
+          <div className="product-window hero-window" role="img" aria-label="Illustrative Origyn evidence workspace preview">
             <aside className="sidebar">
               <b>◩ &nbsp; Workspace <span>⌄</span></b>
               <div>⌁ &nbsp; Overview</div>
               <div>▧ &nbsp; Sources</div>
-              <div>◌ &nbsp; My library</div>
-              <div>⑂ &nbsp; Reviews</div>
-              <label>Analysis</label>
+              <div>◌ &nbsp; Chat</div>
+              <div>⑂ &nbsp; Alerts</div>
+              <label>Evidence</label>
               <div>◈ &nbsp; Claims</div>
               <div>▦ &nbsp; Graph</div>
-              <label>Favorites</label>
-              <div className="selected">◧ &nbsp; Neuroplasticity Review</div>
-              <div>◇ &nbsp; Agent tasks</div>
-              <div>▥ &nbsp; Insights</div>
+              <label>Workspace</label>
+              <div className="selected">◧ &nbsp; Neuroplasticity review</div>
+              <div>◇ &nbsp; Source detail</div>
+              <div>▥ &nbsp; Impact</div>
             </aside>
             <div className="issue">
               <div className="window-toolbar">
                 <span><i className="status yellow"></i> DOC-001 &nbsp; Sleep-dependent consolidation &nbsp; <span className="star">✦</span></span>
-                <span>··· <span className="muted">&nbsp; 1 / 84</span></span>
+                <span>··· <span className="muted">&nbsp; 1 / 12</span></span>
               </div>
               <div className="issue-body">
                 <div className="issue-main">
                   <h3>Neuroplasticity literature review</h3>
-                  <p>Evidence and provenance for your ongoing cognitive science literature review.<br/>Includes 12 uploaded sources.</p>
+                  <p>Evidence and provenance for your ongoing cognitive science literature review.<br/>Includes 12 example source records.</p>
                   
                   <h4>Activity <span>···</span></h4>
                   
@@ -74,20 +96,20 @@ export default function LandingPage() {
                     <i className="avatar">A</i>
                     <div>
                       <b>System</b> <small>· 2 min ago</small>
-                      <p>Completed metadata extraction for 12 sources.</p>
+                      <p>12 illustrative source records are available for review.</p>
                     </div>
                   </div>
                   
                   <div className="activity">
                     <i className="avatar purple">B</i>
                     <div>
-                      <b>Research Assistant</b> <small>· just now</small>
-                      <p>Drafting summary of learning rates based on uploaded literature.</p>
+                      <b>Origyn</b> <small>· just now</small>
+                      <p>An answer can be inspected through its sources and claims.</p>
                       <div className="agent-response">
-                        <span>◩ &nbsp; Agent <small>· connected</small></span>
+                        <span>◩ &nbsp; Evidence <small>· inspectable</small></span>
                         <div className="skeleton long"></div>
                         <div className="skeleton"></div>
-                        <div className="code-status">⑂ &nbsp; Draft ready for review <span>+24 −8</span></div>
+                        <div className="code-status">⑂ &nbsp; Answer evidence available <span>3 claims</span></div>
                       </div>
                     </div>
                   </div>
@@ -95,17 +117,17 @@ export default function LandingPage() {
                 
                 <aside className="properties">
                   <h4>Properties</h4>
-                  <p>◕ &nbsp; In progress</p>
-                  <p>▥ &nbsp; Priority</p>
-                  <p>◉ &nbsp; Assignee</p>
-                  <p>◩ &nbsp; Agent</p>
+                  <p>◕ &nbsp; No retraction found</p>
+                  <p>▥ &nbsp; Last checked</p>
+                  <p>◉ &nbsp; Authors</p>
+                  <p>◩ &nbsp; DOI</p>
                   
-                  <h4>Labels</h4>
+                  <h4>Evidence</h4>
                   <span className="pill">Neuroscience</span>
-                  <span className="pill">Review</span>
+                  <span className="pill">Source</span>
                   
-                  <h4>Project</h4>
-                  <p>◧ &nbsp; Thesis 2026</p>
+                  <h4>Workspace</h4>
+                  <p>◧ &nbsp; Neuroplasticity review</p>
                 </aside>
               </div>
             </div>
@@ -114,20 +136,20 @@ export default function LandingPage() {
         
         <div id="sections">
           <section className="customers-strip wrap reveal">
-            <p>BUILT FOR RESEARCH TEAMS AND EVIDENCE-BASED WORKFLOWS</p>
+            <p>EXPLORE THE EVIDENCE WORKFLOW</p>
             <div className="logos">
-              <span>◈ <b>Research Hub</b></span>
-              <span>▰ <b>Med Lab</b></span>
-              <span>❋ <b>Bio Institute</b></span>
-              <span>◒ <b>Data Sci</b></span>
-              <span>⌘ <b>Policy Org</b></span>
-              <span>✦ <b>Library Sys</b></span>
+              <span>◈ <b>Source library</b></span>
+              <span>▰ <b>Claim review</b></span>
+              <span>❋ <b>Evidence chat</b></span>
+              <span>◒ <b>Evidence graph</b></span>
+              <span>⌘ <b>Impact review</b></span>
+              <span>✦ <b>Answer history</b></span>
             </div>
           </section>
           
           <section id="overview" className="overview wrap section">
             <h2 className="statement reveal">
-              <span>A new standard for evidence tracking.</span> Origyn automatically queries authoritative registries to keep your answers traceable to current evidence.
+              <span>A new standard for evidence tracking.</span> Explore how source status, extracted claims, and answer history connect in one research workspace.
             </h2>
             <div className="principles reveal">
               <article>
@@ -136,11 +158,11 @@ export default function LandingPage() {
                   <div className="mini-layers">
                     <div>◈ &nbsp; Metadata extracted</div>
                     <div>▧ &nbsp; DOI identified</div>
-                    <div>◌ &nbsp; Status confirmed</div>
+                    <div>◌ &nbsp; Status recorded</div>
                   </div>
                 </div>
-                <h3>Automated retraction checks</h3>
-                <p>Identify the paper, query the authoritative registry, and surface the current status instantly.</p>
+                <h3>Visible source status</h3>
+                <p>Inspect each source’s identity, DOI, last check, and recorded retraction status.</p>
               </article>
               
               <article>
@@ -151,7 +173,7 @@ export default function LandingPage() {
                   </div>
                 </div>
                 <h3>Claim extraction</h3>
-                <p>Break papers down into specific, attributable claims to track exactly which assertion informed an answer.</p>
+                <p>Inspect source-linked claims and see which answers used them.</p>
               </article>
               
               <article>
@@ -166,7 +188,7 @@ export default function LandingPage() {
                   </div>
                 </div>
                 <h3>Answers traceable to evidence</h3>
-                <p>Ensure that generated text maintains a direct link back to the source document and its current status.</p>
+                <p>See the claims and source records behind each workspace answer.</p>
               </article>
             </div>
           </section>
@@ -178,110 +200,110 @@ export default function LandingPage() {
                 <h2>Source status<br/>at a glance</h2>
               </div>
               <div>
-                <p>The workspace overview provides immediate visibility into the status of all uploaded literature.</p>
+                <p>The source library lets you filter papers by identification and retraction status, with details available for review.</p>
                 <Link className="text-link" href="/workspace">Explore feature <span>→</span></Link>
               </div>
             </div>
             
             <div className="visual-board visual-panel reveal">
-              <span className="visual-caption">SOURCES KANBAN</span>
+              <span className="visual-caption">SOURCE STATUS ILLUSTRATION</span>
               <div className="kanban">
                 <div className="kanban-col">
-                  <div className="column-label"><i className="status "></i>Active<span>8 &nbsp; +</span></div>
+                  <div className="column-label"><i className="status "></i>No retraction found<span>8</span></div>
                   <div className="task-card">
                     <small>DOC-001</small>
                     <p>Sleep-dependent consolidation</p>
                     <div>
-                      <span className="pill">Active</span><i className="avatar">A</i>
-                    </div>
-                  </div>
-                  <div className="task-card">
-                    <small>DOC-002</small>
-                    <p>Motor learning processes</p>
-                    <div>
-                      <span className="pill">Active</span><i className="avatar">B</i>
-                    </div>
-                  </div>
-                  <div className="task-card">
-                    <small>DOC-003</small>
-                    <p>Cognitive plasticity</p>
-                    <div>
-                      <span className="pill">Active</span><i className="avatar">C</i>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="kanban-col">
-                  <div className="column-label"><i className="status "></i>Processing<span>12 &nbsp; +</span></div>
-                  <div className="task-card">
-                    <small>DOC-004</small>
-                    <p>Sensorimotor lifespan</p>
-                    <div>
-                      <span className="pill">Checking</span><i className="avatar">D</i>
+                      <span className="pill">No retraction found</span><i className="avatar">A</i>
                     </div>
                   </div>
                   <div className="task-card">
                     <small>DOC-005</small>
-                    <p>Working memory capacity</p>
+                    <p>The role of rest in skill acquisition</p>
                     <div>
-                      <span className="pill">Checking</span><i className="avatar">E</i>
+                      <span className="pill">No retraction found</span><i className="avatar">B</i>
                     </div>
                   </div>
                   <div className="task-card">
                     <small>DOC-006</small>
-                    <p>Neurogenesis</p>
+                    <p>Experience-dependent connectivity</p>
                     <div>
-                      <span className="pill">Checking</span><i className="avatar">F</i>
+                      <span className="pill">No retraction found</span><i className="avatar">C</i>
                     </div>
                   </div>
                 </div>
                 
                 <div className="kanban-col">
-                  <div className="column-label"><i className="status yellow"></i>Needs Attention<span>3 &nbsp; +</span></div>
+                  <div className="column-label"><i className="status "></i>Processing<span>1</span></div>
                   <div className="task-card">
-                    <small>DOC-007</small>
+                    <small>DOC-004</small>
+                    <p>Sensorimotor lifespan</p>
+                    <div>
+                      <span className="pill">Processing</span><i className="avatar">D</i>
+                    </div>
+                  </div>
+                  <div className="task-card">
+                    <small>STAGE-02</small>
+                    <p>Identify scholarly metadata</p>
+                    <div>
+                      <span className="pill">Processing</span><i className="avatar">E</i>
+                    </div>
+                  </div>
+                  <div className="task-card">
+                    <small>STAGE-03</small>
+                    <p>Prepare source record</p>
+                    <div>
+                      <span className="pill">Processing</span><i className="avatar">F</i>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="kanban-col">
+                  <div className="column-label"><i className="status yellow"></i>Needs review<span>3</span></div>
+                  <div className="task-card">
+                    <small>DOC-002</small>
                     <p>Repeated cognitive training</p>
                     <div>
                       <span className="pill">Retracted</span><i className="avatar">G</i>
                     </div>
                   </div>
                   <div className="task-card">
-                    <small>DOC-008</small>
+                    <small>DOC-003</small>
                     <p>Longitudinal markers</p>
                     <div>
-                      <span className="pill">Unknown</span><i className="avatar">H</i>
+                      <span className="pill">Unable to verify</span><i className="avatar">H</i>
                     </div>
                   </div>
                   <div className="task-card">
-                    <small>DOC-009</small>
-                    <p>Cortical thickness</p>
+                    <small>DOC-010</small>
+                    <p>Adaptive working-memory protocol</p>
                     <div>
-                      <span className="pill">Unknown</span><i className="avatar">I</i>
+                      <span className="pill">Unable to verify</span><i className="avatar">I</i>
                     </div>
                   </div>
                 </div>
                 
                 <div className="kanban-col">
-                  <div className="column-label"><i className="status "></i>Archived<span>24 &nbsp; +</span></div>
+                  <div className="column-label"><i className="status "></i>Impact<span>3</span></div>
                   <div className="task-card">
-                    <small>DOC-010</small>
-                    <p>Old study 1998</p>
+                    <small>DOC-002</small>
+                    <p>Retracted source</p>
                     <div>
-                      <span className="pill">Archived</span><i className="avatar">J</i>
+                      <span className="pill">Retracted</span><i className="avatar">J</i>
                     </div>
                   </div>
                   <div className="task-card">
-                    <small>DOC-011</small>
-                    <p>Pilot data</p>
+                    <small>CL-021</small>
+                    <p>Affected claim</p>
                     <div>
-                      <span className="pill">Archived</span><i className="avatar">K</i>
+                      <span className="pill">Affected</span><i className="avatar">K</i>
                     </div>
                   </div>
                   <div className="task-card">
-                    <small>DOC-012</small>
-                    <p>Draft manuscript</p>
+                    <small>ans_history_1</small>
+                    <p>Historical answer</p>
                     <div>
-                      <span className="pill">Archived</span><i className="avatar">L</i>
+                      <span className="pill">Evidence changed</span><i className="avatar">L</i>
                     </div>
                   </div>
                 </div>
@@ -293,18 +315,18 @@ export default function LandingPage() {
                   <i className="avatar ">A</i>
                   <div>
                     <b>System</b><small> &nbsp; 12:35</small>
-                    <p>Crossref monitoring detected a retraction notice for DOC-007.</p>
+                    <p>A source status changed: DOC-002 is retracted in this example.</p>
                   </div>
                 </div>
                 <div className="activity">
                   <i className="avatar purple">B</i>
                   <div>
                     <b>Researcher</b><small> &nbsp; 12:35</small>
-                    <p>Acknowledged. Reviewing downstream claims affected by this source.</p>
+                    <p>The affected claim and historical answer remain visible for review.</p>
                   </div>
                 </div>
                 <div className="thread-input">
-                  <span>Create an issue from this conversation</span>
+                  <span>Inspect the affected evidence path</span>
                   <div>＋ &nbsp; ☺ &nbsp; @ <b>↑</b></div>
                 </div>
               </div>
@@ -315,20 +337,20 @@ export default function LandingPage() {
                 <span>Features</span>
                 <div>
                   <details>
-                    <summary>Continuous monitoring <span>+</span></summary>
-                    <p>Papers are checked against Crossref upon upload and periodically thereafter.</p>
+                    <summary>Source status review <span>+</span></summary>
+                    <p>See when a source was last checked and review a source again when needed.</p>
                   </details>
                   <details>
                     <summary>Clear status indicators <span>+</span></summary>
-                    <p>Documents are marked as Active (no retraction found), Retracted, or Unknown.</p>
+                    <p>Sources show No retraction found, Retracted, Unable to verify, or Processing.</p>
                   </details>
                   <details>
                     <summary>Metadata extraction <span>+</span></summary>
-                    <p>Origyn identifies DOIs and queries authoritative registries automatically.</p>
+                    <p>The upload flow displays extracted metadata, DOI identification, and the status-check stage.</p>
                   </details>
                   <details>
-                    <summary>Manual verification <span>+</span></summary>
-                    <p>Review and verify sources that the system could not identify with certainty.</p>
+                    <summary>Sources needing review <span>+</span></summary>
+                    <p>Open sources marked Unable to verify and inspect the available metadata.</p>
                   </details>
                 </div>
               </div>
@@ -342,16 +364,16 @@ export default function LandingPage() {
                 <h2>Claim-level<br/>granularity</h2>
               </div>
               <div>
-                <p>Break papers down into specific, attributable claims to track exactly which assertion informed an answer.</p>
+                <p>Inspect source-linked claims and see which answers used them.</p>
                 <Link className="text-link" href="#feature-list-2">Explore feature <span>→</span></Link>
               </div>
             </div>
             
             <div className="visual-panel planning-panel reveal">
-              <span className="visual-caption">CLAIM EXTRACTION TIMELINE</span>
+              <span className="visual-caption">CLAIM LINEAGE ILLUSTRATION</span>
               <div className="timeline">
                 <div className="months">
-                  <span>JAN</span><span>FEB</span><span>MAR</span><span>APR</span><span>MAY</span><span>JUN</span>
+                  <span>SRC</span><span>CLM</span><span>ANS</span><span>IMP</span><span>REV</span><span>NOW</span>
                 </div>
                 <div className="dates">
                   <span>2</span><span>9</span><span>16</span><span>23</span>
@@ -363,20 +385,20 @@ export default function LandingPage() {
                 </div>
                 <div className="timeline-grid">
                   <div className="timeline-row">
-                    <div className="timeline-title">◈ &nbsp; Source A</div>
+                    <div className="timeline-title">◈ &nbsp; Source DOC-001</div>
                     <div className="timeline-bar bar-0">Claims Extracted <span>◇</span></div>
                   </div>
                   <div className="timeline-row">
-                    <div className="timeline-title">◈ &nbsp; Source B</div>
+                    <div className="timeline-title">◈ &nbsp; Source DOC-002</div>
                     <div className="timeline-bar bar-1">Pending Verification <span>◇</span></div>
                   </div>
                   <div className="timeline-row">
-                    <div className="timeline-title">◈ &nbsp; Source C</div>
-                    <div className="timeline-bar bar-2">Crossref Checked <span>◇</span></div>
+                    <div className="timeline-title">◈ &nbsp; Source DOC-003</div>
+                    <div className="timeline-bar bar-2">Status recorded <span>◇</span></div>
                   </div>
                   <div className="timeline-row">
-                    <div className="timeline-title">◈ &nbsp; Source D</div>
-                    <div className="timeline-bar bar-3">Review Complete <span>◇</span></div>
+                    <div className="timeline-title">◈ &nbsp; Source DOC-006</div>
+                    <div className="timeline-bar bar-3">Evidence linked <span>◇</span></div>
                   </div>
                   <div className="today-marker">
                     <span>Today</span>
@@ -385,8 +407,8 @@ export default function LandingPage() {
               </div>
               
               <div className="chart-card">
-                <div>Claims verified <small>↗</small></div>
-                <svg viewBox="0 0 380 120" role="img" aria-label="Placeholder progress chart">
+                <div>Claims linked <small>↗</small></div>
+                <svg viewBox="0 0 380 120" role="img" aria-label="Illustrative claim lineage chart">
                   <defs>
                     <linearGradient id="chart-fill" x1="0" y1="0" x2="0" y2="1">
                       <stop stopColor="#8980cd" stopOpacity=".25"/>
@@ -397,7 +419,7 @@ export default function LandingPage() {
                   <path d="M0 110L35 100L70 107L105 85L140 80L175 64L210 69L245 35L280 41L315 21L350 28L380 5" stroke="#9990dd" fill="none" strokeWidth="2"/>
                 </svg>
                 <div className="chart-axis">
-                  <span>Month 1</span><span>Month 2</span><span>Month 3</span>
+                  <span>Sources</span><span>Claims</span><span>Answers</span>
                 </div>
               </div>
             </div>
@@ -412,23 +434,23 @@ export default function LandingPage() {
                   </details>
                   <details>
                     <summary>Source linking <span>+</span></summary>
-                    <p>Every claim retains a direct link to its source document and page number.</p>
+                    <p>Claims link to their source record; excerpts and page references appear when available.</p>
                   </details>
                   <details>
                     <summary>Affected claim tracking <span>+</span></summary>
-                    <p>If a source is retracted, all downstream claims are automatically flagged.</p>
+                    <p>Affected claims remain visible when their supporting source becomes retracted.</p>
                   </details>
                   <details>
                     <summary>Verification status <span>+</span></summary>
-                    <p>Track the scholarly status of every assertion in your library.</p>
+                    <p>See whether each claim is supported by current workspace sources or needs review.</p>
                   </details>
                   <details>
                     <summary>Context preservation <span>+</span></summary>
-                    <p>Full quotes and surrounding context are stored alongside claims.</p>
+                    <p>Inspect claim text, source identity, and any excerpt available in the workspace.</p>
                   </details>
                   <details>
-                    <summary>Bulk processing <span>+</span></summary>
-                    <p>Extract claims from multiple documents concurrently.</p>
+                    <summary>Claim search and filters <span>+</span></summary>
+                    <p>Search claims by text, source, or status, and filter by review state.</p>
                   </details>
                 </div>
               </div>
@@ -442,56 +464,56 @@ export default function LandingPage() {
                 <h2>Traceable<br/>answers</h2>
               </div>
               <div>
-                <p>Ensure that generated text maintains a direct link back to the source document and its current scholarly status.</p>
+                <p>Inspect the sources and claims cited by an answer, alongside their current evidence status.</p>
                 <Link className="text-link" href="#feature-list-3">Explore feature <span>→</span></Link>
               </div>
             </div>
             
             <div className="visual-panel automation-panel reveal">
-              <span className="visual-caption">EVIDENCE-LOCKED GENERATION</span>
+              <span className="visual-caption">ANSWER EVIDENCE PREVIEW</span>
               <div className="agents-grid">
                 <div className="agent-card">
                   <div className="agent-title">
-                    <i className="agent-icon">◩</i><b>Summarizer</b><small>Bedrock</small>
+                    <i className="agent-icon">◩</i><b>Evidence chat</b><small>Workspace</small>
                   </div>
-                  <p>Synthesize literature while maintaining strict citation boundaries.</p>
+                  <p>Review an answer together with the claims and sources it cites.</p>
                   <span className="context-label">◧ &nbsp; Source context</span>
                   <div className="agent-result">
-                    <span className="muted">✦ &nbsp; Completed in 8 sec</span>
+                    <span className="muted">◷ &nbsp; Workspace example</span>
                     <div className="skeleton" style={{width: '90%'}}></div>
                     <div className="skeleton" style={{width: '73%'}}></div>
                     <div className="skeleton" style={{width: '83%'}}></div>
-                    <div className="agent-item">◉ &nbsp; Citations mapped</div>
+                    <div className="agent-item">◉ &nbsp; Sources and claims shown</div>
                   </div>
                 </div>
                 
                 <div className="agent-card">
                   <div className="agent-title">
-                    <i className="agent-icon">⌘</i><b>Graph Builder</b><small>Pipeline</small>
+                    <i className="agent-icon">⌘</i><b>Evidence graph</b><small>Lineage</small>
                   </div>
-                  <p>Construct visual relationships between claims and final answers.</p>
+                  <p>Explore document, claim, and answer relationships.</p>
                   <span className="context-label">◧ &nbsp; Lineage context</span>
                   <div className="agent-result">
-                    <span className="muted">✦ &nbsp; Completed in 8 sec</span>
+                    <span className="muted">◷ &nbsp; Workspace example</span>
                     <div className="skeleton" style={{width: '90%'}}></div>
                     <div className="skeleton" style={{width: '73%'}}></div>
                     <div className="skeleton" style={{width: '83%'}}></div>
-                    <div className="agent-item">◉ &nbsp; Edges connected</div>
+                    <div className="agent-item">◉ &nbsp; Lineage visible</div>
                   </div>
                 </div>
                 
                 <div className="agent-card">
                   <div className="agent-title">
-                    <i className="agent-icon">✳</i><b>Monitor</b><small>Registry</small>
+                    <i className="agent-icon">✳</i><b>Impact review</b><small>Source</small>
                   </div>
-                  <p>Continuously check Crossref for changes to source validity.</p>
+                  <p>Inspect the downstream impact when a source status changes.</p>
                   <span className="context-label">◧ &nbsp; Metadata context</span>
                   <div className="agent-result">
-                    <span className="muted">✦ &nbsp; Completed in 8 sec</span>
+                    <span className="muted">◷ &nbsp; Workspace example</span>
                     <div className="skeleton" style={{width: '90%'}}></div>
                     <div className="skeleton" style={{width: '73%'}}></div>
                     <div className="skeleton" style={{width: '83%'}}></div>
-                    <div className="agent-item">◉ &nbsp; Retraction check passed</div>
+                    <div className="agent-item">◉ &nbsp; No retraction found</div>
                   </div>
                 </div>
               </div>
@@ -499,10 +521,10 @@ export default function LandingPage() {
               <div className="automation-bottom">
                 <span>✳</span>
                 <div>
-                  <b>Cryptographically linked</b>
-                  <p>Answers cannot be generated without an unbroken chain of evidence.</p>
+                  <b>Evidence linked</b>
+                  <p>Trace the recorded path from source to claim to answer.</p>
                 </div>
-                <span className="pill">Connected</span>
+                <span className="pill">Traceable</span>
               </div>
             </div>
             
@@ -512,15 +534,15 @@ export default function LandingPage() {
                 <div>
                   <details>
                     <summary>Evidence-locked generation <span>+</span></summary>
-                    <p>The LLM is constrained to generating answers derived solely from extracted claims.</p>
+                    <p>Evidence-Locked Chat uses currently usable workspace claims and shows the sources cited in each answer.</p>
                   </details>
                   <details>
                     <summary>Persistent lineage <span>+</span></summary>
-                    <p>Database relationships maintain the link between answer, claim, and document.</p>
+                    <p>Source, claim, and answer references remain inspectable in the workspace.</p>
                   </details>
                   <details>
                     <summary>Alerts on invalidation <span>+</span></summary>
-                    <p>Receive notifications if a source used in a previous answer is later retracted.</p>
+                    <p>The Alerts view summarizes evidence changes and links to affected historical answers.</p>
                   </details>
                   <details>
                     <summary>Visual evidence graph <span>+</span></summary>
@@ -535,7 +557,7 @@ export default function LandingPage() {
             <div className="section-head reveal">
               <div>
                 <span className="eyebrow"><i className="section-dot dot-4"></i> Review</span>
-                <h2>Inspect,<br/>review, and export</h2>
+                <h2>Inspect,<br/>review, and trace</h2>
               </div>
               <div>
                 <p>Audit the provenance of any generated output before relying on it in your research.</p>
@@ -544,37 +566,37 @@ export default function LandingPage() {
             </div>
             
             <div className="visual-panel build-panel reveal">
-              <span className="visual-caption">EVIDENCE AUDIT LOG</span>
+              <span className="visual-caption">ANSWER HISTORY ILLUSTRATION</span>
               
               <div className="issue-list">
-                <div className="list-group">◕ &nbsp; In review <small>3</small></div>
+                <div className="list-group">◕ &nbsp; Answer states <small>3</small></div>
                 <div className="issue-row">
-                  <span>▥</span><small>ANS-001</small><b>Summary of learning rates</b><span className="pill">Needs review</span><i className="avatar">A</i>
+                  <span>▥</span><small>STATE-01</small><b>Historical answer</b><span className="pill">Evidence changed</span><i className="avatar">A</i>
                 </div>
                 <div className="issue-row">
-                  <span>▥</span><small>ANS-002</small><b>Methodology comparison</b><span className="pill">Needs review</span><i className="avatar">A</i>
+                  <span>▥</span><small>STATE-02</small><b>Updated answer</b><span className="pill">Current</span><i className="avatar">A</i>
                 </div>
                 <div className="issue-row">
-                  <span>▥</span><small>ANS-003</small><b>Sample size analysis</b><span className="pill">Needs review</span><i className="avatar">A</i>
+                  <span>▥</span><small>STATE-03</small><b>Current answer</b><span className="pill">Current</span><i className="avatar">A</i>
                 </div>
                 
-                <div className="list-group">◌ &nbsp; In progress <small>4</small></div>
+                <div className="list-group">◌ &nbsp; Evidence actions <small>4</small></div>
                 <div className="issue-row">
-                  <span>▥</span><small>ANS-004</small><b>Longitudinal trends</b><span className="pill">Working…</span><i className="avatar purple">B</i>
+                  <span>▥</span><small>ACTION-01</small><b>Inspect source</b><span className="pill">Available</span><i className="avatar purple">B</i>
                 </div>
                 <div className="issue-row">
-                  <span>▥</span><small>ANS-005</small><b>Cortical thickness data</b><span className="pill">Working…</span><i className="avatar purple">B</i>
+                  <span>▥</span><small>ACTION-02</small><b>Review claim</b><span className="pill">Available</span><i className="avatar purple">B</i>
                 </div>
                 <div className="issue-row">
-                  <span>▥</span><small>ANS-006</small><b>Review generation</b><span className="pill">Working…</span><i className="avatar purple">B</i>
+                  <span>▥</span><small>ACTION-03</small><b>Focus graph path</b><span className="pill">Available</span><i className="avatar purple">B</i>
                 </div>
                 <div className="issue-row">
-                  <span>▥</span><small>ANS-007</small><b>Claim extraction</b><span className="pill">Working…</span><i className="avatar purple">B</i>
+                  <span>▥</span><small>ACTION-04</small><b>Open affected answer</b><span className="pill">Available</span><i className="avatar purple">B</i>
                 </div>
               </div>
               
               <div className="diff-window">
-                <div className="thread-top">⑂ &nbsp; Review generated answer <span>+24 −8</span></div>
+                <div className="thread-top">⑂ &nbsp; Review answer evidence <span>1 source changed</span></div>
                 <div className="diff-columns">
                   <div>
                     <div className="diff-line "><small>01</small><i style={{width: '52%'}}></i></div>
@@ -600,7 +622,7 @@ export default function LandingPage() {
                   </div>
                 </div>
                 <div className="review-footer">
-                  <span>✓ &nbsp; Review complete</span><span className="pill">Approved</span>
+                  <span>✓ &nbsp; Original retained</span><span className="pill">Inspectable</span>
                 </div>
               </div>
             </div>
@@ -610,28 +632,28 @@ export default function LandingPage() {
                 <span>Features</span>
                 <div>
                   <details>
-                    <summary>Source diffs <span>+</span></summary>
-                    <p>Compare generated answers against the raw text of extracted claims.</p>
+                    <summary>Answer evidence <span>+</span></summary>
+                    <p>Open an answer’s evidence panel to inspect its cited claims and source excerpts.</p>
                   </details>
                   <details>
-                    <summary>Validity checks <span>+</span></summary>
-                    <p>Ensure no retracted papers have slipped into the final synthesis.</p>
+                    <summary>Current evidence context <span>+</span></summary>
+                    <p>Retracted sources are excluded from new current-evidence answers.</p>
                   </details>
                   <details>
-                    <summary>Human approval <span>+</span></summary>
-                    <p>Mark answers as verified before exporting them to external tools.</p>
+                    <summary>Historical answers <span>+</span></summary>
+                    <p>Keep the original answer visible when evidence later changes.</p>
                   </details>
                   <details>
-                    <summary>Transparent export <span>+</span></summary>
-                    <p>Export answers alongside a comprehensive bibliography of evidence.</p>
+                    <summary>Updated answer versions <span>+</span></summary>
+                    <p>Generate a new version from remaining evidence while preserving the earlier answer.</p>
                   </details>
                   <details>
-                    <summary>Audit logs <span>+</span></summary>
-                    <p>Review the history of generation and source checks.</p>
+                    <summary>Impact inspection <span>+</span></summary>
+                    <p>Review which claims and answers depend on a changed source.</p>
                   </details>
                   <details>
-                    <summary>API integration <span>+</span></summary>
-                    <p>Connect the workspace to your existing institutional tools.</p>
+                    <summary>Connected navigation <span>+</span></summary>
+                    <p>Move between sources, claims, graph, alerts, and the exact answer in Chat.</p>
                   </details>
                 </div>
               </div>
@@ -640,8 +662,8 @@ export default function LandingPage() {
           
           <section id="updates" className="section updates wrap">
             <div className="minor-heading">
-              <h2>Latest updates</h2>
-              <Link className="text-link" href="#update-1">View all →</Link>
+              <h2>Explore the workflow</h2>
+              <Link className="text-link" href="/workspace">Open workspace →</Link>
             </div>
             <div className="updates-grid">
               <article id="update-1">
@@ -651,28 +673,28 @@ export default function LandingPage() {
                   </div>
                 </div>
                 <details className="update-detail">
-                  <summary><h3>Crossref Integration Live</h3><span>↗</span></summary>
-                  <p>Origyn now automatically checks the Crossref REST API for Retraction Watch metadata upon document upload.</p>
+                  <summary><h3>Source status review</h3><span>↗</span></summary>
+                  <p>Inspect source identity, DOI, recorded status, and last-check details.</p>
                 </details>
-                <p>Automated retraction monitoring is now available for all workspaces.</p>
-                <time>SEP 17, 2026</time>
+                <p>Review a source and trace any downstream impact.</p>
+                <time>SOURCE</time>
               </article>
               
               <article id="update-2">
                 <div className="update-visual update-2">
                   <div className="inbox-mini">
-                    <div>◈ &nbsp; Priority <span>3</span></div>
+                    <div>◈ &nbsp; Evidence changes <span>3</span></div>
                     <div className="skeleton" style={{width: '90%'}}></div>
                     <div className="skeleton" style={{width: '65%'}}></div>
                     <div className="skeleton" style={{width: '75%'}}></div>
                   </div>
                 </div>
                 <details className="update-detail">
-                  <summary><h3>Evidence Graph Preview</h3><span>↗</span></summary>
-                  <p>Early access to the React Flow visualization of claims and answers.</p>
+                  <summary><h3>Evidence graph</h3><span>↗</span></summary>
+                  <p>Explore the recorded document → claim → answer lineage.</p>
                 </details>
-                <p>Visualize the direct lineage from document to final synthesis.</p>
-                <time>SEP 10, 2026</time>
+                <p>Focus a source to see the affected path through claims and answers.</p>
+                <time>CLAIM</time>
               </article>
               
               <article id="update-3">
@@ -685,48 +707,129 @@ export default function LandingPage() {
                   </div>
                 </div>
                 <details className="update-detail">
-                  <summary><h3>API Documentation</h3><span>↗</span></summary>
-                  <p>Integrate your internal institutional workflows via the Origyn API.</p>
+                  <summary><h3>Answer history</h3><span>↗</span></summary>
+                  <p>Inspect the original answer, its evidence, and any updated version.</p>
                 </details>
-                <p>Documentation for programmatic document ingestion and status monitoring.</p>
-                <time>AUG 28, 2026</time>
+                <p>Evidence changes remain visible without rewriting past answers.</p>
+                <time>ANSWER</time>
               </article>
             </div>
           </section>
           
-          <section id="customers" className="section testimonials wrap">
-            <div className="quotes reveal">
-              <figure>
-                <div className="quote-logo">❋ <span>Institute of Science</span></div>
-                <blockquote>“Origyn provides the rigorous provenance tracking necessary to confidently use AI in our systematic reviews.”</blockquote>
-                <figcaption>
-                  <span>Lead Researcher</span>
-                  <span>Cognitive Science Dept</span>
-                </figcaption>
-              </figure>
-              <figure>
-                <div className="quote-logo">◈ <span>Policy Lab</span></div>
-                <blockquote>“Automating retraction checks directly into the synthesis pipeline ensures our briefings rely on current evidence.”</blockquote>
-                <figcaption>
-                  <span>Director</span>
-                  <span>Research & Policy</span>
-                </figcaption>
-              </figure>
-            </div>
-            
-            <div className="customer-bottom">
-              <p><strong>Trusted by ambitious teams.</strong><br/>From emerging labs to global organizations.</p>
-              <Link className="text-link" href="/workspace">Explore workspace →</Link>
-            </div>
-          </section>
-          
-          <section id="closing" className="closing wrap reveal">
-            <h2 data-content="closing.title">Build your research<br/>on verifiable evidence.</h2>
-            <div>
-              <Link className="button" href="/workspace" data-content="closing.primary">Open workspace</Link>
-              <Link className="button secondary" href="#intake" data-content="closing.secondary">Explore product</Link>
-            </div>
-          </section>
+          <section id="why-origyn" className="section why-origyn wrap">
+  <div className="why-origyn-head reveal">
+    <span className="eyebrow">
+      Why Origyn
+    </span>
+
+    <h2>
+      AI answers should come
+      <br />
+      with their evidence.
+    </h2>
+
+    <p>
+      Origyn keeps the path from source to claim to generated
+      answer visible, so changes in the underlying evidence can
+      be traced downstream.
+    </p>
+  </div>
+
+  <div className="why-grid reveal">
+
+    <article className="why-card">
+      <span className="why-number">01</span>
+
+      <div className="why-preview" aria-label="Illustration of a source record">
+        <div className="why-preview-bar"><span>Sources / doc_002</span><span>Record</span></div>
+        <div className="why-preview-content">
+          <span className="why-preview-label">SOURCE RECORD</span>
+          <strong>Neural adaptation following repeated cognitive training</strong>
+          <div className="why-preview-rule" />
+          <div className="why-preview-bottom"><span className="why-preview-status is-retracted">Retracted</span><span>DOI available</span></div>
+        </div>
+      </div>
+
+      <h3>
+        Know the source
+      </h3>
+
+      <p>
+        Uploaded documents retain their metadata, status,
+        and provenance instead of becoming anonymous chunks
+        inside a retrieval pipeline.
+      </p>
+    </article>
+
+
+    <article className="why-card">
+      <span className="why-number">02</span>
+
+      <div className="why-preview" aria-label="Illustration of an extracted claim">
+        <div className="why-preview-bar"><span>Claims / CL-021</span><span>Evidence</span></div>
+        <div className="why-preview-content">
+          <span className="why-preview-label">EXTRACTED CLAIM</span>
+          <strong>Repeated training was associated with changes in task performance.</strong>
+          <div className="why-preview-rule" />
+          <div className="why-preview-bottom"><span className="why-preview-status is-affected">Affected</span><span>From doc_002</span></div>
+        </div>
+      </div>
+
+      <h3>
+        Trace the claim
+      </h3>
+
+      <p>
+        Extracted claims remain connected to the documents
+        they came from, making the evidence behind an answer
+        inspectable.
+      </p>
+    </article>
+
+
+    <article className="why-card">
+      <span className="why-number">03</span>
+
+      <div className="why-preview" aria-label="Illustration of an answer with changed evidence">
+        <div className="why-preview-bar"><span>Chat / Answer history</span><span>Version 01</span></div>
+        <div className="why-preview-content">
+          <span className="why-preview-label">HISTORICAL ANSWER</span>
+          <strong>What does the evidence say about repeated cognitive training?</strong>
+          <div className="why-preview-rule" />
+          <div className="why-preview-bottom"><span className="why-preview-status is-changed">Evidence changed</span><span>1 claim affected</span></div>
+        </div>
+      </div>
+
+      <h3>
+        See what changes
+      </h3>
+
+      <p>
+        When a source becomes unusable or its evidence status
+        changes, Origyn can identify the claims and answers that
+        depended on it.
+      </p>
+    </article>
+
+  </div>
+
+  <div className="why-footer reveal">
+    <p>
+      Document
+      <span>→</span>
+      Claim
+      <span>→</span>
+      AI Answer
+    </p>
+
+    <Link
+      className="text-link"
+      href="/workspace"
+    >
+      Explore the workspace →
+    </Link>
+  </div>
+</section>
         </div>
       </main>
       
@@ -743,8 +846,8 @@ export default function LandingPage() {
             <Link href="#planning">Extraction</Link>
             <Link href="#automation">Provenance</Link>
             <Link href="#build">Review</Link>
-            <Link href="#updates">Updates</Link>
-            <Link href="#customers">Customers</Link>
+            <Link href="#updates">Workflow</Link>
+            <Link href="#why-origyn">Why Origyn</Link>
           </div>
           <div>
             <h3>Features</h3>
@@ -752,29 +855,29 @@ export default function LandingPage() {
             <Link href="#planning">Extraction</Link>
             <Link href="#automation">Provenance</Link>
             <Link href="#build">Review</Link>
-            <Link href="#updates">Updates</Link>
-            <Link href="#customers">Customers</Link>
+            <Link href="#updates">Workflow</Link>
+            <Link href="#why-origyn">Why Origyn</Link>
           </div>
           <div>
-            <h3>Company</h3>
+            <h3>Origyn</h3>
             <Link href="/workspace">Workspace</Link>
             <Link href="#planning">Extraction</Link>
             <Link href="#automation">Provenance</Link>
             <Link href="#build">Review</Link>
-            <Link href="#updates">Updates</Link>
-            <Link href="#customers">Customers</Link>
+            <Link href="#updates">Workflow</Link>
+            <Link href="#why-origyn">Why Origyn</Link>
           </div>
           <div>
-            <h3>Resources</h3>
+            <h3>Research</h3>
             <Link href="/workspace">Workspace</Link>
             <Link href="#planning">Extraction</Link>
             <Link href="#automation">Provenance</Link>
             <Link href="#build">Review</Link>
-            <Link href="#updates">Updates</Link>
-            <Link href="#customers">Customers</Link>
+            <Link href="#updates">Workflow</Link>
+            <Link href="#why-origyn">Why Origyn</Link>
           </div>
           <div>
-            <h3>Connect</h3>
+            <h3>Navigate</h3>
             <Link href="/workspace">Workspace</Link>
             <Link href="#planning">Extraction</Link>
             <Link href="#automation">Provenance</Link>

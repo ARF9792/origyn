@@ -13,6 +13,7 @@
 
 'use client';
 
+import { formatEvidenceDate } from '@/lib/format-evidence-date';
 import React, { useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { Icon } from '@/components/ui/Icon';
@@ -157,7 +158,7 @@ export function AlertDetail({ alert, onClose, onMarkReviewed, onReopen, triggerR
               <div>
                 <dt>Detected</dt>
                 <dd>
-                  18 Sep 2026{supported ? ', 08:41 UTC' : ', 08:40 UTC'}
+                  {formatEvidenceDate(alert.detectedAt)}
                 </dd>
               </div>
               {retracted && (

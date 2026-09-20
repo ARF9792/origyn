@@ -17,6 +17,7 @@ import { ClaimBadge } from '@/components/ui/ClaimBadge';
 import { LoadingSkeleton } from '@/components/ui/LoadingSkeleton';
 import { ClaimDetail } from '@/components/evidence/ClaimDetail';
 import { activeEvidenceService as evidenceService } from '@/lib/service-selector';
+import { formatEvidenceDate } from '@/lib/format-evidence-date';
 import {
   queryClaims,
   previewClaims,
@@ -150,7 +151,7 @@ function ClaimTableRow({
       </td>
       <td data-label="Last evaluated">
         <span className="checked-time">
-          {claim.lastEvaluated ? '18 Sep, 08:40' : 'Not evaluated'}
+          {claim.lastEvaluated ? formatEvidenceDate(claim.lastEvaluated, 'short') : 'Not evaluated'}
         </span>
       </td>
     </tr>

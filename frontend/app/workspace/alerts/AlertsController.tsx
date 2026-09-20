@@ -21,6 +21,8 @@ import { SourceStatusBadge } from '@/components/ui/SourceStatusBadge';
 import { LoadingSkeleton } from '@/components/ui/LoadingSkeleton';
 import { AlertDetail } from '@/components/evidence/AlertDetail';
 import { activeEvidenceService as evidenceService } from '@/lib/service-selector';
+import { formatEvidenceDate } from '@/lib/format-evidence-date';
+import { isMock } from '@/lib/api';
 import {
   queryAlerts,
 } from '@/lib/evidence-service';
@@ -180,7 +182,7 @@ function AlertRow({
           ) : alert.claim ? (
             <ClaimBadge status={alert.claim.status} />
           ) : null}
-          <time dateTime={alert.detectedAt}>Detected 18 Sep 2026</time>
+          <time dateTime={alert.detectedAt}>Detected {formatEvidenceDate(alert.detectedAt, 'date')}</time>
         </div>
         <div className="e-alert-actions">
           <button
@@ -522,7 +524,7 @@ export function AlertsController() {
                 {filteredAlerts.length} evidence change
                 {filteredAlerts.length === 1 ? '' : 's'}
               </span>
-              <span>Workspace snapshot · 18 Sep 2026</span>
+              <span>{isMock ? 'Workspace snapshot · 18 Sep 2026' : 'Current workspace evidence'}</span>
             </div>
           </>
         ) : (

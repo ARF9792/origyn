@@ -31,11 +31,11 @@ export function Sidebar({ onCloseMobile }: Props) {
 
       <p className="workspace-label">Current workspace</p>
       
-      <button className="workspace-name" title="Switch workspace">
+      <div className="workspace-name">
         <span className="workspace-initial">{MOCK_WORKSPACE.initials}</span>
         {MOCK_WORKSPACE.name}
         <Icon name="chevron" className="nav-count" />
-      </button>
+      </div>
 
       {links.map((link) => {
         const isActive = link.exact
@@ -57,7 +57,7 @@ export function Sidebar({ onCloseMobile }: Props) {
 
       <div className="sidebar-bottom">
         <div className="demo-label">Research Preview</div>
-        <p>This workspace connects to the Day 1 prototype implementation.</p>
+        <p>Explore sources, claims, answers, and their evidence lineage.</p>
         <Link href="/" onClick={onCloseMobile}>
           <Icon name="arrow" />
           Back to website

@@ -1325,7 +1325,7 @@ function MainWave() {
           targetScroll.current -
           currentScroll.current
         )
-        * 0.055;
+        * 0.08;
 
 
       /*
@@ -1338,7 +1338,7 @@ function MainWave() {
           targetStage.current -
           currentStage.current
         )
-        * 0.045;
+        * 0.075;
 
 
       uniforms.uTime.value =

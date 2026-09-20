@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { getDocuments } from '@/lib/api';
+import { getDocuments, isMock } from '@/lib/api';
 import { RECENT_ACTIVITY } from '@/lib/mock-data';
 import { Icon } from '@/components/ui/Icon';
 import { SourceStatusBadge } from '@/components/ui/SourceStatusBadge';
@@ -48,14 +48,14 @@ export function Overview() {
         <div>
           <span className="eyebrow">Workspace Overview</span>
           <h1>Literature status</h1>
-          <p>Continuous status monitoring for {counts.total} items in your workspace.</p>
+          <p>Current status for {counts.total} sources in your workspace.</p>
         </div>
       </div>
 
       <div className="panel health">
         <div className="health-head">
           <div className="total">
-            <b>{counts.total}</b> sources monitored
+            <b>{counts.total}</b> sources in workspace
           </div>
           <Link href="/workspace/sources" className="button compact quiet">
             View all
@@ -138,7 +138,7 @@ export function Overview() {
             <h2>Recent activity</h2>
           </div>
           <div className="activity-list">
-            {RECENT_ACTIVITY.map((activity) => (
+            {isMock ? RECENT_ACTIVITY.map((activity) => (
               <div key={activity.id} className="activity-item">
                 <div className="event-icon">
                   <Icon name={
@@ -153,7 +153,12 @@ export function Overview() {
                   <time>{activity.time}</time>
                 </div>
               </div>
-            ))}
+            )) : (
+              <div className="inline-empty">
+                <h3>Activity history unavailable</h3>
+                <p>Review the current source statuses in your library.</p>
+              </div>
+            )}
           </div>
 
           <div className="quick-actions">
@@ -161,12 +166,12 @@ export function Overview() {
             <Link href="/workspace/upload" className="button compact quiet">
               <Icon name="plus" /> Add source
             </Link>
-            <button className="button compact quiet">
+            <Link href="/workspace/sources" className="button compact quiet">
               <Icon name="search" /> Search library
-            </button>
-            <button className="button compact quiet" disabled>
+            </Link>
+            <Link href="/workspace/chat" className="button compact quiet">
               <Icon name="chat" /> Start chat
-            </button>
+            </Link>
           </div>
         </div>
       </div>

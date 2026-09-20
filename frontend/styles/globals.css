@@ -1,4 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Manrope:wght@400;500;600&display=swap');
+
 
 :root{color-scheme:dark;--bg:#0b0c0d;--surface:#111214;--raised:#17181a;--line:#252629;--text:#ededee;--muted:#8a8c93;--purple:#a39ae8;--radius:12px;font-family:Inter,Arial,Helvetica,sans-serif;font-synthesis:none}*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:95px}body{margin:0;background:var(--bg);color:var(--text);font-size:16px;-webkit-font-smoothing:antialiased}a{color:inherit;text-decoration:none}button{font:inherit}button,a{-webkit-tap-highlight-color:transparent}a:focus-visible,button:focus-visible,summary:focus-visible{outline:2px solid var(--purple);outline-offset:5px}button{cursor:pointer}p{color:var(--muted);line-height:1.6}h1,h2,h3,h4,p{margin:0}h1,h2{font-weight:500;letter-spacing:-.045em}.wrap{width:min(1200px,calc(100% - 80px));margin-inline:auto}.header{height:72px;border-bottom:1px solid #ffffff12;position:sticky;top:0;z-index:30;background:#0b0c0de8;backdrop-filter:blur(20px)}.nav{display:flex;align-items:center;height:100%;gap:24px;font-size:14px}.brand{display:flex;align-items:center;gap:9px;font-size:20px;font-weight:600;margin-right:auto;white-space:nowrap}.brand-mark{display:inline-block;width:22px;height:22px;border-radius:50%;background:repeating-linear-gradient(45deg,#eee 0 3px,transparent 3px 5px)}.nav-links{display:flex;gap:26px;color:var(--muted)}.nav a:hover{color:white}.login{color:var(--muted);border-left:1px solid var(--line);padding-left:24px}.button{display:inline-flex;align-items:center;justify-content:center;padding:13px 19px;border:1px solid #fff2;border-radius:9px;background:#e8e8e9;color:#17181a;font-size:14px;font-weight:500;transition:background .2s,transform .2s}.button:hover{background:#fff;color:#111;transform:translateY(-1px)}.button.small{border-radius:25px;padding:8px 14px;white-space:nowrap}.button.secondary{background:#202124;color:#eee}.menu{display:none;background:none;color:#eee;border:0;font-size:22px}.skip{position:fixed;top:-100px;z-index:99;padding:12px;background:white;color:black}.skip:focus{top:8px}.hero{padding-top:188px}.hero h1{font-size:clamp(42px,5vw,66px);line-height:1.04;max-width:1050px}.hero-sub{display:flex;justify-content:space-between;align-items:flex-end;margin:34px 0 70px}.hero-sub p{font-size:16px}.text-link{font-size:15px;color:var(--muted);white-space:nowrap}.text-link strong{color:#ddd;font-weight:500}.text-link:hover{color:#fff}.text-link span{margin-left:4px}.product-window{border:1px solid #ffffff17;border-radius:12px;background:linear-gradient(130deg,#191a1d,#111214 65%);box-shadow:0 0 0 5px #ffffff02,0 30px 90px #0004;overflow:hidden}.hero-window{height:570px;display:flex;position:relative}.hero-window:after{content:'';position:absolute;inset:70% 0 0;background:linear-gradient(transparent,var(--bg));pointer-events:none}.sidebar{width:220px;flex-shrink:0;padding:24px 18px;border-right:1px solid var(--line);font-size:13px;color:#a6a7ad}.sidebar b{display:block;color:#ddd;margin-bottom:25px}.sidebar b span{float:right}.sidebar div{padding:9px 10px}.sidebar label{display:block;color:#62646b;margin:25px 10px 9px}.sidebar .selected{background:#ffffff08;border-radius:5px;color:#ddd}.issue{flex:1;min-width:0}.window-toolbar{height:48px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 24px;font-size:12px;color:#c1c1c5}.status{display:inline-block;width:12px;height:12px;border:2px solid #888;border-radius:50%;vertical-align:middle;margin-right:7px}.yellow{border-color:#d3b75b}.star{color:#e0bd53}.muted,small{color:var(--muted)}.issue-body{display:flex;gap:35px;padding:60px 42px}.issue-main{flex:1;min-width:0}.issue-main h3{font-size:22px;font-weight:500;letter-spacing:-.025em}.issue-main>p{font-size:13px;line-height:1.8;margin-top:14px}.issue h4{font-size:12px;font-weight:500;color:#b9bac1;margin:32px 0 20px}.issue h4 span{float:right}.activity{display:flex;gap:12px;margin:20px 0;font-size:12px}.activity>div{flex:1}.activity b{font-weight:500}.activity p{margin-top:8px;font-size:12px}.avatar{display:flex;align-items:center;justify-content:center;width:25px;height:25px;border-radius:50%;background:#343d3c;font-style:normal;color:#cacdc6;flex-shrink:0}.purple{background:#423b60}.agent-response{border:1px solid var(--line);border-radius:8px;margin-top:18px;padding:18px;background:#191a1e}.skeleton{height:5px;width:65%;background:#37383e;border-radius:3px;margin-top:12px}.skeleton.long{width:90%;margin-top:22px}.code-status{padding-top:18px;margin-top:20px;border-top:1px solid var(--line);color:#c0bccf}.code-status span{float:right;color:#729a7e}.properties{width:140px;flex-shrink:0}.properties h4:first-child{margin-top:0}.properties p{font-size:12px;margin:14px 0}.pill{font-size:12px;padding:4px 8px;display:inline-block;border:1px solid #ffffff1a;border-radius:20px;margin:3px;color:#a3a4aa}#mobile-nav{padding:16px 24px;background:#111214;border-bottom:1px solid var(--line)}#mobile-nav a{display:block;padding:13px 0;color:#bbb}
 @media(min-width:1500px){.wrap{width:min(1280px,calc(100% - 160px))}}@media(max-width:1000px){.nav-links{gap:16px}.nav-links a:nth-child(n+4){display:none}.hero{padding-top:120px}.properties{display:none}.issue-body{padding:45px 32px}.sidebar{width:190px}}@media(max-width:650px){.wrap{width:calc(100% - 40px)}.header{height:64px}.nav{gap:15px}.nav-links,.login{display:none}.menu{display:block}.hero{padding-top:84px}.hero h1{font-size:42px;line-height:1.1}.hero-sub{display:block;margin:28px 0 40px}.hero-sub .text-link{display:inline-block;margin-top:24px}.hero-window{height:440px}.sidebar{display:none}.issue-body{padding:32px 20px}.issue-main h3{font-size:19px}.window-toolbar{padding:0 15px}.issue-main>p br{display:none}}@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{animation:none!important;transition:none!important}}
@@ -247,6 +248,1691 @@ body {
   .origyn-particle-bg {
     opacity:
       .55;
+  }
+
+}
+
+
+
+/* =========================================================
+   HERO
+   ========================================================= */
+
+.hero h1.origyn-motion-ready {
+  transform:
+    translate3d(0, 22px, 0);
+
+  transition-duration:
+    800ms;
+}
+
+
+.hero-sub.origyn-motion-ready {
+  transform:
+    translate3d(0, 18px, 0);
+}
+
+
+.hero-window.origyn-motion-ready {
+  transform:
+    translate3d(0, 48px, 0)
+    scale(0.975);
+
+  transition:
+    opacity 850ms cubic-bezier(.16, 1, .3, 1)
+      var(--motion-delay, 0ms),
+
+    transform 1050ms cubic-bezier(.16, 1, .3, 1)
+      var(--motion-delay, 0ms);
+}
+
+
+.hero-window.origyn-motion-visible {
+  transform:
+    translate3d(0, 0, 0)
+    scale(1);
+}
+
+
+/* =========================================================
+   SECTION HEADINGS
+   ========================================================= */
+
+.section-head.origyn-motion-ready {
+  transform:
+    translate3d(0, 28px, 0);
+}
+
+
+/* =========================================================
+   PRODUCT PANELS
+   ========================================================= */
+
+.visual-panel.origyn-motion-ready {
+  transform:
+    translate3d(0, 42px, 0)
+    scale(0.982);
+
+  transition:
+    opacity 750ms cubic-bezier(.16, 1, .3, 1)
+      var(--motion-delay, 0ms),
+
+    transform 950ms cubic-bezier(.16, 1, .3, 1)
+      var(--motion-delay, 0ms);
+}
+
+
+.visual-panel.origyn-motion-visible {
+  transform:
+    translate3d(0, 0, 0)
+    scale(1);
+}
+
+
+/*
+ * Important:
+ * no rotateX / rotateY / backdrop animation.
+ * This avoids the old diagonal rendering artifact.
+ */
+
+.visual-panel {
+  backface-visibility:
+    hidden;
+
+  -webkit-backface-visibility:
+    hidden;
+}
+
+
+/* =========================================================
+   PRINCIPLE CARDS
+   ========================================================= */
+
+.principles article.origyn-motion-ready {
+  transform:
+    translate3d(0, 24px, 0);
+
+  transition-duration:
+    650ms,
+    800ms;
+}
+
+
+/* =========================================================
+   UPDATE CARDS
+   ========================================================= */
+
+.updates-grid article.origyn-motion-ready {
+  transform:
+    translate3d(0, 26px, 0)
+    scale(0.99);
+}
+
+
+/* =========================================================
+   TESTIMONIALS
+   ========================================================= */
+
+.quotes figure.origyn-motion-ready {
+  transform:
+    translate3d(0, 32px, 0)
+    scale(0.985);
+
+  transition-duration:
+    750ms,
+    900ms;
+}
+
+
+/* =========================================================
+   CLOSING CTA
+   ========================================================= */
+
+.closing.origyn-motion-ready {
+  transform:
+    translate3d(0, 30px, 0);
+}
+
+
+/* =========================================================
+   CLEANUP AFTER REVEAL
+   ========================================================= */
+
+.origyn-motion-visible {
+  will-change:
+    auto;
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+  .origyn-motion-ready,
+  .origyn-motion-visible {
+    opacity:
+      1 !important;
+
+    transform:
+      none !important;
+
+    transition:
+      none !important;
+  }
+
+}
+
+/* =========================================================
+   ORIGYN — SCROLL REVEAL
+   Restrained, fast, premium
+   ========================================================= */
+
+.reveal-ready {
+  opacity: 0;
+
+  transform:
+    translate3d(
+      0,
+      22px,
+      0
+    );
+
+  transition:
+    opacity 600ms
+      cubic-bezier(.16, 1, .3, 1),
+
+    transform 760ms
+      cubic-bezier(.16, 1, .3, 1);
+
+  will-change:
+    opacity,
+    transform;
+}
+
+
+.reveal-ready.reveal-visible {
+  opacity: 1;
+
+  transform:
+    translate3d(
+      0,
+      0,
+      0
+    );
+}
+
+
+/* =========================================================
+   PRODUCT PANELS
+
+   Slightly heavier than normal text/content.
+   Still no rotations.
+   ========================================================= */
+
+.visual-panel.reveal-ready {
+  transform:
+    translate3d(
+      0,
+      28px,
+      0
+    )
+    scale(.992);
+
+  transition:
+    opacity 650ms
+      cubic-bezier(.16, 1, .3, 1),
+
+    transform 820ms
+      cubic-bezier(.16, 1, .3, 1);
+}
+
+
+.visual-panel.reveal-ready.reveal-visible {
+  transform:
+    translate3d(
+      0,
+      0,
+      0
+    )
+    scale(1);
+}
+
+
+/* =========================================================
+   SECTION HEADERS
+
+   Shorter travel than panels.
+   ========================================================= */
+
+.section-head.reveal-ready {
+  transform:
+    translate3d(
+      0,
+      16px,
+      0
+    );
+}
+
+
+.section-head.reveal-ready.reveal-visible {
+  transform:
+    translate3d(
+      0,
+      0,
+      0
+    );
+}
+
+
+/* =========================================================
+   BIG STATEMENT
+   ========================================================= */
+
+.statement.reveal-ready {
+  transform:
+    translate3d(
+      0,
+      14px,
+      0
+    );
+}
+
+
+/* =========================================================
+   TESTIMONIALS / CLOSING
+   ========================================================= */
+
+.quotes.reveal-ready,
+.closing.reveal-ready {
+  transform:
+    translate3d(
+      0,
+      20px,
+      0
+    );
+}
+
+
+.quotes.reveal-ready.reveal-visible,
+.closing.reveal-ready.reveal-visible {
+  transform:
+    translate3d(
+      0,
+      0,
+      0
+    );
+}
+
+
+/* =========================================================
+   CLEANUP
+   ========================================================= */
+
+.reveal-visible {
+  will-change:
+    auto;
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+  .reveal-ready,
+  .reveal-visible {
+    opacity:
+      1 !important;
+
+    transform:
+      none !important;
+
+    transition:
+      none !important;
+  }
+
+}
+
+/* =========================================================
+   ORIGYN — PRODUCT HEADER
+   ========================================================= */
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+
+  height: 72px;
+
+  padding: 0;
+
+  border-bottom:
+    1px solid rgba(255,255,255,.055);
+
+  background:
+    rgba(7, 8, 9, .76) !important;
+
+  backdrop-filter:
+    blur(18px) saturate(130%);
+
+  -webkit-backdrop-filter:
+    blur(18px) saturate(130%);
+}
+
+
+/* =========================================================
+   NAV LAYOUT
+   ========================================================= */
+
+.header .nav {
+  height: 100%;
+
+  display: flex;
+  align-items: center;
+
+  gap: 24px;
+}
+
+
+/* =========================================================
+   BRAND
+   ========================================================= */
+
+.header .brand {
+  margin-right: auto;
+
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  font-size: 18px;
+
+  font-weight: 600;
+
+  letter-spacing:
+    -.02em;
+
+  color:
+    rgba(255,255,255,.94);
+}
+
+
+.header .brand-mark {
+  width: 20px;
+  height: 20px;
+
+  flex-shrink: 0;
+}
+
+
+/* =========================================================
+   RIGHT SIDE
+   ========================================================= */
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+
+  gap: 22px;
+}
+
+
+.nav-contact,
+.nav-login {
+  position: relative;
+
+  font-size: 13px;
+
+  font-weight: 500;
+
+  color:
+    rgba(255,255,255,.48);
+
+  transition:
+    color 180ms ease;
+}
+
+
+.nav-contact:hover,
+.nav-login:hover {
+  color:
+    rgba(255,255,255,.92);
+}
+
+
+/* subtle divider before login */
+
+.nav-login {
+  padding-left: 22px;
+}
+
+
+.nav-login::before {
+  content: "";
+
+  position: absolute;
+
+  left: 0;
+  top: 50%;
+
+  width: 1px;
+  height: 18px;
+
+  transform:
+    translateY(-50%);
+
+  background:
+    rgba(255,255,255,.08);
+}
+
+
+/* =========================================================
+   PRIMARY CTA
+   ========================================================= */
+
+.nav-workspace {
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  height: 38px;
+
+  padding:
+    0 16px;
+
+  border-radius:
+    10px;
+
+  border:
+    1px solid
+    rgba(255,255,255,.85);
+
+  background:
+    #f1f1f2;
+
+  color:
+    #111214;
+
+  font-size:
+    13px;
+
+  font-weight:
+    600;
+
+  white-space:
+    nowrap;
+
+  transition:
+    background 180ms ease,
+    transform 180ms ease,
+    box-shadow 180ms ease;
+}
+
+
+.nav-workspace:hover {
+  color:
+    #090a0b !important;
+
+  background:
+    #ffffff;
+
+  transform:
+    translateY(-1px);
+
+  box-shadow:
+    0 7px 24px
+    rgba(255,255,255,.08);
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 650px) {
+
+  .header {
+    height:
+      64px;
+  }
+
+
+  .nav-actions {
+    gap:
+      14px;
+  }
+
+
+  .nav-contact {
+    display:
+      none;
+  }
+
+
+  .nav-login {
+    padding-left:
+      0;
+  }
+
+
+  .nav-login::before {
+    display:
+      none;
+  }
+
+
+  .nav-workspace {
+    height:
+      36px;
+
+    padding:
+      0 13px;
+
+    font-size:
+      12px;
+  }
+
+}
+
+/* =========================================================
+   ORIGYN LOGO
+   ========================================================= */
+
+.header .brand-logo-link {
+  position: relative;
+
+  width: 158px;
+  height: 44px;
+
+  margin-right: auto;
+
+  display: block;
+
+  overflow: hidden;
+
+  flex-shrink: 0;
+}
+
+
+.brand-logo-frame {
+  position: absolute;
+  inset: 0;
+
+  display: block;
+
+  overflow: hidden;
+}
+
+
+/*
+ * The generated artwork has a large black canvas around it.
+ * We zoom into the actual mark + wordmark here.
+ */
+
+.brand-logo-image {
+  object-fit: cover;
+
+  object-position:
+    58% 50%;
+
+  transform:
+    scale(1.58);
+
+  /*
+   * Makes the black image background visually disappear
+   * into the dark navbar while preserving the light logo.
+   */
+  mix-blend-mode:
+    screen;
+
+  user-select:
+    none;
+
+  pointer-events:
+    none;
+}
+
+
+/* Remove the old generated CSS icon if it exists anywhere */
+
+.header .brand-mark {
+  display:
+    none;
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 650px) {
+
+  .header .brand-logo-link {
+    width:
+      132px;
+
+    height:
+      38px;
+  }
+
+
+  .brand-logo-image {
+    transform:
+      scale(1.58);
+  }
+
+}
+
+/* =========================================================
+   ORIGYN — FINAL TYPOGRAPHY SYSTEM
+   Display: Manrope
+   Product / UI: Inter
+   ========================================================= */
+
+:root {
+  --font-ui:
+    "Inter",
+    Arial,
+    Helvetica,
+    sans-serif;
+
+  --font-display:
+    "Manrope",
+    "Inter",
+    Arial,
+    Helvetica,
+    sans-serif;
+}
+
+
+/* =========================================================
+   GLOBAL
+   ========================================================= */
+
+body {
+  font-family:
+    var(--font-ui);
+
+  font-feature-settings:
+    "kern" 1,
+    "liga" 1;
+
+  text-rendering:
+    optimizeLegibility;
+}
+
+
+/*
+ * Product UI should remain neutral and highly readable.
+ */
+
+button,
+input,
+textarea,
+select {
+  font-family:
+    var(--font-ui);
+}
+
+
+/* =========================================================
+   HERO
+   ========================================================= */
+
+.hero h1 {
+  max-width:
+    1080px;
+
+  font-family:
+    var(--font-display);
+
+  font-size:
+    clamp(
+      50px,
+      5.3vw,
+      74px
+    );
+
+  font-weight:
+    500;
+
+  line-height:
+    .99;
+
+  letter-spacing:
+    -.057em;
+
+  color:
+    #f2f2f3;
+
+  text-wrap:
+    balance;
+}
+
+
+/*
+ * Supporting copy stays Inter so the contrast
+ * between display typography and UI typography
+ * remains intentional.
+ */
+
+.hero-sub p {
+  max-width:
+    620px;
+
+  font-family:
+    var(--font-ui);
+
+  font-size:
+    15px;
+
+  font-weight:
+    400;
+
+  line-height:
+    1.7;
+
+  letter-spacing:
+    -.012em;
+
+  color:
+    rgba(
+      237,
+      237,
+      238,
+      .54
+    );
+}
+
+
+/* announcement / secondary hero action */
+
+.hero-sub .text-link {
+  font-family:
+    var(--font-ui);
+
+  font-size:
+    14px;
+
+  letter-spacing:
+    -.01em;
+}
+
+
+/* =========================================================
+   LARGE LANDING STATEMENT
+   ========================================================= */
+
+.statement {
+  max-width:
+    1020px;
+
+  font-family:
+    var(--font-display);
+
+  font-size:
+    clamp(
+      28px,
+      3.15vw,
+      42px
+    );
+
+  font-weight:
+    400;
+
+  line-height:
+    1.22;
+
+  letter-spacing:
+    -.047em;
+}
+
+
+.statement > span {
+  font-weight:
+    500;
+}
+
+
+/* =========================================================
+   SECTION HEADINGS
+   ========================================================= */
+
+.section-head h2 {
+  font-family:
+    var(--font-display);
+
+  font-size:
+    clamp(
+      38px,
+      4.15vw,
+      56px
+    );
+
+  font-weight:
+    500;
+
+  line-height:
+    1.015;
+
+  letter-spacing:
+    -.054em;
+
+  text-wrap:
+    balance;
+}
+
+
+.section-head > div > p {
+  font-family:
+    var(--font-ui);
+
+  font-size:
+    16px;
+
+  line-height:
+    1.58;
+
+  letter-spacing:
+    -.012em;
+}
+
+
+/* =========================================================
+   SECTION EYEBROWS
+   ========================================================= */
+
+.eyebrow {
+  font-family:
+    var(--font-ui);
+
+  font-size:
+    13px;
+
+  font-weight:
+    500;
+
+  line-height:
+    1;
+
+  letter-spacing:
+    -.005em;
+}
+
+
+/* =========================================================
+   PRINCIPLE / FEATURE TITLES
+   ========================================================= */
+
+.principles h3 {
+  font-family:
+    var(--font-display);
+
+  font-size:
+    18px;
+
+  font-weight:
+    500;
+
+  line-height:
+    1.25;
+
+  letter-spacing:
+    -.035em;
+}
+
+
+.principles p {
+  font-family:
+    var(--font-ui);
+
+  letter-spacing:
+    -.01em;
+}
+
+
+/* =========================================================
+   SMALL SECTION TITLES
+   ========================================================= */
+
+.minor-heading h2 {
+  font-family:
+    var(--font-display);
+
+  font-size:
+    31px;
+
+  font-weight:
+    500;
+
+  line-height:
+    1.08;
+
+  letter-spacing:
+    -.045em;
+}
+
+
+/* =========================================================
+   UPDATE CARDS
+   ========================================================= */
+
+.updates-grid h3 {
+  font-family:
+    var(--font-display);
+
+  font-weight:
+    500;
+
+  letter-spacing:
+    -.03em;
+}
+
+
+.updates-grid article > p {
+  font-family:
+    var(--font-ui);
+
+  letter-spacing:
+    -.008em;
+}
+
+
+/* =========================================================
+   TESTIMONIALS
+   ========================================================= */
+
+.quotes blockquote {
+  font-family:
+    var(--font-display);
+
+  font-weight:
+    400;
+
+  line-height:
+    1.22;
+
+  letter-spacing:
+    -.045em;
+}
+
+
+.quotes figcaption {
+  font-family:
+    var(--font-ui);
+
+  letter-spacing:
+    -.008em;
+}
+
+
+/* =========================================================
+   CLOSING CTA
+   ========================================================= */
+
+.closing h2 {
+  font-family:
+    var(--font-display);
+
+  font-size:
+    clamp(
+      40px,
+      4vw,
+      57px
+    );
+
+  font-weight:
+    500;
+
+  line-height:
+    1.015;
+
+  letter-spacing:
+    -.054em;
+
+  text-wrap:
+    balance;
+}
+
+
+/* =========================================================
+   NAVIGATION
+   ========================================================= */
+
+.header .brand {
+  font-family:
+    var(--font-display);
+
+  font-weight:
+    600;
+
+  letter-spacing:
+    -.035em;
+}
+
+
+.nav-contact,
+.nav-login,
+.nav-workspace {
+  font-family:
+    var(--font-ui);
+
+  letter-spacing:
+    -.012em;
+}
+
+
+.nav-contact,
+.nav-login {
+  font-weight:
+    500;
+}
+
+
+.nav-workspace {
+  font-weight:
+    600;
+}
+
+
+/* =========================================================
+   PRODUCT WINDOW
+
+   Explicitly keep the mock product interface in Inter.
+   ========================================================= */
+
+.product-window,
+.visual-panel,
+.sidebar,
+.window-toolbar,
+.issue,
+.task-card,
+.agent-card,
+.timeline,
+.diff-window,
+.chart-card {
+  font-family:
+    var(--font-ui);
+}
+
+
+/* =========================================================
+   BUTTONS / LINKS
+   ========================================================= */
+
+.button,
+.text-link {
+  font-family:
+    var(--font-ui);
+
+  letter-spacing:
+    -.012em;
+}
+
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
+
+.footer-main h3 {
+  font-family:
+    var(--font-ui);
+
+  font-weight:
+    500;
+
+  letter-spacing:
+    -.015em;
+}
+
+
+.footer-main a,
+.footer-bottom {
+  font-family:
+    var(--font-ui);
+
+  letter-spacing:
+    -.005em;
+}
+
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 1000px) {
+
+  .hero h1 {
+    font-size:
+      clamp(
+        48px,
+        6.2vw,
+        64px
+      );
+
+    line-height:
+      1;
+  }
+
+
+  .section-head h2 {
+    font-size:
+      46px;
+  }
+
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 650px) {
+
+  .hero h1 {
+    font-size:
+      clamp(
+        40px,
+        11vw,
+        48px
+      );
+
+    line-height:
+      1.01;
+
+    letter-spacing:
+      -.052em;
+  }
+
+
+  .hero-sub p {
+    font-size:
+      15px;
+
+    line-height:
+      1.62;
+    color: rgba(237, 237, 238, .60);
+  }
+
+
+  .statement {
+    font-size:
+      29px;
+
+    line-height:
+      1.24;
+  }
+
+
+  .section-head h2 {
+    font-size:
+      39px;
+
+    line-height:
+      1.03;
+
+    letter-spacing:
+      -.05em;
+  }
+
+
+  .minor-heading h2 {
+    font-size:
+      28px;
+  }
+
+
+  .closing h2 {
+    font-size:
+      40px;
+
+    line-height:
+      1.03;
+  }
+
+}
+
+/* =========================================================
+   WHY ORIGYN
+   Replaces fake testimonials
+   ========================================================= */
+
+.why-origyn {
+  position: relative;
+}
+
+
+.why-origyn-head {
+  display: grid;
+
+  grid-template-columns:
+    1.1fr .9fr;
+
+  column-gap: 90px;
+
+  align-items: end;
+
+  margin-bottom: 58px;
+}
+
+
+.why-origyn-head .eyebrow {
+  grid-column: 1 / -1;
+}
+
+
+.why-origyn-head h2 {
+  font-family:
+    var(--font-display);
+
+  font-size:
+    clamp(
+      38px,
+      4.15vw,
+      56px
+    );
+
+  font-weight:
+    500;
+
+  line-height:
+    1.015;
+
+  letter-spacing:
+    -.054em;
+
+  color:
+    #eeeeef;
+}
+
+
+.why-origyn-head > p {
+  max-width: 430px;
+
+  justify-self: end;
+
+  font-family:
+    var(--font-ui);
+
+  font-size: 16px;
+
+  line-height: 1.65;
+
+  letter-spacing:
+    -.012em;
+
+  color:
+    rgba(
+      237,
+      237,
+      238,
+      .5
+    );
+}
+
+
+/* =========================================================
+   CARDS
+   ========================================================= */
+
+.why-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, 1fr);
+
+  border-top:
+    1px solid
+    rgba(255,255,255,.09);
+
+  border-bottom:
+    1px solid
+    rgba(255,255,255,.09);
+}
+
+
+.why-card {
+  position: relative;
+
+  min-height: 330px;
+
+  padding:
+    30px 30px 34px;
+
+  display: flex;
+
+  flex-direction: column;
+}
+
+
+.why-card + .why-card {
+  border-left:
+    1px solid
+    rgba(255,255,255,.09);
+}
+
+
+.why-number {
+  font-family:
+    var(--font-ui);
+
+  font-size: 10px;
+
+  letter-spacing:
+    .08em;
+
+  color:
+    rgba(255,255,255,.26);
+}
+
+
+.why-preview {
+  width: 100%;
+  height: 168px;
+  min-width: 0;
+  margin-top: 30px;
+  margin-bottom: 28px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 9px;
+  background: #151619;
+  box-shadow: 0 18px 35px rgba(0,0,0,.18);
+  font-family: var(--font-ui);
+}
+
+.why-preview-bar {
+  height: 34px;
+  padding: 0 13px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+  color: rgba(255,255,255,.48);
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.why-preview-bar span:first-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.why-preview-bar span:last-child {
+  color: rgba(255,255,255,.32);
+}
+
+.why-preview-content {
+  height: calc(100% - 34px);
+  padding: 13px;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.why-preview-label {
+  margin-bottom: 8px;
+  color: rgba(255,255,255,.36);
+  font-size: 9px;
+  letter-spacing: .09em;
+}
+
+.why-preview-content strong {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  color: rgba(255,255,255,.85);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+.why-preview-rule {
+  height: 1px;
+  margin-top: auto;
+  margin-bottom: 10px;
+  background: rgba(255,255,255,.08);
+}
+
+.why-preview-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+  color: rgba(255,255,255,.4);
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.why-preview-bottom > span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.why-preview-status {
+  flex: none;
+  padding: 3px 7px;
+  border: 1px solid rgba(255,255,255,.13);
+  border-radius: 4px;
+  color: rgba(255,255,255,.72);
+  line-height: 1.2;
+}
+
+.why-preview-status.is-retracted {
+  border-color: rgba(207,128,128,.25);
+  color: #d5a5a5;
+}
+
+.why-preview-status.is-affected,
+.why-preview-status.is-changed {
+  border-color: rgba(195,164,113,.25);
+  color: #c9b795;
+}
+
+
+.why-card h3 {
+  font-family:
+    var(--font-display);
+
+  font-size: 20px;
+
+  font-weight: 500;
+
+  line-height: 1.2;
+
+  letter-spacing:
+    -.035em;
+
+  color:
+    rgba(255,255,255,.9);
+
+  margin-bottom: 12px;
+}
+
+
+.why-card p {
+  max-width: 310px;
+
+  font-family:
+    var(--font-ui);
+
+  font-size: 14px;
+
+  line-height: 1.65;
+
+  letter-spacing:
+    -.008em;
+
+  color:
+    rgba(255,255,255,.43);
+}
+
+
+/* =========================================================
+   FOOTER LINE
+   ========================================================= */
+
+.why-footer {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  gap: 30px;
+
+  padding-top: 30px;
+}
+
+
+.why-footer > p {
+  display: flex;
+
+  align-items: center;
+
+  gap: 12px;
+
+  font-family:
+    var(--font-ui);
+
+  font-size: 13px;
+
+  color:
+    rgba(255,255,255,.44);
+}
+
+
+.why-footer > p span {
+  color:
+    rgba(255,255,255,.20);
+}
+
+
+/* =========================================================
+   HOVER — VERY SUBTLE
+   ========================================================= */
+
+.why-card {
+  transition:
+    background 220ms ease;
+}
+
+
+.why-card:hover {
+  background:
+    rgba(255,255,255,.018);
+}
+
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+  .why-origyn-head {
+    grid-template-columns:
+      1fr;
+
+    gap:
+      24px;
+  }
+
+
+  .why-origyn-head > p {
+    justify-self:
+      start;
+  }
+
+
+  .why-card {
+    padding:
+      26px 22px 30px;
+  }
+
+}
+
+@media (max-width: 960px) {
+  .why-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .why-card {
+    min-height: 0;
+  }
+
+  .why-card + .why-card {
+    border-left: 0;
+    border-top: 1px solid rgba(255,255,255,.09);
+  }
+
+  .why-preview {
+    max-width: 480px;
+  }
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 650px) {
+
+  .why-origyn-head h2 {
+    font-size:
+      39px;
+  }
+
+
+  .why-grid {
+    grid-template-columns:
+      1fr;
+  }
+
+
+  .why-card {
+    min-height:
+      auto;
+
+    padding:
+      28px 4px 32px;
+  }
+
+
+  .why-card + .why-card {
+    border-left:
+      0;
+
+    border-top:
+      1px solid
+      rgba(255,255,255,.09);
+  }
+
+
+  .why-preview {
+    margin-top: 24px;
+  }
+
+
+  .why-card p {
+    max-width:
+      420px;
+  }
+
+
+  .why-footer {
+    align-items:
+      flex-start;
+
+    flex-direction:
+      column;
   }
 
 }
