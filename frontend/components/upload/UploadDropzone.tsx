@@ -67,7 +67,7 @@ export function UploadDropzone({ onFileSelect, disabled }: Props) {
       >
         Choose file
       </button>
-      <span>PDF up to 25 MB</span>
+      <span>PDF up to 4 MB</span>
     </div>
   );
 }

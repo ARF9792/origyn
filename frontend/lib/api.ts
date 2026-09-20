@@ -95,10 +95,14 @@ export async function uploadDocument(file: File, options?: UploadOptions): Promi
 
 
 
-  // Client-side size validation (below Lambda/API Gateway limit)
-  const MAX_BYTES = 9.5 * 1024 * 1024;
+  // Client-side size validation.
+  // Current architecture: Browser → API Gateway → Lambda (synchronous).
+  // Lambda sync payload limit is 6 MB. API Gateway base64-encodes binary bodies
+  // before passing to Lambda, so ~4.5 MB raw binary saturates that limit.
+  // Advertised and enforced limit is 4 MB with margin.
+  const MAX_BYTES = 4 * 1024 * 1024;
   if (file.size > MAX_BYTES) {
-    const err = new Error('File exceeds 9.5 MB limit. Choose a smaller PDF.') as Error & { code?: string };
+    const err = new Error('File is too large. Maximum supported size is 4 MB.') as Error & { code?: string };
     err.code = 'INVALID_FILE';
     throw err;
   }
@@ -123,6 +127,13 @@ export async function uploadDocument(file: File, options?: UploadOptions): Promi
   if (!res.ok) {
     let body: { error?: { code?: string; message?: string; existingDocumentId?: string } } = {};
     try { body = await res.json(); } catch { /* ignore */ }
+
+    // 413 from API Gateway or Lambda means payload exceeded infrastructure limit.
+    if (res.status === 413) {
+      const err = new Error('File is too large. Maximum supported size is 4 MB.') as Error & { code?: string };
+      err.code = 'INVALID_FILE';
+      throw err;
+    }
 
     const code = body?.error?.code ?? 'UPLOAD_FAILED';
     const message = body?.error?.message ?? `Upload failed: ${res.status}`;
