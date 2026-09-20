@@ -4,6 +4,9 @@ import "@/styles/globals.css";
 export const metadata: Metadata = {
   title: "Origyn",
   description: "Evidence-aware research.",
+  icons: {
+    icon: [{ url: "/icon.png", type: "image/png" }],
+  },
 };
 
 export default function RootLayout({
