@@ -4,7 +4,6 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Icon } from '../ui/Icon';
-import { MOCK_WORKSPACE } from '@/lib/mock-data';
 
 interface Props {
   onCloseMobile?: () => void;
@@ -24,18 +23,17 @@ export function Sidebar({ onCloseMobile }: Props) {
 
   return (
     <nav className="sidebar">
-      <div className="identity">
+      <Link
+        href="/"
+        className="identity"
+        onClick={onCloseMobile}
+        aria-label="Go to Origyn home"
+      >
         <span className="brand-symbol" />
         Origyn
-      </div>
+      </Link>
 
       <p className="workspace-label">Current workspace</p>
-      
-      <div className="workspace-name">
-        <span className="workspace-initial">{MOCK_WORKSPACE.initials}</span>
-        {MOCK_WORKSPACE.name}
-        <Icon name="chevron" className="nav-count" />
-      </div>
 
       {links.map((link) => {
         const isActive = link.exact
@@ -55,14 +53,6 @@ export function Sidebar({ onCloseMobile }: Props) {
         );
       })}
 
-      <div className="sidebar-bottom">
-        <div className="demo-label">Research Preview</div>
-        <p>Explore sources, claims, answers, and their evidence lineage.</p>
-        <Link href="/" onClick={onCloseMobile}>
-          <Icon name="arrow" />
-          Back to website
-        </Link>
-      </div>
     </nav>
   );
 }

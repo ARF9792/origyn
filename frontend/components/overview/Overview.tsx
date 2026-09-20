@@ -108,23 +108,38 @@ export function Overview() {
           {needsAttention.length === 0 ? (
             <div className="inline-empty">
               <h3>All clear</h3>
-              <p>No retracted or unverified sources require your attention.</p>
+              <p>
+                No retracted, invalidated, or unverified sources require your
+                attention.
+              </p>
             </div>
           ) : (
             needsAttention.map((doc) => (
               <div
                 key={doc.id}
-                className={`attention-item ${doc.status === 'RETRACTED' ? 'critical' : ''}`}
+                className={`attention-item ${
+                  doc.status === 'RETRACTED' || doc.status === 'INVALID'
+                    ? 'critical'
+                    : ''
+                }`}
               >
-                <Icon name={doc.status === 'RETRACTED' ? 'warning' : 'unknown'} />
+                <Icon
+                  name={
+                    doc.status === 'RETRACTED' || doc.status === 'INVALID'
+                      ? 'warning'
+                      : 'unknown'
+                  }
+                />
                 <div>
                   <h3>{doc.title || doc.filename}</h3>
                   <p>
                     {doc.status === 'RETRACTED'
                       ? 'This paper has been marked as retracted. Review downstream claims that may be affected.'
-                      : 'The authoritative status of this source could not be verified automatically.'}
+                      : doc.status === 'INVALID'
+                        ? 'This source has been invalidated and should no longer be used as active evidence.'
+                        : 'The authoritative status of this source could not be verified automatically.'}
                   </p>
-                  <Link href={`/workspace/sources/${doc.id}`} className="text-link">
+                  <Link href={`/workspace/sources/${encodeURIComponent(doc.id)}`} className="text-link">
                     Review source <span>→</span>
                   </Link>
                 </div>
@@ -163,12 +178,6 @@ export function Overview() {
 
           <div className="quick-actions">
             <span className="subtle">Quick actions</span>
-            <Link href="/workspace/upload" className="button compact quiet">
-              <Icon name="plus" /> Add source
-            </Link>
-            <Link href="/workspace/sources" className="button compact quiet">
-              <Icon name="search" /> Search library
-            </Link>
             <Link href="/workspace/chat" className="button compact quiet">
               <Icon name="chat" /> Start chat
             </Link>

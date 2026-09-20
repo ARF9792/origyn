@@ -1,11 +1,8 @@
 'use client';
 
 import React from 'react';
-import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Icon } from '../ui/Icon';
-import { MOCK_WORKSPACE } from '@/lib/mock-data';
-import { isMock } from '@/lib/api';
 
 interface Props {
   onToggleMobile: () => void;
@@ -14,7 +11,6 @@ interface Props {
 export function TopBar({ onToggleMobile }: Props) {
   const pathname = usePathname();
 
-  // Simple breadcrumb extraction
   let pageName = 'Overview';
   if (pathname.includes('/sources')) pageName = 'Sources';
   if (pathname.includes('/chat')) pageName = 'Chat';
@@ -33,16 +29,7 @@ export function TopBar({ onToggleMobile }: Props) {
         >
           <Icon name="menu" />
         </button>
-        <span className="workspace-crumb">{MOCK_WORKSPACE.name}</span>
-        <span className="separator workspace-crumb">/</span>
         <span>{pageName}</span>
-      </div>
-
-      <div className="top-actions">
-        <span className="snapshot">{isMock ? `Snapshot: ${MOCK_WORKSPACE.snapshot}` : 'Current workspace data'}</span>
-        <Link href="/workspace/upload" className="button primary compact">
-          <Icon name="plus" /> Add source
-        </Link>
       </div>
     </header>
   );
